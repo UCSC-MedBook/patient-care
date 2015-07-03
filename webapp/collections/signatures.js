@@ -1,5 +1,5 @@
 
-Signatures = new Meteor.Collection("signatures");
+Signatures = new Meteor.Collection("signatures_in_cohort");
 
 ///////////////
 // SimpleSchema

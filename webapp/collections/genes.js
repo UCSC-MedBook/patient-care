@@ -1,5 +1,5 @@
 
-Genes = new Meteor.Collection("genes");
+Genes = new Meteor.Collection("genes_in_cohort");
 
 ///////////////
 // SimpleSchema
@@ -9,7 +9,10 @@ Genes = new Meteor.Collection("genes");
 
 Genes.attachSchema(new SimpleSchema({
   name: { type: String },
-  description: { type: String },
+  status: { type: String },
+  description: { type: String, optional: true },
+  previous: { type: [String], optional: true },
+  synonym: { type: [String], optional: true }
   // links to genome browser, genecards
   // Interactions (max or interaction browser)
   // Lollipop (cbio or xena)
