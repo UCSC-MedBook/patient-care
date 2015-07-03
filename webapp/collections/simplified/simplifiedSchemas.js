@@ -5,29 +5,33 @@
 simplifiedStudySchema = new SimpleSchema({
   // should I define this as a schema?
   "name": { type: String },
-  "studyId": { type: String }
+  "Study_ID": { type: String }
 });
 
 // join to "samples"
 simplifiedSampleSchema = new SimpleSchema({
-  "name": { type: String },
-  "sampleId": { type: String } // refers to _id
+  // need to rewrite this
 });
 
 // join to "signatures"
 simplifiedSignatureSchema = new SimpleSchema({
   "name": { type: String },
-  "signatureId": { type: String }
+  "Signature_ID": { type: String }
 });
 
 // join to "genes"
 simplifiedGeneSchema = new SimpleSchema({
   "name": { type: String },
-  "geneId": { type: String }
+  "Gene_ID": { type: String }
 });
 
-// join to "pathways"
+memberEventSchema = new SimpleSchema({
+  "name": { type: simplifiedGeneSchema },
+  "event": { type: [String] } // to be defined further later
+});
+
 simplifiedPathwaySchema = new SimpleSchema({
   "name": { type: String },
-  "pathwayId": { type: String }
+  "Pathway_ID": { type: String },
+  "members": { type: [memberEventSchema] }
 });

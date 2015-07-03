@@ -6,30 +6,34 @@ Patients = new Meteor.Collection("patients_in_cohort");
 ///////////////
 
 treatmentSchema = new SimpleSchema({
-  "start_date": { type: Date },
-  "end_date": { type: Date, optional: true },
+  // if day 3, they started 3 days after starting the trial
+  "start_day": { type: Number },
+  // if null --> still on treatment
+  "end_day": { type: Number, optional: true },
   "drug_name": { type: String },
   "reason_for_stop": { type: String, optional: true },
-  "prior_treatment": { type: Boolean, optional: true },
-  // add optional fields
+  //"prior_treatment": { type: Boolean, optional: true },
 });
 
-memberEventSchema = new SimpleSchema({
-  name: { type: simplifiedGeneSchema },
-  event: { type: [String] } // to be defined further later
-});
-
-pathwaySchema = new SimpleSchema({
-  name: { type: String },
-  members: { type: [memberEventSchema] }
-  // events array for each member?
+sampleSchema = new SimpleSchema({
+  "name": { type: String },
+  "pathways": {
+    type: [simplifiedPathwaySchema],
+    optional: true
+  },
+  "signatures": {
+    type: [simplifiedSignatureSchema],
+    optional: true
+  }
 });
 
 Patients.attachSchema(new SimpleSchema({
   "Patient_ID": { type: String },
   "study": { type: simplifiedStudySchema },
+  "study_site": { type: String, optional: true },
   "age": { type: Number, optional: true },
-  "is_alive" : { type: Boolean, optional: true },
+  "gender": { type: String, optional: true },
+  "last_known_survival_status" : { type: String, optional: true },
   "neoplasm_disease_stage" : { type: String, optional: true },
   "pathology_T_stage" : { type: String, optional: true },
   "pathology_N_stage" : { type: String, optional: true },
@@ -44,20 +48,12 @@ Patients.attachSchema(new SimpleSchema({
   "race" : { type: String, optional: true },
   "ethnicity" : { type: String, optional: true },
   "samples": { // contains Sample_IDs
-    type: [String],
+    type: [sampleSchema],
     // will we display more information
     optional: true
   },
   "treatments": {
     type: [treatmentSchema],
-    optional: true
-  },
-  "pathways": {
-    type: [pathwaySchema],
-    optional: true
-  },
-  "signatures": {
-    type: [simplifiedSignatureSchema],
     optional: true
   }
 }));

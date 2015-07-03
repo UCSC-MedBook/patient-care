@@ -13,6 +13,7 @@ Genes.attachSchema(new SimpleSchema({
   description: { type: String, optional: true },
   previous: { type: [String], optional: true },
   synonym: { type: [String], optional: true }
+
   // links to genome browser, genecards
   // Interactions (max or interaction browser)
   // Lollipop (cbio or xena)
