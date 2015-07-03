@@ -26,7 +26,6 @@ pathwaySchema = new SimpleSchema({
 });
 
 Patients.attachSchema(new SimpleSchema({
-  "_id": { type: String },
   "Patient_ID": { type: String },
   "study": { type: simplifiedStudySchema },
   "age": { type: Number, optional: true },
