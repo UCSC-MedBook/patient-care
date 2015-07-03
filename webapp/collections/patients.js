@@ -18,6 +18,7 @@ treatmentSchema = new SimpleSchema({
   //"prior_treatment": { type: Boolean, optional: true },
 });
 
+// move this into its own collection
 sampleSchema = new SimpleSchema({
   "name": { type: String }, // Sample_ID
   "site_of_metastasis" : { type: String, optional: true },

@@ -1,18 +1,3 @@
-/*
-// add this back in when we have the sign-in package
-Router.onBeforeAction(function () {
-  // all properties available in the route function
-  // are also available here such as this.params
-
-  if(!Meteor.user()){
-    this.render('signin');
-  }else{
-    this.next();
-  }
-
-});
-*/
-
 Router.configure({
   // we use the  appBody template to define the layout for the entire app
   layoutTemplate: 'appBody',
