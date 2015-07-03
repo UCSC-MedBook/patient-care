@@ -8,11 +8,6 @@ simplifiedStudySchema = new SimpleSchema({
   "Study_ID": { type: String }
 });
 
-// join to "samples"
-simplifiedSampleSchema = new SimpleSchema({
-  // need to rewrite this
-});
-
 // join to "signatures"
 simplifiedSignatureSchema = new SimpleSchema({
   "name": { type: String },

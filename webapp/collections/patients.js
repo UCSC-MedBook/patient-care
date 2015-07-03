@@ -5,6 +5,9 @@ Patients = new Meteor.Collection("patients_in_cohort");
 // SimpleSchema
 ///////////////
 
+// note on "_day" fields:
+// These are numbers as counted from patient.on_study_date
+
 treatmentSchema = new SimpleSchema({
   // if day 3, they started 3 days after starting the trial
   "start_day": { type: Number },
@@ -17,13 +20,8 @@ treatmentSchema = new SimpleSchema({
 
 sampleSchema = new SimpleSchema({
   "name": { type: String }, // Sample_ID
-  "arm" : { type: String, optional: true },
-  "day" : { type: Number, optional: true },
-  "phase" : { type: String, optional: true },
-  "segment" : { type: String, optional: true },
-  "site" : { type: String, optional: true },
-  "day_of_procedure": { type: Number, optional: true },
-  "visit_day": { type: Number, optional: true },
+  "site_of_metastasis" : { type: String, optional: true },
+  "procedure_day": { type: Number, optional: true },
   "pathways": {
     type: [simplifiedPathwaySchema],
     optional: true
@@ -38,6 +36,8 @@ Patients.attachSchema(new SimpleSchema({
   "Patient_ID": { type: String },
   "study": { type: simplifiedStudySchema },
   "study_site": { type: String, optional: true },
+  "on_study_date": { type: Date, optional: true },
+  "off_study_day": { type: Number, optional: true },
   "age": { type: Number, optional: true },
   "gender": { type: String, optional: true },
   "last_known_survival_status" : { type: String, optional: true },
@@ -50,8 +50,9 @@ Patients.attachSchema(new SimpleSchema({
   "completeness_of_resection" : { type: String, optional: true },
   "number_of_lymph_nodes" : { type: Number, optional: true },
   "gleason_grade" : { type: String, optional: true },
-  "psa_result_preop" : { type: Number, optional: true },
-  "psa_value" : { type: Number, optional: true },
+  "baseline_psa" : { type: Number, optional: true },
+  "psa_nadir" : { type: Number, optional: true },
+  "psa_nadir_days" : { type: Number, optional: true },
   "race" : { type: String, optional: true },
   "ethnicity" : { type: String, optional: true },
   "samples": {
