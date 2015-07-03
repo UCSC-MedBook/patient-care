@@ -1,5 +1,7 @@
 # Created by Teo Fleming (github mokolodi1, mokolodi1@gmail.com)
 
+# params: filename, database name, collection name
+
 # the first line of the file serves as lables for the rest of the data
 
 if [ -z $3 ]; then
