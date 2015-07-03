@@ -27,7 +27,7 @@ simplifiedGeneSchema = new SimpleSchema({
 
 memberEventSchema = new SimpleSchema({
   "name": { type: simplifiedGeneSchema },
-  "event": { type: [String] } // to be defined further later
+  "events": { type: [String] } // to be defined further later (allowed fields)
 });
 
 simplifiedPathwaySchema = new SimpleSchema({

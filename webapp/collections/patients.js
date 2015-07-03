@@ -16,7 +16,14 @@ treatmentSchema = new SimpleSchema({
 });
 
 sampleSchema = new SimpleSchema({
-  "name": { type: String },
+  "name": { type: String }, // Sample_ID
+  "arm" : { type: String, optional: true },
+  "day" : { type: Number, optional: true },
+  "phase" : { type: String, optional: true },
+  "segment" : { type: String, optional: true },
+  "site" : { type: String, optional: true },
+  "day_of_procedure": { type: Number, optional: true },
+  "visit_day": { type: Number, optional: true },
   "pathways": {
     type: [simplifiedPathwaySchema],
     optional: true
@@ -47,9 +54,8 @@ Patients.attachSchema(new SimpleSchema({
   "psa_value" : { type: Number, optional: true },
   "race" : { type: String, optional: true },
   "ethnicity" : { type: String, optional: true },
-  "samples": { // contains Sample_IDs
+  "samples": {
     type: [sampleSchema],
-    // will we display more information
     optional: true
   },
   "treatments": {
