@@ -18,21 +18,6 @@ treatmentSchema = new SimpleSchema({
   //"prior_treatment": { type: Boolean, optional: true },
 });
 
-// move this into its own collection
-sampleSchema = new SimpleSchema({
-  "name": { type: String }, // Sample_ID
-  "site_of_metastasis" : { type: String, optional: true },
-  "procedure_day": { type: Number, optional: true },
-  "pathways": {
-    type: [simplifiedPathwaySchema],
-    optional: true
-  },
-  "signatures": {
-    type: [simplifiedSignatureSchema],
-    optional: true
-  }
-});
-
 Patients.attachSchema(new SimpleSchema({
   "Patient_ID": { type: String },
   "study": { type: simplifiedStudySchema },
@@ -57,7 +42,7 @@ Patients.attachSchema(new SimpleSchema({
   "race" : { type: String, optional: true },
   "ethnicity" : { type: String, optional: true },
   "samples": {
-    type: [sampleSchema],
+    type: [simplifiedSampleSchema],
     optional: true
   },
   "treatments": {

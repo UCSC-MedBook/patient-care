@@ -8,6 +8,12 @@ simplifiedStudySchema = new SimpleSchema({
   "Study_ID": { type: String }
 });
 
+// join to "samples"
+simplifiedSampleSchema = new SimpleSchema({
+  "name": { type: String },
+  "Sample_ID": { type: String }
+});
+
 // join to "signatures"
 simplifiedSignatureSchema = new SimpleSchema({
   "name": { type: String },
@@ -25,6 +31,7 @@ memberEventSchema = new SimpleSchema({
   "events": { type: [String] } // to be defined further later (allowed fields)
 });
 
+// join to pathways
 simplifiedPathwaySchema = new SimpleSchema({
   "name": { type: String },
   "Pathway_ID": { type: String },
