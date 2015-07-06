@@ -2,16 +2,15 @@
 // These are numbers as counted from patient.on_study_date
 
 treatmentSchema = new SimpleSchema({
+  "drug_name": { type: String }, // better name?
   // if day 3, they started 3 days after starting the trial
   "start_day": { type: Number },
   // if null --> still on treatment
   "end_day": { type: Number, optional: true },
-  "drug_name": { type: String },
   "reason_for_stop": { type: String, optional: true },
-  //"prior_treatment": { type: Boolean, optional: true },
 });
 
-// this has to be defined
+// this has to be defined (samples.js has to be down a level)
 // console.log(schemas.samplesSchema);
 
 schemas.patientsSchema = new SimpleSchema({
@@ -30,14 +29,14 @@ schemas.patientsSchema = new SimpleSchema({
   "pathology_N_stage" : { type: String, optional: true },
   "pathology_M_stage" : { type: String, optional: true },
   "radiation_therapy" : { type: String, optional: true },
-  "radiations_radiation_regimen_indication" : { type: String, optional: true },
+  "radiation_regimen_indication" : { type: String, optional: true },
   "completeness_of_resection" : { type: String, optional: true },
   "number_of_lymph_nodes" : { type: Number, optional: true },
   "gleason_grade" : { type: String, optional: true },
   "baseline_psa" : { type: Number, optional: true },
   "psa_nadir" : { type: Number, optional: true },
   "psa_nadir_days" : { type: Number, optional: true },
-  "psa_trend": { type: [Number], optional: true },
+  "psa_trend": { type: [psaLevelSchema], optional: true }, // for timeline
   "treatments": {
     type: [treatmentSchema],
     optional: true

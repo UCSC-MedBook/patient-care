@@ -8,7 +8,7 @@ contrastSchema = new SimpleSchema({
 });
 
 geneInSignatureSchema = new SimpleSchema({
-  "gene_gid": { type: String },
+  "gene_id": { type: String },
   "gene_label": { type: String },
   "weight": { type: String }, // not optional
   "pval": { type: String, optional: true }
@@ -17,7 +17,7 @@ geneInSignatureSchema = new SimpleSchema({
 schemas.signatureInCohortSchema = new SimpleSchema({
   "name": { type: String },
   "contrast": { type: contrastSchema },
-  "study_human_id": { type: String },
-  "study_gid": { type: String },
+  "study_id": { type: String },
+  "study_label": { type: String },
   "members": { type: [geneInSignatureSchema] },
 });

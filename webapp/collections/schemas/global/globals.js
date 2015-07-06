@@ -2,7 +2,7 @@ schemas = {};
 
 mutationSchema = new SimpleSchema({
   "gene_label": { type: String },
-  "gene_gid": { type: String },
+  "gene_id": { type: String },
   "protein_change": { type: String, optional: true },
   "mutation_type": { type: String }, // variant_classification for us
   "chromosome": { type: String },
@@ -16,7 +16,7 @@ mutationSchema = new SimpleSchema({
 
 // for waterfall plots
 patientValuePairSchema = new SimpleSchema({
-  "patient_gid": { type: String },
+  "patient_id": { type: String },
   "patient_label": { type: String },
   "value": { type: Number }
 });
