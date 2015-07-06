@@ -1,13 +1,4 @@
-
-Genes = new Meteor.Collection("genes_in_cohort");
-
-///////////////
-// SimpleSchema
-///////////////
-
-
-
-Genes.attachSchema(new SimpleSchema({
+schemas.genesInCohortSchema = new SimpleSchema({
   name: { type: String },
   status: { type: String },
   description: { type: String, optional: true },
@@ -20,4 +11,4 @@ Genes.attachSchema(new SimpleSchema({
   // Gene-omics view (see next slide)
   // Circle map with first neighbors (next slide)
   // slide 2 of 2 of the keynote
-}));
+});

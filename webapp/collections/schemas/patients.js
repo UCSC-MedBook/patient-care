@@ -1,10 +1,3 @@
-
-Patients = new Meteor.Collection("patients_in_cohort");
-
-///////////////
-// SimpleSchema
-///////////////
-
 // note on "_day" fields:
 // These are numbers as counted from patient.on_study_date
 
@@ -18,9 +11,11 @@ treatmentSchema = new SimpleSchema({
   //"prior_treatment": { type: Boolean, optional: true },
 });
 
-Patients.attachSchema(new SimpleSchema({
-  "Patient_ID": { type: String },
-  "study": { type: simplifiedStudySchema },
+console.log(schemas.samplesSchema);
+
+schemas.patientsSchema = new SimpleSchema({
+  "human_patient_id": { type: String }, // Patient_ID, ex. DTB-056
+  "human_study_id": { type: String },
   "study_site": { type: String, optional: true },
   "on_study_date": { type: Date, optional: true },
   "off_study_day": { type: Number, optional: true },
@@ -41,12 +36,14 @@ Patients.attachSchema(new SimpleSchema({
   "psa_nadir_days" : { type: Number, optional: true },
   "race" : { type: String, optional: true },
   "ethnicity" : { type: String, optional: true },
-  "samples": {
-    type: [simplifiedSampleSchema],
-    optional: true
-  },
+  // What information do we have for prior treatments?
+  // Should they be kept under "treatments" or "prior_treatments"
   "treatments": {
     type: [treatmentSchema],
     optional: true
+  },
+  "samples": {
+    type: [schemas.samplesSchema],
+    optional: true
   }
-}));
+});
