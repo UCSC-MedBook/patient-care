@@ -2,7 +2,7 @@
 // to a page containing more information
 
 // join to "studies"
-simplifiedStudySchema = new SimpleSchema({
+studySchemaLink = new SimpleSchema({
   // should I define this as a schema?
   "name": { type: String },
   "Study_ID": { type: String }
@@ -34,6 +34,6 @@ memberEventSchema = new SimpleSchema({
 // join to pathways
 simplifiedPathwaySchema = new SimpleSchema({
   "name": { type: String },
-  "Pathway_ID": { type: String },
+  //"Pathway_ID": { type: String },
   "members": { type: [memberEventSchema] }
 });
