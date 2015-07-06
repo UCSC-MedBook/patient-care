@@ -8,7 +8,8 @@ contrastSchema = new SimpleSchema({
 });
 
 geneInSignatureSchema = new SimpleSchema({
-  "name": { type: String }, // human_gene_id
+  "gene_gid": { type: String },
+  "gene_label": { type: String },
   "weight": { type: String }, // not optional
   "pval": { type: String, optional: true }
 });

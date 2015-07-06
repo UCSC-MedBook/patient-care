@@ -29,5 +29,6 @@ schemas.samplesSchema = new SimpleSchema({
   "signatures": {
     type: [sampleSpecificSignatureSchema],
     optional: true
-  }
+  },
+  "mutations": { type: [mutationSchema], optional: true }
 });
