@@ -1,9 +1,6 @@
 Patients = new Meteor.Collection("patients");
 Patients.attachSchema(schemas.patientsSchema);
 
-Samples = new Meteor.Collection("samples");
-Samples.attachSchema(schemas.samplesSchema);
-
 Signatures = new Meteor.Collection("signatures_in_cohort");
 Signatures.attachSchema(schemas.signatureInCohortSchema);
 

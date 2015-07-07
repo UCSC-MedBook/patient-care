@@ -14,11 +14,14 @@ sampleSpecificSignatureSchema = new SimpleSchema({
   "signature_id": { type: String },
   "signature_label": { type: String }, // eg. small-cell
   "value_type": { type: String }, // ex. kinase_viper
+  // contains data for waterfall plot
   "patient_values_in_cohort": { type: [patientValuePairSchema] }
   // we'll know the current patient from the top-level object
 });
 
 schemas.samplesSchema = new SimpleSchema({
+  "created_at": { type: Date },
+  "viewed": { type: Boolean },
   "sample_label": { type: String }, // Sample_ID
   "patient_id": { type: String },n
   "patient_label": { type: String },

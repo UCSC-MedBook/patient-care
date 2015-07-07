@@ -14,7 +14,10 @@ treatmentSchema = new SimpleSchema({
 // console.log(schemas.samplesSchema);
 
 schemas.patientsSchema = new SimpleSchema({
+  "created_at": { type: Date },
+  "viewed": { type: Boolean }, // should it be kept forever? dun dun dunn
   "patient_label": { type: String }, // Patient_ID, ex. DTB-056
+  "study_id": { type: String },
   "study_label": { type: String },
   "study_site": { type: String, optional: true },
   "on_study_date": { type: Date, optional: true },

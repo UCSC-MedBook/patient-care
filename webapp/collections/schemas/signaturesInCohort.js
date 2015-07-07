@@ -15,6 +15,8 @@ geneInSignatureSchema = new SimpleSchema({
 });
 
 schemas.signatureInCohortSchema = new SimpleSchema({
+  "created_at": { type: Date },
+  "viewed": { type: Boolean },
   "name": { type: String },
   "contrast": { type: contrastSchema },
   "study_id": { type: String },

@@ -5,6 +5,8 @@ outlierSampleSchema = new SimpleSchema({
 });
 
 schemas.genesInCohortSchema = new SimpleSchema({
+  "created_at": { type: Date },
+  "viewed": { type: Boolean },
   "study_label": { type: String },
   "study_id": { type: String },
   "gene_label": { type: String },
