@@ -1,7 +1,7 @@
 // note on "_day" fields:
 // These are numbers as counted from patient.on_study_date
 
-treatmentSchema = new SimpleSchema({
+Schemas.treatment = new SimpleSchema({
   "drug_name": { type: String }, // better name?
   // if day 3, they started 3 days after starting the trial
   "start_day": { type: Number },
@@ -10,7 +10,7 @@ treatmentSchema = new SimpleSchema({
   "reason_for_stop": { type: String, optional: true },
 });
 
-psaLevelSchema = new SimpleSchema({
+Schemas.psaLevel = new SimpleSchema({
   "day": { type: Number },
   "value": { type: Number }
 });
@@ -18,7 +18,7 @@ psaLevelSchema = new SimpleSchema({
 // this has to be defined (samples.js has to be down a level)
 // console.log(schemas.samplesSchema);
 
-schemas.patientsSchema = new SimpleSchema({
+Schemas.topLevel.patients = new SimpleSchema({
   "created_at": { type: Date },
   "viewed": { type: Boolean }, // should it be kept forever? dun dun dunn
   "patient_label": { type: String }, // Patient_ID, ex. DTB-056
@@ -44,13 +44,14 @@ schemas.patientsSchema = new SimpleSchema({
   "baseline_psa" : { type: Number, optional: true },
   "psa_nadir" : { type: Number, optional: true },
   "psa_nadir_days" : { type: Number, optional: true },
-  "psa_trend": { type: [psaLevelSchema], optional: true }, // for timeline
+  // for timeline
+  "psa_trend": { type: [Schemas.psaLevelSchema], optional: true },
   "treatments": {
-    type: [treatmentSchema],
+    type: [Schemas.treatment],
     optional: true
   },
   "samples": {
-    type: [schemas.samplesSchema],
+    type: [Schemas.samples],
     optional: true
   }
 });

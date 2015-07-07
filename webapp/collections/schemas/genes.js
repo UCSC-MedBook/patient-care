@@ -1,10 +1,10 @@
-outlierSampleSchema = new SimpleSchema({
+Schemas.outlierSample = new SimpleSchema({
   "sample_id": { type: String },
   "sample_label": { type: String },
   "value": { type: Number },
 });
 
-schemas.genesInCohortSchema = new SimpleSchema({
+Schemas.topLevel.genesInCohort = new SimpleSchema({
   "created_at": { type: Date },
   "viewed": { type: Boolean },
   "study_label": { type: String },
@@ -19,10 +19,10 @@ schemas.genesInCohortSchema = new SimpleSchema({
   "interaction_url": { type: String, optional: true },
   "mutations": {
     "label": "Common mutations",
-    "type": [mutationSchema],
+    "type": [Schemas.mutation],
     "optional": true
   },
-  "high_low_activity_samples": { type: [outlierSampleSchema], optional: true }
+  "high_low_activity_samples": { type: [Schemas.outlierSample], optional: true }
 
   // Lollipop (cbio or xena)
   // Gene-omics view (see next slide)

@@ -26,4 +26,8 @@ Router.map(function() {
     }
   });
 
+  this.route('visualizeSchema', {
+    path: '/visualizeSchema'
+  });
+
 });

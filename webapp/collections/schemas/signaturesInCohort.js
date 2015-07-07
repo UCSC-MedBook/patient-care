@@ -1,4 +1,4 @@
-contrastSchema = new SimpleSchema({
+Schemas.contrast = new SimpleSchema({
   "name": { type: String },
   "group1": { type: String },
   "group2": { type: String },
@@ -7,19 +7,19 @@ contrastSchema = new SimpleSchema({
   // had collaborations field
 });
 
-geneInSignatureSchema = new SimpleSchema({
+Schemas.geneInSignature = new SimpleSchema({
   "gene_id": { type: String },
   "gene_label": { type: String },
   "weight": { type: String }, // not optional
   "pval": { type: String, optional: true }
 });
 
-schemas.signatureInCohortSchema = new SimpleSchema({
+Schemas.topLevel.signatureInCohort = new SimpleSchema({
   "created_at": { type: Date },
   "viewed": { type: Boolean },
   "name": { type: String },
-  "contrast": { type: contrastSchema },
+  "contrast": { type: Schemas.contrast },
   "study_id": { type: String },
   "study_label": { type: String },
-  "members": { type: [geneInSignatureSchema] },
+  "members": { type: [Schemas.geneInSignature] },
 });

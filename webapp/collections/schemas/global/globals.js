@@ -1,6 +1,7 @@
-schemas = {};
+Schemas = {};
+Schemas.topLevel = {};
 
-mutationSchema = new SimpleSchema({
+Schemas.mutation = new SimpleSchema({
   "gene_label": { type: String },
   "gene_id": { type: String },
   "protein_change": { type: String, optional: true },
@@ -15,7 +16,7 @@ mutationSchema = new SimpleSchema({
 });
 
 // for waterfall plots
-patientValuePairSchema = new SimpleSchema({
+Schemas.patientValuePair = new SimpleSchema({
   "patient_id": { type: String },
   "patient_label": { type: String },
   "value": { type: Number }
