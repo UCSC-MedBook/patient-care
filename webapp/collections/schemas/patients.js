@@ -63,6 +63,10 @@ Schemas.samples = new SimpleSchema({
   "gene_sets": { type: [Schemas.geneSet], optional: true }
 });
 
+//////////////////////////////////////////
+// Related specifically to patients schema
+//////////////////////////////////////////
+
 Schemas.treatment = new SimpleSchema({
   "drug_name": { type: String }, // better name?
   // if day 3, they started 3 days after starting the trial
