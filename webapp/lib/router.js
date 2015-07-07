@@ -14,15 +14,17 @@ Router.map(function() {
 
   // showPatient (/sample/:currentSampleLabel) ==> same thing
   this.route('showPatient', {
-    path: '/patient/:currentPatientId',
+    path: '/patient/:currentPatientLabel',
+    subscriptions: function () {
+      Meteor.subscribe("patient_reports", this.params.currentPatientLabel);
+    },
     data: function () {
-      var currentPatient = Patients.findOne({
-        Patient_ID: this.params.currentPatientId
+      var currentPatient = PatientReports.findOne({
+        "patient_label": this.params.currentPatientLabel
       });
-      return {
-        currentPatient: currentPatient,
-        patientId: this.params.currentPatientId
-      };
+      console.log("currentPatient (router.js)");
+      console.log(currentPatient);
+      return currentPatient;
     }
   });
 

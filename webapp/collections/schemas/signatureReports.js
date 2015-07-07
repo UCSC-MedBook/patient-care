@@ -14,7 +14,7 @@ Schemas.geneInSignature = new SimpleSchema({
   "pval": { type: String, optional: true }
 });
 
-Schemas.topLevel.signatureInCohort = new SimpleSchema({
+Schemas.signatureReports = new SimpleSchema({
   "created_at": { type: Date },
   "viewed": { type: Boolean },
   "name": { type: String },

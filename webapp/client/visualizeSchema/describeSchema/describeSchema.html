@@ -3,10 +3,7 @@
   <ul>
     <!-- ../schemaObject refers to argument in outer template -->
     {{#each getSchemaSpecifics ../schemaObject}}
-      {{name}}: {{typeString}}
-      <br />
+      <li>{{name}}: {{typeString}}</li>
     {{/each}}
-    <li>first</li>
-    <li>second</li>
   </ul>
 </template>

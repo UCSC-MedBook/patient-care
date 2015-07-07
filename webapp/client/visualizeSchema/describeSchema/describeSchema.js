@@ -13,8 +13,7 @@ Template.describeSchema.helpers({
         console.log(schemaObject._schema[current]);
         type = schemaObject._schema[current].type;
         fullString = type.toString();
-        firstPartLength = "function ".length
-        typeString = fullString.substring(firstPartLength, fullString.indexOf("("/*)*/) - firstPartLength);
+        typeString = fullString.substring("function ".length, fullString.indexOf("("/*)*/));
         schemaSpecifics.push({
           "name": current,
           "type": type,

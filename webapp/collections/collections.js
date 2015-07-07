@@ -1,13 +1,11 @@
-Patients = new Meteor.Collection("patients");
-Patients.attachSchema(Schemas.patients);
+PatientReports = new Meteor.Collection("patient_reports");
+PatientReports.attachSchema(Schemas.patientReports);
 
-Signatures = new Meteor.Collection("signatures_in_cohort");
-Signatures.attachSchema(Schemas.signatureInCohort);
+SignatureReports = new Meteor.Collection("signature_reports");
+SignatureReports.attachSchema(Schemas.signatureReports);
 
-Pathways = new Meteor.Collection("pathways_in_cohort");
-Pathways.attachSchema(Schemas.pathwaysInCohort);
+PathwayReports = new Meteor.Collection("pathway_reports");
+PathwayReports.attachSchema(Schemas.pathwayReports);
 
-Genes = new Meteor.Collection("genes_in_cohort");
-Genes.attachSchema(Schemas.genesInCohort);
-
-console.log(Schemas);
+GeneReports = new Meteor.Collection("gene_reports");
+GeneReports.attachSchema(Schemas.geneReports);

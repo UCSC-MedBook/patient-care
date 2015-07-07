@@ -4,7 +4,7 @@ Schemas.outlierSample = new SimpleSchema({
   "value": { type: Number },
 });
 
-Schemas.topLevel.genesInCohort = new SimpleSchema({
+Schemas.geneReports = new SimpleSchema({
   "created_at": { type: Date },
   "viewed": { type: Boolean },
   "study_label": { type: String },

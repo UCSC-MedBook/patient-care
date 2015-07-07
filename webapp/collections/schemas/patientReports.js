@@ -46,9 +46,8 @@ Schemas.geneSet = new SimpleSchema({
 Schemas.samples = new SimpleSchema({
   "created_at": { type: Date },
   "viewed": { type: Boolean },
+  "sample_id": { type: String }, // refers to "samples" collection
   "sample_label": { type: String }, // Sample_ID
-  "patient_id": { type: String },
-  "patient_label": { type: String },
   "site_of_metastasis" : { type: String, optional: true },
   "procedure_day": { type: Number, optional: true },
   "pathways": {
@@ -81,9 +80,10 @@ Schemas.psaLevel = new SimpleSchema({
   "value": { type: Number }
 });
 
-Schemas.topLevel.patients = new SimpleSchema({
+Schemas.patientReports = new SimpleSchema({
   "created_at": { type: Date },
   "viewed": { type: Boolean }, // should it be kept forever? dun dun dunn
+  "patient_id": { type: String }, // refers to "patients" collection
   "patient_label": { type: String }, // Patient_ID, ex. DTB-056
   "study_id": { type: String },
   "study_label": { type: String },
