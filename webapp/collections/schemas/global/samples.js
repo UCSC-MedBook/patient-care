@@ -4,13 +4,13 @@ pathwayMemberSchema = new SimpleSchema({
   "events": { type: [String] }
 });
 
-sampleSpecificPathwaySchema = new SimpleSchema({
+samplePathwaySchema = new SimpleSchema({
   "name": { type: String }, // ex. cell cycle
   "pathway_id": { type: String },
   "members": { type: [pathwayMemberSchema] }
 });
 
-sampleSpecificSignatureSchema = new SimpleSchema({
+sampleSignatureSchema = new SimpleSchema({
   "signature_id": { type: String },
   "signature_label": { type: String }, // eg. small-cell
   "value_type": { type: String }, // ex. kinase_viper
@@ -19,22 +19,27 @@ sampleSpecificSignatureSchema = new SimpleSchema({
   // we'll know the current patient from the top-level object
 });
 
+signatureType = new SimpleSchema({
+  "type": { type: String },
+  "description": { type: String },
+  "signatures": { type: [sampleSignatureSchema] }
+});
+
 schemas.samplesSchema = new SimpleSchema({
   "created_at": { type: Date },
   "viewed": { type: Boolean },
   "sample_label": { type: String }, // Sample_ID
-  "patient_id": { type: String },n
+  "patient_id": { type: String },
   "patient_label": { type: String },
   "site_of_metastasis" : { type: String, optional: true },
   "procedure_day": { type: Number, optional: true },
   "pathways": {
-    type: [sampleSpecificPathwaySchema],
+    type: [samplePathwaySchema],
     optional: true
   },
   "signatures": {
-    type: [sampleSpecificSignatureSchema],
+    type: [signatureType],
     optional: true
   },
   "mutations": { type: [mutationSchema], optional: true },
-  "genes": { type: [geneExpressionSchema], optional: true } // should we have this?
 });

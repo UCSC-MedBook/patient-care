@@ -10,6 +10,11 @@ treatmentSchema = new SimpleSchema({
   "reason_for_stop": { type: String, optional: true },
 });
 
+psaLevelSchema = new SimpleSchema({
+  "day": { type: Number },
+  "value": { type: Number }
+});
+
 // this has to be defined (samples.js has to be down a level)
 // console.log(schemas.samplesSchema);
 

@@ -12,6 +12,7 @@ Router.configure({
 Router.map(function() {
   this.route('signin');
 
+  // showPatient (/sample/:currentSampleLabel) ==> same thing
   this.route('showPatient', {
     path: '/patient/:currentPatientId',
     data: function () {
@@ -24,4 +25,5 @@ Router.map(function() {
       };
     }
   });
+
 });
