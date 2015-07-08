@@ -9,3 +9,9 @@ PathwayReports.attachSchema(Schemas.pathwayReports);
 
 GeneReports = new Meteor.Collection("gene_reports");
 GeneReports.attachSchema(Schemas.geneReports);
+
+// Patients = new Meteor.Collection("patients");
+// Patients.attachSchema(Schemas.patients);
+
+// Samples = new Meteor.Collection("samples");
+// Samples.attachSchema(Schemas.samples);

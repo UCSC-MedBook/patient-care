@@ -5,3 +5,9 @@ Template.patientReport.helpers({
   },
 
 });
+
+Template.sampleReport.helpers({
+  stuff: function (parameter) {
+    //console.log(parameter);
+  }
+});

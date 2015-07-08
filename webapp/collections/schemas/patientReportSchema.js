@@ -27,7 +27,7 @@ Schemas.sampleSignature = new SimpleSchema({
   // we'll know the current patient from the top-level object
 });
 
-Schemas.signature = new SimpleSchema({
+Schemas.signatureType = new SimpleSchema({
   "type": { type: String },
   "description": { type: String },
   "signatures": { type: [Schemas.sampleSignature] }
@@ -49,6 +49,8 @@ Schemas.samples = new SimpleSchema({
   "viewed": { type: Boolean },
   "sample_id": { type: String }, // refers to "samples" collection
   "sample_label": { type: String }, // Sample_ID
+  "patient_id": { type: String },
+  "patient_label": { type: String },
   "site_of_metastasis" : { type: String, optional: true },
   "procedure_day": { type: Number, optional: true },
   "pathways": {
@@ -89,7 +91,7 @@ Schemas.patientReports = new SimpleSchema({
   "study_id": { type: String },
   "study_label": { type: String },
   "study_site": { type: String, optional: true },
-  // flag for on study or off study
+  "is_on_study": { type: Boolean, optional: true },
   "age": { type: Number, optional: true },
   "gender": { type: String, optional: true },
   "race" : { type: String, optional: true },
@@ -108,7 +110,7 @@ Schemas.patientReports = new SimpleSchema({
   "psa_nadir" : { type: Number, optional: true },
   "psa_nadir_days" : { type: Number, optional: true },
   // for timeline
-  "psa_trend": { type: [Schemas.psaLevelSchema], optional: true },
+  "psa_trend": { type: [Schemas.psaLevel], optional: true },
   "treatments": {
     type: [Schemas.treatment],
     optional: true

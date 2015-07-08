@@ -1,9 +1,0 @@
-<!-- probably move this into its own package -->
-<template name="describeSchema">
-  <ul>
-    <!-- ../schemaObject refers to argument in outer template -->
-    {{#each getSchemaSpecifics ../schemaObject}}
-      <li>{{name}}: {{typeString}}</li>
-    {{/each}}
-  </ul>
-</template>
