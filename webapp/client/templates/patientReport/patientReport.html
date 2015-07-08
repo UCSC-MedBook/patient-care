@@ -13,14 +13,18 @@
   samples
   <ul>
     {{#each samples}}
-      <li>sample goes here</li>
+      <li>
+        {{> sampleReport this}}
+      </li>
     {{/each}}
   </ul>
   <br />
   treatments
   <ul>
     {{#each treatments}}
-      <li>treatment goes here</li>
+      <li>
+        {{> treatmentReport this}}
+      </li>
     {{/each}}
   </ul>
 

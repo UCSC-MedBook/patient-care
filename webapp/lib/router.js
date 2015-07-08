@@ -14,7 +14,7 @@ Router.map(function() {
 
   // showPatient (/sample/:currentSampleLabel) ==> same thing
   this.route('patientReport', {
-    path: '/patient/:currentPatientLabel',
+    path: '/patientReport/:currentPatientLabel',
     subscriptions: function () {
       Meteor.subscribe("patient_reports", this.params.currentPatientLabel);
     },
@@ -31,6 +31,14 @@ Router.map(function() {
       console.log("currentPatient (router.js)");
       console.log(currentPatient);
       return currentPatient;
+    }
+  });
+
+  this.route('sampleReport', {
+    path: '/sampleReport/:currentSampleLabel',
+    onBeforeAction: function () {
+      // look up sample,
+      Router.go("/patient");
     }
   });
 
