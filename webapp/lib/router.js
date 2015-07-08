@@ -13,15 +13,21 @@ Router.map(function() {
   this.route('signin');
 
   // showPatient (/sample/:currentSampleLabel) ==> same thing
-  this.route('showPatient', {
+  this.route('patientReport', {
     path: '/patient/:currentPatientLabel',
     subscriptions: function () {
       Meteor.subscribe("patient_reports", this.params.currentPatientLabel);
     },
     data: function () {
+      var currentLabel = this.params.currentPatientLabel
       var currentPatient = PatientReports.findOne({
-        "patient_label": this.params.currentPatientLabel
+        "patient_label": currentLabel
       });
+      var upper = currentLabel.toUpperCase();
+      if (!currentPatient && upper !== currentLabel) {
+        // we should have an error here just in case
+        Router.go("/patient/" + upper);
+      }
       console.log("currentPatient (router.js)");
       console.log(currentPatient);
       return currentPatient;

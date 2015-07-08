@@ -18,6 +18,7 @@ Schemas.signatureReports = new SimpleSchema({
   "created_at": { type: Date },
   "viewed": { type: Boolean },
   "name": { type: String },
+  "job_id": { type: String }, // refers to "jobs" collection (what generated this signatureReport)
   "contrast": { type: Schemas.contrast },
   "study_id": { type: String },
   "study_label": { type: String },

@@ -22,7 +22,8 @@ Schemas.sampleSignature = new SimpleSchema({
   "signature_label": { type: String }, // eg. small-cell
   "value_type": { type: String }, // ex. kinase_viper
   // contains data for waterfall plot
-  "patient_values_in_cohort": { type: [Schemas.patientValuePair] }
+  "patient_values_in_cohort": { type: [Schemas.patientValuePair] },
+  "job_id": { type: String }, // refers to "jobs" collection (what generated this signatureReport)
   // we'll know the current patient from the top-level object
 });
 
@@ -88,8 +89,7 @@ Schemas.patientReports = new SimpleSchema({
   "study_id": { type: String },
   "study_label": { type: String },
   "study_site": { type: String, optional: true },
-  "on_study_date": { type: Date, optional: true },
-  "off_study_day": { type: Number, optional: true },
+  // flag for on study or off study
   "age": { type: Number, optional: true },
   "gender": { type: String, optional: true },
   "race" : { type: String, optional: true },

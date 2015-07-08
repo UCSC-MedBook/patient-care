@@ -1,0 +1,27 @@
+<template name="patientReport">
+  <h1>
+    {{patient_label}}
+  </h1>
+  age: {{age}}
+  <br />
+  current day: {{getCurrentDay}}
+  <br />
+  report created at: {{created_at}}
+  <br />
+  study: {{study_label}}
+  <br />
+  samples
+  <ul>
+    {{#each samples}}
+      <li>sample goes here</li>
+    {{/each}}
+  </ul>
+  <br />
+  treatments
+  <ul>
+    {{#each treatments}}
+      <li>treatment goes here</li>
+    {{/each}}
+  </ul>
+
+</template>
