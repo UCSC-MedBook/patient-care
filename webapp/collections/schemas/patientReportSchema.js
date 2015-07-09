@@ -22,7 +22,7 @@ Schemas.signatureAlgorithm = new SimpleSchema({
   "signature_algorithm_label": { type: String }, // eg. small-cell
   "value_type": { type: String }, // ex. kinase_viper
   "individual_signatures": { type: [Schemas.signature] },
-  "job_id": { type: String }, // refers to "jobs" collection (what generated this signatureReport)
+  "job_id": { type: Meteor.ObjectID }, // refers to "jobs" collection (what generated this signatureReport)
   "version_number": { type: String }
   // we'll know the current patient from the top-level object
 });
@@ -45,12 +45,8 @@ Schemas.geneSet = new SimpleSchema({
 });
 
 Schemas.samples = new SimpleSchema({
-  "created_at": { type: Date },
-  "viewed": { type: Boolean },
-  "sample_id": { type: String }, // refers to "samples" collection
+  "sample_id": { type: Meteor.ObjectID }, // refers to "samples" collection
   "sample_label": { type: String }, // Sample_ID
-  "patient_id": { type: String },
-  "patient_label": { type: String },
   "site_of_metastasis" : { type: String, optional: true },
   "procedure_day": { type: Number, optional: true },
   "pathways": {
@@ -76,19 +72,23 @@ Schemas.treatment = new SimpleSchema({
   // if null --> still on treatment
   "end_day": { type: Number, optional: true },
   "reason_for_stop": { type: String, optional: true },
+  "psa_response": { type: String, optional: true },
+  "bone_response": { type: String, optional: true },
+  "category": { type: String, optional: true }, // ex. "Clinical Trial"
 });
 
-Schemas.psaLevel = new SimpleSchema({
+Schemas.psaReading = new SimpleSchema({
   "day": { type: Number },
   "value": { type: Number }
 });
 
 Schemas.patientReports = new SimpleSchema({
+  "_id": { type: Meteor.ObjectID },
   "created_at": { type: Date },
   "viewed": { type: Boolean }, // should it be kept forever? dun dun dunn
-  "patient_id": { type: String }, // refers to "patients" collection
+  "patient_id": { type: Meteor.ObjectID }, // refers to "patients" collection
   "patient_label": { type: String }, // Patient_ID, ex. DTB-056
-  "study_id": { type: String },
+  "study_id": { type: Meteor.ObjectID },
   "study_label": { type: String },
   "study_site": { type: String, optional: true },
   "is_on_study": { type: Boolean, optional: true },
@@ -110,7 +110,7 @@ Schemas.patientReports = new SimpleSchema({
   "psa_nadir" : { type: Number, optional: true },
   "psa_nadir_days" : { type: Number, optional: true },
   // for timeline
-  "psa_trend": { type: [Schemas.psaLevel], optional: true },
+  "psa_levels": { type: [Schemas.psaReading], optional: true },
   "treatments": {
     type: [Schemas.treatment],
     optional: true

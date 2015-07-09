@@ -34,6 +34,7 @@ if (Meteor.isClient) {
   Meteor.subscribe("patient_reports", function () {
     console.log("subscribed");
     var patientValidation = Schemas.patientReports.newContext();
+    // only do one patient to start out with
     var thatPatient = PatientReports.find({"patient_label": "DTB-011"}).fetch()[0];
     patientValidation.validate(thatPatient);
     console.log("to be printed: patient validated then validation context"
