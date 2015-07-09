@@ -8,6 +8,12 @@ Template.patientReport.helpers({
 
 Template.sampleReport.helpers({
   stuff: function (parameter) {
-    //console.log(parameter);
+    console.log(parameter);
+  }
+});
+
+Template.signatureType.helpers({
+  stuff: function (parameter) {
+    console.log(parameter);
   }
 });

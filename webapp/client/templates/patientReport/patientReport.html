@@ -2,14 +2,19 @@
   <h1>
     {{patient_label}}
   </h1>
-  age: {{age}}
+  Report created at: {{created_at}}
   <br />
-  current day: {{getCurrentDay}}
+  Study: {{study_label}}
   <br />
-  report created at: {{created_at}}
+  Study site: {{study_site}}
   <br />
-  study: {{study_label}}
+  Age: {{age}}
   <br />
+  Race: {{race}}
+  <br />
+  Gender: {{gender}}
+  <br />
+
   samples
   <ul>
     {{#each samples}}
@@ -31,33 +36,47 @@
 </template>
 
 <template name="sampleReport">
-  <!-- ".." refers to {{this}} in calling template -->
-  {{stuff ..}}
-  {{#if ../site_of_metastasis}}
-    Site of metastasis: {{../site_of_metastasis}}
-  {{/if}}
-  <br />
-  {{#if ../procedure_day}}
-    Procedure day: {{../procedure_day}}
-  {{/if}}
-  <br />
-  {{#if ../signatures}}
-    Signatures: {{../signatures}}
-  {{/if}}
-  <br />
+  <div style="border-radius: 3px;border: 2px solid #000;">
+    {{stuff ..}} <!-- ".." refers to {{this}} in calling template -->
+    Label: {{../sample_label}}
+    <br />
+    {{#if ../site_of_metastasis}}
+      Site of metastasis: {{../site_of_metastasis}}
+    {{/if}}
+    <br />
+    {{#if ../procedure_day}}
+      Procedure day: {{../procedure_day}}
+    {{/if}}
+    <br />
+    {{#if ../signatures}}
+      Signatures:
+      {{#each ../signatures}}
+        {{> signatureType this}}
+      {{/each}}
+    {{/if}}
+    <br />
+  </div>
+</template>
+
+<template name="signatureType">
+  <div class="signature-type">
+    {{stuff ..}}
+  </div>
 </template>
 
 <template name="treatmentReport">
-  Drug name: {{../drug_name}}
-  <br />
-  Start day: {{../start_day}}
-  <br />
-  {{#if ../end_day}}
-    End day: {{../end_day}}
+  <div style="border-radius: 3px;border: 2px solid #000;">
+    Drug name: {{../drug_name}}
     <br />
-  {{/if}}
-  {{#if ../reason_for_stop}}
-    Reason for stop: {{../reason_for_stop}}
+    Start day: {{../start_day}}
     <br />
-  {{/if}}
+    {{#if ../end_day}}
+      End day: {{../end_day}}
+      <br />
+    {{/if}}
+    {{#if ../reason_for_stop}}
+      Reason for stop: {{../reason_for_stop}}
+      <br />
+    {{/if}}
+  </div>
 </template>

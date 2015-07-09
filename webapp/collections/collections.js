@@ -4,6 +4,9 @@ PatientReports.attachSchema(Schemas.patientReports);
 SignatureReports = new Meteor.Collection("signature_reports");
 SignatureReports.attachSchema(Schemas.signatureReports);
 
+SignatureAlgorithmReports = new Meteor.Collection("signature_algorithm_reports");
+SignatureAlgorithmReports.attachSchema(Schemas.signatureAlgorithmReports);
+
 PathwayReports = new Meteor.Collection("pathway_reports");
 PathwayReports.attachSchema(Schemas.pathwayReports);
 

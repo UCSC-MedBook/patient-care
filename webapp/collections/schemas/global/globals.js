@@ -1,6 +1,12 @@
 Schemas = {};
 Schemas.topLevel = {};
 
+Schemas.signature = new SimpleSchema({
+  "signature_label": { type: String },
+  // contains data for waterfall plot
+  "patient_values_in_cohort": { type: [Schemas.patientValuePair] },
+});
+
 Schemas.mutation = new SimpleSchema({
   "gene_label": { type: String },
   "gene_id": { type: String },

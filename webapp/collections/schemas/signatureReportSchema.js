@@ -1,26 +1,35 @@
-Schemas.contrast = new SimpleSchema({
+Schemas.sampleInTrainingSet = new SimpleSchema({
+  "sample_id": { type: String },
+  "sample_label": { type: String }
+});
+Schemas.trainingSet = new SimpleSchema({
   "name": { type: String },
   "group1": { type: String },
   "group2": { type: String },
-  "list1": { type: [String] }, // probably not a String
-  "list1": { type: [String] }
+  "list1": { type: [Schemas.sampleInTrainingSet] }, // probably not a String
+  "list1": { type: [Schemas.sampleInTrainingSet] }
   // had collaborations field
 });
 
-Schemas.geneInSignature = new SimpleSchema({
+Schemas.signatureWeights = new SimpleSchema({
   "gene_id": { type: String },
   "gene_label": { type: String },
   "weight": { type: String }, // not optional
-  "pval": { type: String, optional: true }
+  "pval": { type: String, optional: true } // do we need a p-value?
+});
+
+Schemas.studyMetadata = new SimpleSchema({
+  "study_id": { type: String },
+  "study_label": { type: String },
 });
 
 Schemas.signatureReports = new SimpleSchema({
   "created_at": { type: Date },
   "viewed": { type: Boolean },
-  "name": { type: String },
-  "job_id": { type: String }, // refers to "jobs" collection (what generated this signatureReport)
-  "contrast": { type: Schemas.contrast },
-  "study_id": { type: String },
-  "study_label": { type: String },
-  "members": { type: [Schemas.geneInSignature] },
+  "signature_algorithm_id": { type: String },
+  "signature_algorithm_label": { type: String },
+  "studies": { type: Schemas.studyMetadata },
+  "value_type": { type: String },
+  "sparse_weights": { type: [Schemas.signatureWeights] },
+  "dense_weights": { type: [Schemas.signatureWeights] },
 });

@@ -17,20 +17,20 @@ Schemas.samplePathway = new SimpleSchema({
   "members": { type: [Schemas.pathwayMember] }
 });
 
-Schemas.sampleSignature = new SimpleSchema({
-  "signature_id": { type: String },
-  "signature_label": { type: String }, // eg. small-cell
+Schemas.signatureAlgorithm = new SimpleSchema({
+  "signature_algorithm_report_id": { type: String }, // "signature_algorithm_report"
+  "signature_algorithm_label": { type: String }, // eg. small-cell
   "value_type": { type: String }, // ex. kinase_viper
-  // contains data for waterfall plot
-  "patient_values_in_cohort": { type: [Schemas.patientValuePair] },
+  "individual_signatures": { type: [Schemas.signature] },
   "job_id": { type: String }, // refers to "jobs" collection (what generated this signatureReport)
+  "version_number": { type: String }
   // we'll know the current patient from the top-level object
 });
 
 Schemas.signatureType = new SimpleSchema({
   "type": { type: String },
   "description": { type: String },
-  "signatures": { type: [Schemas.sampleSignature] }
+  "signatures": { type: [Schemas.signatureAlgorithm] }
 });
 
 Schemas.geneSetMember = new SimpleSchema({
@@ -57,7 +57,7 @@ Schemas.samples = new SimpleSchema({
     type: [Schemas.samplePathway],
     optional: true
   },
-  "signatures": {
+  "signatureTypes": {
     type: [Schemas.signatureType],
     optional: true
   },
