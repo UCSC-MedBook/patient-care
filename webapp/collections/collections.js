@@ -18,3 +18,28 @@ GeneReports.attachSchema(Schemas.geneReports);
 
 // Samples = new Meteor.Collection("samples");
 // Samples.attachSchema(Schemas.samples);
+
+//var patientValidation = Schemas.patientReports.newContext();
+//console.log("patientValidation:");
+//console.log(patientValidation);
+//var thatPatient = PatientReports.find({"patient_label": "DTB-011"}).fetch();
+//console.log("that patient:");
+// console.log(thatPatient);
+// //patientValidation.validate(thatPatient);
+// console.log("validated DTB-011");
+// console.log(patientValidation);
+
+// validate data in 'patient_reports' collection
+if (Meteor.isClient) {
+  Meteor.subscribe("patient_reports", function () {
+    console.log("subscribed");
+    var patientValidation = Schemas.patientReports.newContext();
+    var thatPatient = PatientReports.find({"patient_label": "DTB-011"}).fetch()[0];
+    patientValidation.validate(thatPatient);
+    console.log("to be printed: patient validated then validation context"
+                + " (look in _invalidKeys)");
+    console.log(thatPatient);
+    console.log(patientValidation);
+  });
+
+}

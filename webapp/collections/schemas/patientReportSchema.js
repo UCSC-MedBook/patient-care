@@ -12,8 +12,8 @@ Schemas.pathwayMember = new SimpleSchema({
 });
 
 Schemas.samplePathway = new SimpleSchema({
-  "name": { type: String }, // ex. cell cycle
   "pathway_id": { type: String },
+  "pathway_label": { type: String }, // ex. cell cycle
   "members": { type: [Schemas.pathwayMember] }
 });
 
