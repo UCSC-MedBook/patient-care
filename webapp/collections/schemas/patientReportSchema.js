@@ -83,19 +83,28 @@ Schemas.psaReading = new SimpleSchema({
 });
 
 Schemas.patientReports = new SimpleSchema({
+  // hidden from user
   "_id": { type: Meteor.ObjectID },
   "created_at": { type: Date },
   "viewed": { type: Boolean }, // should it be kept forever? dun dun dunn
   "patient_id": { type: Meteor.ObjectID }, // refers to "patients" collection
-  "patient_label": { type: String }, // Patient_ID, ex. DTB-056
   "study_id": { type: Meteor.ObjectID },
+
+  // header
+  "patient_label": { type: String }, // Patient_ID, ex. DTB-056
+
+  // study
   "study_label": { type: String },
   "study_site": { type: String, optional: true },
   "is_on_study": { type: Boolean, optional: true },
+
+  // demographics
   "age": { type: Number, optional: true },
   "gender": { type: String, optional: true },
   "race" : { type: String, optional: true },
   "ethnicity" : { type: String, optional: true },
+
+  // clinical information
   "last_known_survival_status" : { type: String, optional: true },
   "neoplasm_disease_stage" : { type: String, optional: true },
   "pathology_T_stage" : { type: String, optional: true },
@@ -109,12 +118,15 @@ Schemas.patientReports = new SimpleSchema({
   "baseline_psa" : { type: Number, optional: true },
   "psa_nadir" : { type: Number, optional: true },
   "psa_nadir_days" : { type: Number, optional: true },
-  // for timeline
+
+  // treatments
   "psa_levels": { type: [Schemas.psaReading], optional: true },
   "treatments": {
     type: [Schemas.treatment],
     optional: true
   },
+
+  // samples
   "samples": {
     type: [Schemas.samples],
     optional: true
