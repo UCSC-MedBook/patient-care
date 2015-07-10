@@ -2,81 +2,45 @@
   <h1>
     {{patient_label}}
   </h1>
-  Report created at: {{created_at}}
-  <br />
-  Study: {{study_label}}
-  <br />
-  Study site: {{study_site}}
-  <br />
-  Age: {{age}}
-  <br />
-  Race: {{race}}
-  <br />
-  Gender: {{gender}}
-  <br />
 
-  samples
-  <ul>
-    {{#each samples}}
-      <li>
-        {{> sampleReport this}}
-      </li>
-    {{/each}}
-  </ul>
-  <br />
-  treatments
-  <ul>
-    {{#each treatments}}
-      <li>
-        {{> treatmentReport this}}
-      </li>
-    {{/each}}
-  </ul>
+  {{> demographics this}}
+
+  <!-- clinical information -->
+
+  {{> samples this}}
 
 </template>
 
-<template name="sampleReport">
-  <div style="border-radius: 3px;border: 2px solid #000;">
-    {{stuff ..}} <!-- ".." refers to {{this}} in calling template -->
-    Label: {{../sample_label}}
-    <br />
-    {{#if ../site_of_metastasis}}
-      Site of metastasis: {{../site_of_metastasis}}
-    {{/if}}
-    <br />
-    {{#if ../procedure_day}}
-      Procedure day: {{../procedure_day}}
-    {{/if}}
-    <br />
-    {{#if ../signatures}}
-      Signatures:
-      {{#each ../signatures}}
-        {{> signatureType this}}
+<template name="samples">
+  <div class="component-box">
+    <h2>Samples</h2>
+    <ul>
+      {{#each ../samples}}
+        <li>{{> sample this}}</li>
       {{/each}}
-    {{/if}}
-    <br />
+    </ul>
   </div>
 </template>
 
-<template name="signatureType">
-  <div class="signature-type">
-    {{stuff ..}}
+<template name="sample">
+  <div class="component-box">
+    <h3>{{../sample_label}}</h3>
+    <ul>
+      {{#if ../site_of_metastasis}} <li>Site of metastasis: {{../site_of_metastasis}}</li> {{/if}}
+      {{#if ../procedure_day}} <li>Procedure day: {{../procedure_day}}</li> {{/if}}
+      <li>Render more information here</li>
+    </ul>
   </div>
 </template>
 
-<template name="treatmentReport">
-  <div style="border-radius: 3px;border: 2px solid #000;">
-    Drug name: {{../drug_name}}
-    <br />
-    Start day: {{../start_day}}
-    <br />
-    {{#if ../end_day}}
-      End day: {{../end_day}}
-      <br />
-    {{/if}}
-    {{#if ../reason_for_stop}}
-      Reason for stop: {{../reason_for_stop}}
-      <br />
-    {{/if}}
+<template name="demographics">
+  <div class="component-box">
+    <h2>Demographics</h2>
+    <ul>
+      {{#if ../age}} <li>Age: {{../age}}</li> {{/if}}
+      {{#if ../gender}} <li>Gender: {{../gender}}</li> {{/if}}
+      {{#if ../race}} <li>Race: {{../race}}</li> {{/if}}
+      {{#if ../ethnicity}} <li>Ethnicity: {{../ethnicity}}</li> {{/if}}
+    </ul>
   </div>
 </template>

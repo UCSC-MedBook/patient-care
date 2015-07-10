@@ -30,7 +30,7 @@ Schemas.signatureAlgorithm = new SimpleSchema({
 Schemas.signatureType = new SimpleSchema({
   "type": { type: String },
   "description": { type: String },
-  "signatures": { type: [Schemas.signatureAlgorithm] }
+  "signatureAlgorithms": { type: [Schemas.signatureAlgorithm] }
 });
 
 Schemas.geneSetMember = new SimpleSchema({
@@ -66,11 +66,12 @@ Schemas.samples = new SimpleSchema({
 //////////////////////////////////////////
 
 Schemas.treatment = new SimpleSchema({
-  "drug_name": { type: String }, // better name?
   // if day 3, they started 3 days after starting the trial
-  "start_day": { type: Number },
+  "start_day": { type: Number, optional: true },
   // if null --> still on treatment
   "end_day": { type: Number, optional: true },
+  "description": { type: String, optional: true },
+  "drug_name": { type: String, optional: true },
   "reason_for_stop": { type: String, optional: true },
   "psa_response": { type: String, optional: true },
   "bone_response": { type: String, optional: true },

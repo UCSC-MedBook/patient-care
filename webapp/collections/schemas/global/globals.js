@@ -1,6 +1,13 @@
 Schemas = {};
 Schemas.topLevel = {};
 
+// for waterfall plots
+Schemas.patientValuePair = new SimpleSchema({
+  "patient_id": { type: String },
+  "patient_label": { type: String },
+  "value": { type: Number }
+});
+
 Schemas.signature = new SimpleSchema({
   "signature_label": { type: String },
   // contains data for waterfall plot
@@ -19,11 +26,4 @@ Schemas.mutation = new SimpleSchema({
   "variant_allele": { type: String },
   "MA_FImpact": { type: String, optional: true },
   "MA_FIS": { type: Number, optional: true }
-});
-
-// for waterfall plots
-Schemas.patientValuePair = new SimpleSchema({
-  "patient_id": { type: String },
-  "patient_label": { type: String },
-  "value": { type: Number }
 });

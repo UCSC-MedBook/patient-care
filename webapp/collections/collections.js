@@ -19,28 +19,21 @@ GeneReports.attachSchema(Schemas.geneReports);
 // Samples = new Meteor.Collection("samples");
 // Samples.attachSchema(Schemas.samples);
 
-//var patientValidation = Schemas.patientReports.newContext();
-//console.log("patientValidation:");
-//console.log(patientValidation);
-//var thatPatient = PatientReports.find({"patient_label": "DTB-011"}).fetch();
-//console.log("that patient:");
-// console.log(thatPatient);
-// //patientValidation.validate(thatPatient);
-// console.log("validated DTB-011");
-// console.log(patientValidation);
-
 // validate data in 'patient_reports' collection
 if (Meteor.isClient) {
   Meteor.subscribe("patient_reports", function () {
     console.log("subscribed");
     var patientValidation = Schemas.patientReports.newContext();
     // only do one patient to start out with
-    var thatPatient = PatientReports.find({"patient_label": "DTB-011"}).fetch()[0];
-    patientValidation.validate(thatPatient);
-    console.log("to be printed: patient validated then validation context"
-                + " (look in _invalidKeys)");
-    console.log(thatPatient);
-    console.log(patientValidation);
+    var patients = PatientReports.find().fetch();
+    for (var i = 0; i < patients.length; i++) {
+      var currentPatient = patients[i];
+      patientValidation.validate(currentPatient);
+      if (patientValidation._invalidKeys.length > 0) {
+        console.log("problem with " + currentPatient.patient_label);
+        console.log(patientValidation._invalidKeys);
+      }
+    }
+    console.log("done validating patients data");
   });
-
 }
