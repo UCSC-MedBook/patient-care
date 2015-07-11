@@ -30,7 +30,7 @@ Schemas.signatureAlgorithm = new SimpleSchema({
 Schemas.signatureType = new SimpleSchema({
   "type": { type: String },
   "description": { type: String },
-  "signatureAlgorithms": { type: [Schemas.signatureAlgorithm] }
+  "signature_algorithms": { type: [Schemas.signatureAlgorithm] }
 });
 
 Schemas.geneSetMember = new SimpleSchema({
@@ -53,7 +53,7 @@ Schemas.samples = new SimpleSchema({
     type: [Schemas.samplePathway],
     optional: true
   },
-  "signatureTypes": {
+  "signature_types": {
     type: [Schemas.signatureType],
     optional: true
   },

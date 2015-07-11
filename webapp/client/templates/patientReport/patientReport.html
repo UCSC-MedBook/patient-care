@@ -7,12 +7,26 @@
 
   <!-- clinical information -->
 
-  {{> samples this}}
+  {{#if samples}}
+    {{> samples this}}
+  {{/if}}
 
 </template>
 
+<template name="demographics">
+  <div class="component-box component-border">
+    <h2>Demographics</h2>
+    <ul>
+      {{#if ../age}} <li>Age: {{../age}}</li> {{/if}}
+      {{#if ../gender}} <li>Gender: {{../gender}}</li> {{/if}}
+      {{#if ../race}} <li>Race: {{../race}}</li> {{/if}}
+      {{#if ../ethnicity}} <li>Ethnicity: {{../ethnicity}}</li> {{/if}}
+    </ul>
+  </div>
+</template>
+
 <template name="samples">
-  <div class="component-box">
+  <div class="component-box component-border">
     <h2>Samples</h2>
     <ul>
       {{#each ../samples}}
@@ -23,24 +37,56 @@
 </template>
 
 <template name="sample">
-  <div class="component-box">
+  <div class="component-box component-border">
     <h3>{{../sample_label}}</h3>
     <ul>
       {{#if ../site_of_metastasis}} <li>Site of metastasis: {{../site_of_metastasis}}</li> {{/if}}
       {{#if ../procedure_day}} <li>Procedure day: {{../procedure_day}}</li> {{/if}}
-      <li>Render more information here</li>
+      {{#if ../signature_types}}
+        <li>
+          {{#each ../signature_types}}
+            {{> signatureType this}}
+          {{/each}}
+        </li>
+      {{else}}
+        <li>There are no signatures associated with this sample</li>
+      {{/if}}
+    </ul>
+  </div>
+
+
+</template>
+
+<template name="signatureType">
+  <div class="component-box component-border">
+    <h4>{{description}}</h4>
+    <ul>
+      {{#each ../signature_algorithms}}
+        <li>{{> signatureAlgorithm this}}</li>
+      {{/each}}
     </ul>
   </div>
 </template>
 
-<template name="demographics">
-  <div class="component-box">
-    <h2>Demographics</h2>
+<template name="signatureAlgorithm">
+  <div class="component-box component-border">
+    <h4>{{../signature_algorithm_label}}</h4>
     <ul>
-      {{#if ../age}} <li>Age: {{../age}}</li> {{/if}}
-      {{#if ../gender}} <li>Gender: {{../gender}}</li> {{/if}}
-      {{#if ../race}} <li>Race: {{../race}}</li> {{/if}}
-      {{#if ../ethnicity}} <li>Ethnicity: {{../ethnicity}}</li> {{/if}}
+      {{#each ../individual_signatures}}
+        <li>{{> individualSignature this}}</li>
+      {{/each}}
     </ul>
   </div>
+</template>
+
+<template name="individualSignature">
+  <div class="component-box component-border">
+    <h4>{{../signature_label}}</h4>
+    <img src="/images/sample_waterfall_plot.png" alt="This is a placeholder!" height="100"/>
+    {{> signatureWaterfall this}}
+  </div>
+</template>
+
+<template name="signatureWaterfall">
+
 </template>

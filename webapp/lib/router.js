@@ -12,6 +12,8 @@ Router.configure({
 Router.map(function() {
   this.route('signin');
 
+  // root ==> list of patients, list of studies
+
   // showPatient (/sample/:currentSampleLabel) ==> same thing
   this.route('patientReport', {
     path: '/patientReport/:patientLabel',
