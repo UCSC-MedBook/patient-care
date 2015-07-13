@@ -2,11 +2,11 @@ body {
   margin: 0px;
 }
 
-svg .text {
+svg .anchor-middle {
   text-anchor: middle;
 }
 
-svg .line {
+svg line {
   stroke: black;
   stroke-width: 1;
 }
