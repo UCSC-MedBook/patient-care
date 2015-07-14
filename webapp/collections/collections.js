@@ -19,21 +19,22 @@ GeneReports.attachSchema(Schemas.geneReports);
 // Samples = new Meteor.Collection("samples");
 // Samples.attachSchema(Schemas.samples);
 
-// validate data in 'patient_reports' collection
-if (Meteor.isClient) {
-  Meteor.subscribe("patient_reports", function () {
-    console.log("subscribed");
-    var patientValidation = Schemas.patientReports.newContext();
-    // only do one patient to start out with
-    var patients = PatientReports.find().fetch();
-    for (var i = 0; i < patients.length; i++) {
-      var currentPatient = patients[i];
-      patientValidation.validate(currentPatient);
-      if (patientValidation._invalidKeys.length > 0) {
-        console.log("problem with " + currentPatient.patient_label);
-        console.log(patientValidation._invalidKeys);
-      }
-    }
-    console.log("done validating patients data");
-  });
-}
+// // validate data in 'patient_reports' collection
+// // taken out because we need to add data
+// if (Meteor.isClient) {
+//   Meteor.subscribe("patient_reports", function () {
+//     console.log("subscribed");
+//     var patientValidation = Schemas.patientReports.newContext();
+//     // only do one patient to start out with
+//     var patients = PatientReports.find().fetch();
+//     for (var i = 0; i < patients.length; i++) {
+//       var currentPatient = patients[i];
+//       patientValidation.validate(currentPatient);
+//       if (patientValidation._invalidKeys.length > 0) {
+//         console.log("problem with " + currentPatient.patient_label);
+//         console.log(patientValidation._invalidKeys);
+//       }
+//     }
+//     console.log("done validating patients data");
+//   });
+// }

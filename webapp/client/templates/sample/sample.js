@@ -1,43 +1,12 @@
+Template.signatureWaterfall.helpers({
+
+});
+
 // get the data
 // put the data into mongo
 // create a route
 // put this into a template
 // subscribe and make it work
-
-var theData = {
-  "vertical_axis_text": "Model Score",
-  "upper_threshold_value": 1.6,
-  "lower_threshold_value": -1.9,
-  // "lowest_value_for_algorithm": -3.1,
-  // "highest_value_for_algorithm": 3,
-  "patient_values": [
-    { "patient_id": "1234", "patient_label": "thisOne", "value": 2.6 },
-    { "patient_id": "1234", "patient_label": "thisOne", "value": 2.5 },
-    { "patient_id": "1234", "patient_label": "thisOne", "value": 2.1 },
-    { "patient_id": "1234", "patient_label": "thisOne", "value": 2 },
-    { "patient_id": "1234", "patient_label": "thisOne", "value": 1.8 },
-    { "patient_id": "1234", "patient_label": "thisOne", "value": 1.7 },
-    { "patient_id": "1234", "patient_label": "thisOne", "value": 1.6 },
-    { "patient_id": "1234", "patient_label": "thisOne", "value": 0.1 },
-    { "patient_id": "1234", "patient_label": "thisOne", "value": -0.4 },
-    { "patient_id": "1234", "patient_label": "thisOne", "value": -1.9 },
-    { "patient_id": "1234", "patient_label": "thisOne", "value": -2 },
-    { "patient_id": "1234", "patient_label": "thisOne", "value": -2.1 },
-    { "patient_id": "1234", "patient_label": "thisOne", "value": -2.1 },
-    { "patient_id": "1234", "patient_label": "thisOne", "value": -2.2 },
-    { "patient_id": "1234", "patient_label": "thisOne", "value": -2.4 },
-    { "patient_id": "1234", "patient_label": "thisOne", "value": -2.4 },
-    { "patient_id": "1234", "patient_label": "thisOne", "value": -2.55 },
-    { "patient_id": "1234", "patient_label": "thisOne", "value": -2.8 },
-    { "patient_id": "1234", "patient_label": "thisOne", "value": -3 },
-    { "patient_id": "1234", "patient_label": "thisOne", "value": -3.1 },
-  ],
-  "colors": {
-    "lower_than_threshold": "blue",
-    "higher_than_threshold": "red",
-    "between_thresholds": "blue"
-  }
-};
 
 setTimeout(function () { // make sure DOM is there
   console.log("This will show after 500 milliseconds");
@@ -47,6 +16,41 @@ setTimeout(function () { // make sure DOM is there
   var LEFT_AXIS_WIDTH = 50;
   var VERTICAL_MARGIN = 10;
   var HORIZONTAL_MARGIN = 5;
+
+  var theData = {
+    "vertical_axis_text": "Model Score",
+    "upper_threshold_value": 1.6,
+    "lower_threshold_value": -1.9,
+    // "lowest_value_for_algorithm": -3.1,
+    // "highest_value_for_algorithm": 3,
+    "patient_values": [
+      { "patient_id": "1234", "patient_label": "thisOne", "value": 2.6 },
+      { "patient_id": "1234", "patient_label": "thisOne", "value": 2.5 },
+      { "patient_id": "1234", "patient_label": "thisOne", "value": 2.1 },
+      { "patient_id": "1234", "patient_label": "thisOne", "value": 2 },
+      { "patient_id": "1234", "patient_label": "thisOne", "value": 1.8 },
+      { "patient_id": "1234", "patient_label": "thisOne", "value": 1.7 },
+      { "patient_id": "1234", "patient_label": "thisOne", "value": 1.6 },
+      { "patient_id": "1234", "patient_label": "thisOne", "value": 0.1 },
+      { "patient_id": "1234", "patient_label": "thisOne", "value": -0.4 },
+      { "patient_id": "1234", "patient_label": "thisOne", "value": -1.9 },
+      { "patient_id": "1234", "patient_label": "thisOne", "value": -2 },
+      { "patient_id": "1234", "patient_label": "thisOne", "value": -2.1 },
+      { "patient_id": "1234", "patient_label": "thisOne", "value": -2.1 },
+      { "patient_id": "1234", "patient_label": "thisOne", "value": -2.2 },
+      { "patient_id": "1234", "patient_label": "thisOne", "value": -2.4 },
+      { "patient_id": "1234", "patient_label": "thisOne", "value": -2.4 },
+      { "patient_id": "1234", "patient_label": "thisOne", "value": -2.55 },
+      { "patient_id": "1234", "patient_label": "thisOne", "value": -2.8 },
+      { "patient_id": "1234", "patient_label": "thisOne", "value": -3 },
+      { "patient_id": "1234", "patient_label": "thisOne", "value": -3.1 },
+    ],
+    "colors": {
+      "lower_than_threshold": "blue",
+      "higher_than_threshold": "red",
+      "between_thresholds": "blue"
+    }
+  };
 
   // make sure the patient_values are sorted
   theData.patient_values = theData.patient_values.sort(function (a, b) {
@@ -74,7 +78,7 @@ setTimeout(function () { // make sure DOM is there
   // numbers to be on the left side, also where the tick marks are
   var leftAxisNumbers = valuesToPixel.ticks(5); // mind blown
 
-  var svg = d3.select("#the_chart_id")
+  var svg = d3.select(".attach_chart_here")
               .append("svg")
               .attr("width", WIDTH)
               .attr("height", HEIGHT)
@@ -118,6 +122,8 @@ setTimeout(function () { // make sure DOM is there
   var barWidth = (indexToPixel(1) - indexToPixel(0)) * .9;
   svg.data(theData.patient_values)
       .enter()
+      .append("a")
+      .attr("href", "https://www.google.com")
       .append("rect")
       .attr("x", function (object, index) {
         return indexToPixel(index);
@@ -138,6 +144,7 @@ setTimeout(function () { // make sure DOM is there
         }
       })
       .attr("fill", function (object, index) {
+        // TODO: use colors in schema
         if (object.value >= theData.upper_threshold_value) {
           return "steelblue";
         } else if (object.value <= theData.lower_threshold_value) {
@@ -151,9 +158,10 @@ setTimeout(function () { // make sure DOM is there
       .on("mouseleave", function (object, indext) {
         d3.select(this).style({ opacity: '1' });
       })
-      .on("click", function (object, index) {
-        window.location.assign("www.googe.com");// = "www.google.com";
-      })
+      // .on("click", function (object, index) {
+      //   // TODO: this should be done in a different way I think
+      //   window.location.assign("/patientReport/" + object.patient_label);
+      // })
       .attr("cursor", "pointer"); // cursor looks like a link
 
   // threshold lines

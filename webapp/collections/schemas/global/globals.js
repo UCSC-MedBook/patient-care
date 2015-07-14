@@ -8,11 +8,17 @@ Schemas.patientValuePair = new SimpleSchema({
   "value": { type: Number }
 });
 
+Schemas.thresholdColors = new SimpleSchema({
+  "lower_than_threshold": { type: String },
+  "higher_than_threshold": { type: String },
+  "between_thresholds": { type: String },
+});
+
 Schemas.signature = new SimpleSchema({
   "signature_label": { type: String },
   "upper_significance_value": { type: Number },
   "lower_significance_value": { type: Number },
-  "patient_values_in_cohort": { type: [Schemas.patientValuePair] }, // contains data
+  "patient_values": { type: [Schemas.patientValuePair] }, // contains data
 
   // text to the left of the vertical axis
   "vertical_axis_text": { type: String, optional: true },
@@ -20,6 +26,7 @@ Schemas.signature = new SimpleSchema({
   // for if
   "lowest_value_for_algorithm": { type: Number, optional: true },
   "highest_value_for_algorithm": { type: Number, optional: true },
+  "colors": { type: Schemas.thresholdColors, optional: true }
 });
 
 Schemas.mutation = new SimpleSchema({
