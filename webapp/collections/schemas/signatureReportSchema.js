@@ -2,14 +2,6 @@ Schemas.sampleInTrainingSet = new SimpleSchema({
   "sample_id": { type: String },
   "sample_label": { type: String }
 });
-Schemas.trainingSet = new SimpleSchema({
-  "name": { type: String },
-  "group1": { type: String },
-  "group2": { type: String },
-  "list1": { type: [Schemas.sampleInTrainingSet] }, // probably not a String
-  "list1": { type: [Schemas.sampleInTrainingSet] }
-  // had collaborations field
-});
 
 Schemas.signatureWeights = new SimpleSchema({
   "gene_id": { type: String },
