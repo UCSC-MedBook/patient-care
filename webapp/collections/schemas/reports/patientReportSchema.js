@@ -86,15 +86,11 @@ Schemas.psaReading = new SimpleSchema({
 Schemas.patientReports = new SimpleSchema({
   // hidden from user
   "_id": { type: Meteor.ObjectID },
-  "created_at": { type: Date },
-  "viewed": { type: Boolean }, // should it be kept forever? dun dun dunn
-  "patient_id": { type: Meteor.ObjectID }, // refers to "patients" collection
-  "study_id": { type: Meteor.ObjectID },
-
-  // header
   "patient_label": { type: String }, // Patient_ID, ex. DTB-056
+  "created_at": { type: Date },
+  "patient_id": { type: Meteor.ObjectID }, // refers to "patients" collection
 
-  // study
+  "study_id": { type: Meteor.ObjectID },
   "study_label": { type: String },
   "study_site": { type: String, optional: true },
   "is_on_study": { type: Boolean, optional: true },

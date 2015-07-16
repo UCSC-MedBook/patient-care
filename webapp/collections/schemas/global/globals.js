@@ -1,5 +1,4 @@
-Schemas = {};
-Schemas.topLevel = {};
+Schemas = {}; // global variable (no var)
 
 // for waterfall plots
 Schemas.patientValuePair = new SimpleSchema({
