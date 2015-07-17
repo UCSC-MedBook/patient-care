@@ -9,3 +9,4 @@ aldeed:simple-schema
 aldeed:collection2
 iron:router
 d3js:d3
+medbook:report-schemas
