@@ -43,14 +43,14 @@
 
 <template name="individualSignature">
   <div class="component-box component-border">
-    <h4>{{../signature_label}}</h4>
+    <h4>{{../description}}</h4>
     <!-- <img src="/images/sample_waterfall_plot.png" alt="This is a placeholder!" height="100"/> -->
     {{> signatureWaterfall this}}
   </div>
 </template>
 
 <template name="signatureWaterfall">
-  <div class="attach_chart_here">
+  <div id="{{../../signature_label}}">
     <!-- d3 will attach here -->
   </div>
 </template>
