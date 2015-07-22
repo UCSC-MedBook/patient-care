@@ -10,3 +10,6 @@ aldeed:collection2
 iron:router
 d3js:d3
 medbook:report-collections
+medbook:user-context
+accounts-password
+accounts-ui

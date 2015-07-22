@@ -1,5 +1,5 @@
 <template name="sample">
-  <div class="component-box component-border">
+  <div id="{{../sample_label}}" class="component-box component-border">
     <h3>{{../sample_label}}</h3>
     <ul>
       {{#if ../site_of_metastasis}} <li>Site of metastasis: {{../site_of_metastasis}}</li> {{/if}}
@@ -50,7 +50,7 @@
 </template>
 
 <template name="signatureWaterfall">
-  <div id="{{../../signature_label}}">
+  <div id="{{../current_sample_label}}-{{../../signature_label}}">
     <!-- d3 will attach here -->
   </div>
 </template>

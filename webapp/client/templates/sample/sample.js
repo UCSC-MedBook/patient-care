@@ -1,10 +1,14 @@
-Template.signatureWaterfall.rendered = function (first, second, third) {
-
-  console.log(this.data);
+Template.signatureWaterfall.rendered = function () {
 
   var outerData = this.data;
 
+
+
   this.autorun(function () {
+
+    console.log("rendering :: :: ");
+    console.log(outerData);
+    console.log(outerData.current_sample_label);
 
     var HEIGHT = 200;
     var WIDTH = 400;
@@ -14,10 +18,10 @@ Template.signatureWaterfall.rendered = function (first, second, third) {
 
     var theData = outerData;
 
-    // make sure the patient_values are sorted
+    // sort the patient_values
     theData.patient_values = theData.patient_values.sort(function (a, b) {
       return b.value - a.value;
-    })
+    });
 
     // assume data is sorted; use values from algorithm if available
     // also assume
@@ -32,11 +36,6 @@ Template.signatureWaterfall.rendered = function (first, second, third) {
     lowestValue = hundrethRound(lowestValue);
     highestValue = hundrethRound(highestValue);
 
-    console.log("lowest::");
-    console.log(lowestValue);
-    console.log("highest::");
-    console.log(highestValue);
-
     var valuesToPixel = d3.scale.linear()
                           .domain([highestValue, lowestValue])
                           .range([VERTICAL_MARGIN, HEIGHT - VERTICAL_MARGIN]);
@@ -50,10 +49,8 @@ Template.signatureWaterfall.rendered = function (first, second, third) {
 
     // numbers to be on the left side, also where the tick marks are
     var leftAxisNumbers = valuesToPixel.ticks(5); // mind blown
-    console.log("leftAxisNumbers::");
-    console.log(leftAxisNumbers);
 
-    var svg = d3.select("#" + theData.signature_label)
+    var svg = d3.select("#" + theData.current_sample_label + "-" + theData.signature_label)
                 .append("svg")
                 .attr("width", WIDTH)
                 .attr("height", HEIGHT)
@@ -97,9 +94,6 @@ Template.signatureWaterfall.rendered = function (first, second, third) {
     var barWidth = (indexToPixel(1) - indexToPixel(0)) * .9;
     svg.data(theData.patient_values)
         .enter()
-        .append("a")
-        .attr("xlink:href", "/hello")
-        .attr("target", "_blank")
         .append("rect")
         .attr("x", function (object, index) {
           return indexToPixel(index);
@@ -120,8 +114,8 @@ Template.signatureWaterfall.rendered = function (first, second, third) {
           }
         })
         .attr("fill", function (object, index) {
-          // TODO: use colors in schema
-          if (object.sample_label === "DTB-011") {
+          // TODO: un-hardcode the sample being highlighted
+          if (object.sample_label === theData.current_sample_label) {
             return theData.colors.current_sample || "black";
           } else if (object.value >= theData.upper_threshold_value) {
             return theData.colors.higher_than_threshold || "steelblue";
@@ -136,10 +130,13 @@ Template.signatureWaterfall.rendered = function (first, second, third) {
         .on("mouseleave", function (object, indext) {
           d3.select(this).style({ opacity: '1' });
         })
-        // .on("click", function (object, index) {
-        //   // TODO: this should be done in a different way I think
-        //   window.location.assign("/patientReport/" + object.patient_label);
-        // })
+        .on("click", function (object, index) {
+          // change to .append("a") after issue is fixed
+          // https://github.com/iron-meteor/iron-router/issues/1392
+          console.log("clicked on :: ");
+          console.log(object);
+          patientReportGo(object.patient_id);
+        })
         .attr("cursor", "pointer"); // cursor looks like a link
 
     // threshold lines

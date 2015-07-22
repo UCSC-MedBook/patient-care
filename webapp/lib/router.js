@@ -10,30 +10,31 @@ Router.configure({
 });
 
 Router.map(function() {
-  this.route('signin');
+  //this.route('signin');
 
   // root ==> list of patients, list of studies
 
-  // showPatient (/sample/:currentSampleLabel) ==> same thing
   this.route('patientReport', {
     path: '/patientReport/:patientLabel',
     subscriptions: function () {
-      return Meteor.subscribe("patient_reports", this.params.patientLabel);
+      return Meteor.subscribe("PatientReports", this.params.patientLabel);
     },
     data: function () {
       var currentLabel = this.params.patientLabel
       var currentPatient = PatientReports.findOne({
         "patient_label": currentLabel
       });
+      // check if we have a report yet for that patient
       return currentPatient;
     },
   });
 
-  this.route('sampleReport', {
-    path: '/sampleReport/:currentSampleLabel',
+  // not really used
+  this.route('redirecting', { // this is literally just a redirect
+    path: '/patientReportById/:patientId',
     onBeforeAction: function () {
-
-      Router.go("/patient");
+      Meteor.call("patientReportGo", patientId);
+      this.next();
     }
   });
 
