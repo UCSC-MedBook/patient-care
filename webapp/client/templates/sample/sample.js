@@ -2,33 +2,33 @@ Template.signatureWaterfall.rendered = function () {
 
   var outerData = this.data;
 
-
+  console.log(this);
 
   this.autorun(function () {
 
-    console.log("rendering :: :: ");
-    console.log(outerData);
-    console.log(outerData.current_sample_label);
+    // console.log("rendering :: :: ");
+    // console.log(outerData);
+    // console.log(outerData.current_sample_label);
 
-    var HEIGHT = 200;
-    var WIDTH = 400;
+    var HEIGHT = 150;
+    var WIDTH = 200;
     var LEFT_AXIS_WIDTH = 50;
     var VERTICAL_MARGIN = 10;
     var HORIZONTAL_MARGIN = 5;
 
     var theData = outerData;
 
-    // sort the patient_values
-    theData.patient_values = theData.patient_values.sort(function (a, b) {
+    // sort the sample_values
+    theData.sample_values = theData.sample_values.sort(function (a, b) {
       return b.value - a.value;
     });
 
     // assume data is sorted; use values from algorithm if available
     // also assume
     var lowestValue = theData.lowest_value_for_algorithm
-            || theData.patient_values[theData.patient_values.length - 1].value;
+            || theData.sample_values[theData.sample_values.length - 1].value;
     var highestValue = theData.highest_value_for_algorithm
-            || theData.patient_values[0].value;
+            || theData.sample_values[0].value;
 
     function hundrethRound(number) {
       return Math.ceil(number * 100) / 100;
@@ -41,7 +41,7 @@ Template.signatureWaterfall.rendered = function () {
                           .range([VERTICAL_MARGIN, HEIGHT - VERTICAL_MARGIN]);
 
     var indexToPixel = d3.scale.linear()
-                          .domain([0, theData.patient_values.length])
+                          .domain([0, theData.sample_values.length])
                           .range([
                             LEFT_AXIS_WIDTH + HORIZONTAL_MARGIN
                             , WIDTH - HORIZONTAL_MARGIN
@@ -92,7 +92,7 @@ Template.signatureWaterfall.rendered = function () {
 
     // bars on the plot
     var barWidth = (indexToPixel(1) - indexToPixel(0)) * .9;
-    svg.data(theData.patient_values)
+    svg.data(theData.sample_values)
         .enter()
         .append("rect")
         .attr("x", function (object, index) {
@@ -114,15 +114,15 @@ Template.signatureWaterfall.rendered = function () {
           }
         })
         .attr("fill", function (object, index) {
-          // TODO: un-hardcode the sample being highlighted
+          var colors = object.colors;
           if (object.sample_label === theData.current_sample_label) {
-            return theData.colors.current_sample || "black";
+            return colors ? colors.current_sample : "#B97D4B";
           } else if (object.value >= theData.upper_threshold_value) {
-            return theData.colors.higher_than_threshold || "steelblue";
+            return colors ? colors.higher_than_threshold : "#B97D4B";
           } else if (object.value <= theData.lower_threshold_value) {
-            return theData.colors.lower_than_threshold || "#B97D4B";
+            return colors ? colors.lower_than_threshold : "steelblue";
           }
-          return theData.colors.between_thresholds || "lightgrey";
+          return colors ? colors.between_thresholds : "#AAAAAA";
         })
         .on("mouseover", function (object, indext) {
           d3.select(this).style({ opacity: '0.7' });
@@ -133,9 +133,10 @@ Template.signatureWaterfall.rendered = function () {
         .on("click", function (object, index) {
           // change to .append("a") after issue is fixed
           // https://github.com/iron-meteor/iron-router/issues/1392
-          console.log("clicked on :: ");
-          console.log(object);
-          patientReportGo(object.patient_id);
+          patientReportGo({
+            "patient_id": object.patient_id,
+            "sample_label": object.sample_label,
+          });
         })
         .attr("cursor", "pointer"); // cursor looks like a link
 

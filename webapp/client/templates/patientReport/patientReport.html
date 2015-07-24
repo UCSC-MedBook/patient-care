@@ -1,4 +1,6 @@
 <template name="patientReport">
+  <!-- {{print this}} -->
+
   <h1>
     {{patient_label}}
   </h1>
@@ -15,11 +17,12 @@
 
 <template name="demographics">
   <div class="component-box component-border">
+    <!-- onclick="Router.go('patientReport', {patient_label: 'DTB-089'}, {hash: 'DTB-089Pro'})" -->
     <h2>Demographics</h2>
     <ul>
-      {{#if ../age}} <li>Age: {{../age}}</li> {{/if}}
-      {{#if ../gender}} <li>Gender: {{../gender}}</li> {{/if}}
-      {{#if ../race}} <li>Race: {{../race}}</li> {{/if}}
+      {{#if ../age}} <li>Age: {{../age}}</li> {{/if}} <br />
+      {{#if ../gender}} <li>Gender: {{../gender}}</li> {{/if}} <br />
+      {{#if ../race}} <li>Race: {{../race}}</li> {{/if}} <br />
       {{#if ../ethnicity}} <li>Ethnicity: {{../ethnicity}}</li> {{/if}}
     </ul>
   </div>

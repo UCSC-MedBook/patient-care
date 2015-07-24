@@ -1,0 +1,11 @@
+<template name="listReports">
+  <ul>
+    {{#each getReports}}
+      <li>
+        <a href="{{ pathFor 'patientReport' patientLabel=this.patient_label }}">
+          {{this.patient_label}}
+        </a>
+      </li>
+    {{/each}}
+  </ul>
+</template>

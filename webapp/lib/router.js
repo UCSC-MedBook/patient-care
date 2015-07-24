@@ -15,12 +15,12 @@ Router.map(function() {
   // root ==> list of patients, list of studies
 
   this.route('patientReport', {
-    path: '/patientReport/:patientLabel',
+    path: '/patientReport/:patient_label',
     subscriptions: function () {
-      return Meteor.subscribe("PatientReports", this.params.patientLabel);
+      return Meteor.subscribe("PatientReports", this.params.patient_label);
     },
     data: function () {
-      var currentLabel = this.params.patientLabel
+      var currentLabel = this.params.patient_label
       var currentPatient = PatientReports.findOne({
         "patient_label": currentLabel
       });
@@ -29,13 +29,8 @@ Router.map(function() {
     },
   });
 
-  // not really used
-  this.route('redirecting', { // this is literally just a redirect
-    path: '/patientReportById/:patientId',
-    onBeforeAction: function () {
-      Meteor.call("patientReportGo", patientId);
-      this.next();
-    }
+  this.route('listReports', {
+    path: '/',
   });
 
 });
