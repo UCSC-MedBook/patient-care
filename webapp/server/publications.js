@@ -1,5 +1,26 @@
-Meteor.publish("PatientReports", function (patientLabel) {
-  return PatientReports.find({"patient_label": patientLabel});
+Meteor.publish("PatientReport", function (patientLabel) {
+
+  var patientCursor = PatientReports.find(
+    {"patient_label": patientLabel},
+    {limit: 1});
+
+  var chartIds = [];
+  patientCursor.forEach(function (patient) { // better way to get the data?
+    _.each(patient.samples, function (currentSample) {
+      if (currentSample.cohort_signatures) {
+        _.each(currentSample.cohort_signatures, function (currentSignature) {
+          chartIds.push(currentSignature.chart_id);
+        });
+      }
+    });
+  });
+
+  console.log(chartIds);
+
+  return [
+    patientCursor,
+    Charts.find({ "_id": {$in: chartIds} })
+  ];
 });
 
 // allows quick linking between patient reports

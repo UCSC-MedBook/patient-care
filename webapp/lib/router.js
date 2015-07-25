@@ -15,9 +15,11 @@ Router.map(function() {
   // root ==> list of patients, list of studies
 
   this.route('patientReport', {
-    path: '/patientReport/:patient_label',
+    path: '/PatientCare/patientReport/:patient_label',
     subscriptions: function () {
-      return Meteor.subscribe("PatientReports", this.params.patient_label);
+      return Meteor.subscribe("PatientReport", this.params.patient_label, function () {
+        console.log("loaded PatientReport subscription");
+      });
     },
     data: function () {
       var currentLabel = this.params.patient_label
@@ -30,7 +32,7 @@ Router.map(function() {
   });
 
   this.route('listReports', {
-    path: '/',
+    path: '/PatientCare/',
   });
 
 });

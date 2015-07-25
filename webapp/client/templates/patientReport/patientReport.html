@@ -13,6 +13,8 @@
     {{> samples this}}
   {{/if}}
 
+  {{print this}}
+
 </template>
 
 <template name="demographics">
@@ -20,18 +22,28 @@
     <!-- onclick="Router.go('patientReport', {patient_label: 'DTB-089'}, {hash: 'DTB-089Pro'})" -->
     <h2>Demographics</h2>
     <ul>
-      {{#if ../age}} <li>Age: {{../age}}</li> {{/if}} <br />
-      {{#if ../gender}} <li>Gender: {{../gender}}</li> {{/if}} <br />
-      {{#if ../race}} <li>Race: {{../race}}</li> {{/if}} <br />
+      {{#if ../age}} <li>Age: {{../age}}</li> {{/if}}
+      {{#if ../gender}} <li>Gender: {{../gender}}</li> {{/if}}
+      {{#if ../race}} <li>Race: {{../race}}</li> {{/if}}
       {{#if ../ethnicity}} <li>Ethnicity: {{../ethnicity}}</li> {{/if}}
     </ul>
   </div>
+</template>
+
+<template name="clinicalInformation">
+
+  {{#if ../age}} <li>Age: {{../age}}</li> {{/if}} <br />
+  {{#if ../gender}} <li>Gender: {{../gender}}</li> {{/if}} <br />
+  {{#if ../race}} <li>Race: {{../race}}</li> {{/if}} <br />
+
+
 </template>
 
 <template name="samples">
   <div class="component-box component-border">
     <h2>Samples</h2>
     <ul>
+
       {{#each ../samples}}
         <li>{{> sample this}}</li>
       {{/each}}

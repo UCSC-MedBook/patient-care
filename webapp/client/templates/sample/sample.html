@@ -2,12 +2,14 @@
   <div id="{{../sample_label}}" class="component-box component-border">
     <h3>{{../sample_label}}</h3>
     <ul>
-      {{#if site_of_metastasis}} <li>Site of metastasis: {{site_of_metastasis}}</li> {{/if}}
-      {{#if procedure_day}} <li>Procedure day: {{procedure_day}}</li> {{/if}}
+      <!-- {{#if site_of_metastasis}} <li>Site of metastasis: {{site_of_metastasis}}</li> {{/if}}
+      {{#if procedure_day}} <li>Procedure day: {{procedure_day}}</li> {{/if}} -->
+      {{#if ../site_of_biopsy}} <li>Site of biopsy: {{../site_of_biopsy}}</li> {{/if}}
+      {{#if ../trichotomy_call}} <li>Trichotomy call: {{../trichotomy_call}}</li> {{/if}}
 
-      {{#if signature_types}}
-        {{#each signature_types}}
-          <li>{{> signatureType this}}</li>
+      {{#if cohort_signatures}}
+        {{#each cohort_signatures}}
+          <li class="inline-table">{{> cohortSignature this}}</li>
         {{/each}}
       {{else}}
         <li>There are no signatures associated with this sample</li>
@@ -16,26 +18,9 @@
   </div>
 </template>
 
-<template name="signatureType">
+<template name="cohortSignature">
   <div class="component-box component-border">
-    <h3>{{signature_type_label}}</h3>
-    {{#each signature_algorithms}}
-      {{#each individual_signatures}}
-        <li>{{> signatureReport this}}</li>
-      {{/each}}
-    {{/each}}
-  </div>
-</template>
-
-<template name="signatureReport">
-  <div class="component-box component-border">
-    <h4>{{../description}}</h4>
-    {{> signatureWaterfall this}}
-  </div>
-</template>
-
-<template name="signatureWaterfall">
-  <div id="{{../current_sample_label}}-{{../../signature_label}}">
-    <!-- d3 will attach here -->
+    <h4>{{description}}</h4>
+    {{> renderChart this }}
   </div>
 </template>

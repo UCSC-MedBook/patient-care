@@ -1,6 +1,7 @@
 .component-box {
   padding: 10px;
   margin: 5px;
+  display: inline-table;
 }
 
   .component-box h2 {
@@ -24,11 +25,11 @@
     padding-left: 0px;
   }
 
-  .component-box li {
-    display: inline-block;
-  }
-
 .component-border {
   border-radius: 2px;
   border: 1px solid #000;
+}
+
+.inline-table {
+  display: inline-table;
 }
