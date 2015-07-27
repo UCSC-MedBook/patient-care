@@ -1,6 +1,4 @@
 <template name="patientReport">
-  <!-- {{print this}} -->
-
   <h1>
     {{patient_label}}
   </h1>
@@ -13,13 +11,13 @@
     {{> samples this}}
   {{/if}}
 
+  {{print "patientReport this :: "}}
   {{print this}}
 
 </template>
 
 <template name="demographics">
   <div class="component-box component-border">
-    <!-- onclick="Router.go('patientReport', {patient_label: 'DTB-089'}, {hash: 'DTB-089Pro'})" -->
     <h2>Demographics</h2>
     <ul>
       {{#if ../age}} <li>Age: {{../age}}</li> {{/if}}

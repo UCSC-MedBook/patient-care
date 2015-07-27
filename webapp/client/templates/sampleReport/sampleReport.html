@@ -8,9 +8,12 @@
       {{#if ../trichotomy_call}} <li>Trichotomy call: {{../trichotomy_call}}</li> {{/if}}
 
       {{#if cohort_signatures}}
-        {{#each cohort_signatures}}
-          <li class="inline-table">{{> cohortSignature this}}</li>
-        {{/each}}
+        <div class="component-box component-border inline-table">
+          <h3>Signatures</h3>
+          {{#each cohort_signatures}}
+            <li class="inline-table">{{> cohortSignature this}}</li>
+          {{/each}}
+        </div>
       {{else}}
         <li>There are no signatures associated with this sample</li>
       {{/if}}

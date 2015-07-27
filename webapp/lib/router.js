@@ -29,6 +29,9 @@ Router.map(function() {
       // check if we have a report yet for that patient
       return currentPatient;
     },
+    onStop: function () {
+      console.log("onStop (router.js)");
+    },
   });
 
   this.route('listReports', {

@@ -1,5 +1,9 @@
 Meteor.methods({
   patientReportGo: function (description) {
+
+    // console.log("patientReportGo description :: ");
+    // console.log(description);
+
     if (Session.get("metadataReady")) {
       if (description.patient_id) {
         var patientReport = PatientReports.findOne({"patient_id": description.patient_id});

@@ -15,7 +15,7 @@ Meteor.publish("PatientReport", function (patientLabel) {
     });
   });
 
-  console.log(chartIds);
+  //console.log(chartIds);
 
   return [
     patientCursor,
