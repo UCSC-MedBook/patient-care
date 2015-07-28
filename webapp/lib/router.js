@@ -26,7 +26,7 @@ Router.map(function() {
       var currentPatient = PatientReports.findOne({
         "patient_label": currentLabel
       });
-      // check if we have a report yet for that patient
+      // TODO: check if we have a report yet for that patient
       return currentPatient;
     },
     onStop: function () {
@@ -36,6 +36,26 @@ Router.map(function() {
 
   this.route('listReports', {
     path: '/PatientCare/',
+  });
+
+  this.route('geneReport', {
+    path: '/PatientCare/geneReport/:gene_label',
+    subscriptions: function () {
+      return Meteor.subscribe("GeneReport", this.params.gene_label, function () {
+        console.log("loaded GeneReport subscription");
+      });
+    },
+    data: function () {
+      var currentLabel = this.params.gene_label
+      var currentGene = GeneReports.findOne({
+        "gene_label": currentLabel
+      });
+      // TODO: check if we have a report yet for that gene
+      return currentGene;
+    },
+    onStop: function () {
+      console.log("onStop (router.js)");
+    },
   });
 
 });

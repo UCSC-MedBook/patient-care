@@ -33,3 +33,10 @@ Meteor.publish("PatientReportMetadata", function () {
     }
   });
 });
+
+Meteor.publish("GeneReport", function (geneLabel) {
+  // TODO: add security and such
+  return [
+    GeneReports.find({"gene_label": geneLabel})
+  ];
+});

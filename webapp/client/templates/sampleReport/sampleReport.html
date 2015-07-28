@@ -8,8 +8,8 @@
       {{#if ../trichotomy_call}} <li>Trichotomy call: {{../trichotomy_call}}</li> {{/if}}
 
       {{#if cohort_signatures}}
-        <div class="component-box component-border inline-table">
-          <h3>Signatures</h3>
+        <div class="component-box inline-table">
+          <p>Top ranked signature scores</p>
           {{#each cohort_signatures}}
             <li class="inline-table">{{> cohortSignature this}}</li>
           {{/each}}

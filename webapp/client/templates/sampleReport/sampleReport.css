@@ -8,3 +8,7 @@ svg line {
   stroke: black;
   stroke-width: 1;
 }
+
+p {
+  margin: 0px;
+}
