@@ -6,7 +6,8 @@ svg .anchor-middle {
   text-anchor: middle;
 }
 
-svg line {
-  stroke: black;
-  stroke-width: 1;
+svg line, svg path {
+  stroke: #999;
+	stroke-width: 1px;
+	shape-rendering: crispEdges;
 }
