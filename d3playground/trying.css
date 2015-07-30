@@ -16,3 +16,20 @@ body {
   stroke: #000;
   shape-rendering: crispEdges;
 }
+
+.boxplot line {
+  fill: none;
+  stroke: #F00;
+  stroke-width: 3;
+  shape-rendering: crispEdges;
+}
+
+.boxplot .inside-threshold {
+  fill: #AAA;
+  stroke: #AAA;
+}
+
+.boxplot .outside-threshold {
+  fill: #00F;
+  stroke: #00F;
+}
