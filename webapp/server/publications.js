@@ -36,7 +36,15 @@ Meteor.publish("PatientReportMetadata", function () {
 
 Meteor.publish("GeneReport", function (geneLabel) {
   // TODO: add security and such
+
+  var geneReportCursor = GeneReports.find({"gene_label": geneLabel});
+  var currentReport = geneReportCursor.fetch()[0];
+
+  var geneNames = _.pluck(currentReport.network.elements, 'name');
+  var expression2Cursor = expression2.find({"gene": { $in: geneNames }});
+
   return [
-    GeneReports.find({"gene_label": geneLabel})
+    geneReportCursor,
+    expression2Cursor,
   ];
 });
