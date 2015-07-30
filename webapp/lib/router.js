@@ -41,7 +41,9 @@ Router.map(function() {
   this.route('geneReport', {
     path: '/PatientCare/geneReport/:gene_label',
     subscriptions: function () {
+      Session.set("geneReportLoaded", false);
       return Meteor.subscribe("GeneReport", this.params.gene_label, function () {
+        Session.set("geneReportLoaded", true);
         console.log("loaded GeneReport subscription");
       });
     },
