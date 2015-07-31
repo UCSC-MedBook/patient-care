@@ -1,3 +1,5 @@
 data/*.tab
 data/*.csv
-scripts/*.json
+.project
+.gitignore
+my_dev.mak
