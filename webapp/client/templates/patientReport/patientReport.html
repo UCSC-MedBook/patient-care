@@ -15,55 +15,36 @@
     {{> samples this}}
   {{/if}}
 
-  {{> kinaseSignatures}}
-
-  {{> tfSignatures}}
+  {{> signatures}}
 
 </template>
 
-<template name="kinaseSignatures">
-  <div class="component-box component-border">
-    <h2 style="display: inline-block; margin-bottom: 10px">Kinase signatures</h2>
+<template name="signatures">
+  <!-- TODO: make a loop for this -->
+  {{> signaturesOfType "kinase"}}
+  {{> signaturesOfType "tf"}}
+  {{> signaturesOfType "subtype"}}
+</template>
 
-    <select style="float: right;">
-      <option value="viper">Viper</option>
-      <option value="paradigm">Paradigm</option>
-    </select>
-
-    <table style="width:100%">
-      <!-- header -->
-      <td></td>
-      <td><img src="/images/boxplot axis.png" /></td>
-      {{#each getSignatures}}
-        <tr>
-          <td style="text-align: center;">{{this}}</td>
-          <td><img src="{{randomBoxplotUrl}}" /></td>
-        </tr>
-      {{/each}}
+<template name="signaturesOfType">
+  <div class="component-box component-border signatures-box">
+    <h2>{{upcaseFirst this}} signatures</h2>
+    <table>
+    {{#each getSignaturesOfType this}}
+      <tr>
+        <td>{{label}}</td>
+        <td>
+          {{> renderBoxAndWhisker this}}
+        </td>
+      </tr>
+    {{/each}}
     </table>
   </div>
 </template>
 
-<template name="tfSignatures">
-  <div class="component-box component-border">
-    <h2 style="display: inline-block; margin-bottom: 10px">TF signatures</h2>
-
-    <select style="float: right;">
-      <option value="viper">Viper</option>
-      <option value="paradigm">Paradigm</option>
-    </select>
-
-    <table style="width:100%">
-      <!-- header -->
-      <td></td>
-      <td><img src="/images/boxplot axis.png" /></td>
-      {{#each getSignatures}}
-        <tr>
-          <td style="text-align: center;">{{this}}</td>
-          <td><img src="{{randomBoxplotUrl}}" /></td>
-        </tr>
-      {{/each}}
-    </table>
+<template name="renderBoxAndWhisker">
+  <div id="{{type}}{{algorithm}}{{removeSpaces label}}">
+    <!-- should attach here -->
   </div>
 </template>
 

@@ -4,22 +4,9 @@ Meteor.publish("PatientReport", function (patientLabel) {
     {"patient_label": patientLabel},
     {limit: 1});
 
-  var chartIds = [];
-  patientCursor.forEach(function (patient) { // better way to get the data?
-    _.each(patient.samples, function (currentSample) {
-      if (currentSample.cohort_signatures) {
-        _.each(currentSample.cohort_signatures, function (currentSignature) {
-          chartIds.push(currentSignature.chart_id);
-        });
-      }
-    });
-  });
-
-  //console.log(chartIds);
-
   return [
     patientCursor,
-    Charts.find({ "_id": {$in: chartIds} })
+    CohortSignatures.find({"_id": { $in: patientCursor.fetch()[0]['cohort_signature_ids'] }}),
   ];
 });
 

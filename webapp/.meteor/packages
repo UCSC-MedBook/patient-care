@@ -14,3 +14,5 @@ medbook:user-context
 accounts-password
 accounts-ui
 medbook:charts
+medbook:primary-collections
+less
