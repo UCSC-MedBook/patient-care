@@ -17,6 +17,14 @@
 
   {{> signatures}}
 
+  {{> circleOfDeath}}
+
+</template>
+
+<template name="circleOfDeath">
+  <div class="component-box component-border">
+    <img src="/images/circle_of_death.png">
+  </div>
 </template>
 
 <template name="signatures">
@@ -29,6 +37,10 @@
 <template name="signaturesOfType">
   <div class="component-box component-border signatures-box">
     <h2>{{upcaseFirst this}} signatures</h2>
+    <select name="select">
+      <option value="viper" selected>viper</option>
+      <option value="paradigm">paradigm</option>
+    </select>
     <table>
     {{#each getSignaturesOfType this}}
       <tr>

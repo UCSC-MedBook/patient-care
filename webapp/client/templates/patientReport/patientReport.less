@@ -1,7 +1,7 @@
 .component-box {
   padding: 10px;
   margin: 5px;
-  display: inline-table;
+  display: inline-block;
 }
 
   .component-box h2 {
@@ -26,10 +26,12 @@
 }
 
 .inline-table {
-  display: inline-table;
+  display: inline;
 }
 
-
+li, td {
+  font-size: 14px;
+}
 
 .signatures-box table {
   border-collapse: collapse;
@@ -43,6 +45,13 @@
 }
 .signatures-box tr:last-child {
   border-bottom: none;
+}
+.signatures-box h2 {
+  display: inline;
+  margin-right: 15px;
+}
+.signatures-box select {
+  float: right
 }
 
 /*
