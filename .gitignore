@@ -1,3 +1,6 @@
 data/*.tab
 data/*.csv
-scripts/*.json
+.project
+.gitignore
+webapp/packages/*
+my_dev.mak
