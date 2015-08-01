@@ -46,7 +46,7 @@
       <tr>
         <td>{{label}}</td>
         <td>
-          {{> renderBoxAndWhisker this}}
+          {{> renderChart this}}
         </td>
       </tr>
     {{/each}}
@@ -54,7 +54,7 @@
   </div>
 </template>
 
-<template name="renderBoxAndWhisker">
+<template name="renderChart">
   <div id="{{type}}{{algorithm}}{{removeSpaces label}}">
     <!-- should attach here -->
   </div>
