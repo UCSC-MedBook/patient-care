@@ -7,22 +7,26 @@
     {{patient_label}}
   </h1>
 
-  {{> demographics this}}
+  <div id="top-part" class="flex-container">
+    {{> demographics this}}
 
-  <!-- clinical information -->
+    <!-- clinical information -->
 
-  {{#if samples}}
-    {{> samples this}}
-  {{/if}}
+    {{#if samples}}
+      {{> samples this}}
+    {{/if}}
+  </div>
 
-  {{> signatures}}
+  <div id="dataInformation" class="flex-container">
+    {{> signatures}}
 
-  {{> circleOfDeath}}
+    {{> circleOfDeath}}
+  </div>
 
 </template>
 
 <template name="circleOfDeath">
-  <div class="component-box component-border">
+  <div class="component-box">
     <img src="/images/circle_of_death.png">
   </div>
 </template>
@@ -35,7 +39,7 @@
 </template>
 
 <template name="signaturesOfType">
-  <div class="component-box component-border signatures-box">
+  <div class="component-box signatures-box">
     <h2>{{upcaseFirst this}} signatures</h2>
     <select name="select">
       <option value="viper" selected>viper</option>
@@ -44,7 +48,7 @@
     <table>
     {{#each getSignaturesOfType this}}
       <tr>
-        <td>{{label}}</td>
+        <td align="center"><span>{{label}}</span></td>
         <td>
           {{> renderChart this}}
         </td>
@@ -55,13 +59,13 @@
 </template>
 
 <template name="renderChart">
-  <div id="{{type}}{{algorithm}}{{removeSpaces label}}">
+  <div class="chart" id="{{type}}{{algorithm}}{{removeSpaces label}}">
     <!-- should attach here -->
   </div>
 </template>
 
 <template name="demographics">
-  <div class="component-box component-border">
+  <div class="component-box">
     <h2>Demographics</h2>
     <ul>
       {{#if ../age}} <li>Age: {{../age}}</li> {{/if}}
@@ -81,13 +85,26 @@
 </template>
 
 <template name="samples">
-  <div class="component-box component-border">
+  <div class="component-box">
     <h2>Samples</h2>
-    <ul>
+      <ul>
+        <div class="flex-container">
+        {{#each ../samples}}
+          <li>{{> sample this}}</li>
+        {{/each}}
+      </div>
+    </ul>
+  </div>
+</template>
 
-      {{#each ../samples}}
-        <li>{{> sample this}}</li>
-      {{/each}}
+<template name="sample">
+  <div id="{{../sample_label}}" class="component-box">
+    <h3>{{../sample_label}}</h3>
+    <ul>
+      <!-- {{#if site_of_metastasis}} <li>Site of metastasis: {{site_of_metastasis}}</li> {{/if}}
+      {{#if procedure_day}} <li>Procedure day: {{procedure_day}}</li> {{/if}} -->
+      {{#if ../site_of_biopsy}} <li>Site of biopsy: {{../site_of_biopsy}}</li> {{/if}}
+      {{#if ../trichotomy_call}} <li>Trichotomy call: {{../trichotomy_call}}</li> {{/if}}
     </ul>
   </div>
 </template>

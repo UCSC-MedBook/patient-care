@@ -1,4 +1,4 @@
-svg {
+.circle-map svg {
     font-family: Verdana;
     background-color: #FFF;
     cursor: default;
@@ -8,24 +8,24 @@ svg {
     -o-user-select: none;
     user-select: none;
 }
-svg:not(.active):not(.ctrl) {
-    cursor: crosshair;
-}
-svg:not(.active):not(.ctrl) path.link {
-    cursor: pointer;
-}
-.node not(.circleMapG) {
-    stroke:#fff;
-    stroke-width:1.5px;
-}
-.node .circleMapSvg {
-    overflow: visible
-}
-.node text {
-    stroke: darkslategrey;
-    fill: darkslategrey;
-}
-.link {
-    stroke: black;
-    stroke-opacity: .6;
-}
+  .circle-map svg:not(.active):not(.ctrl) {
+      cursor: crosshair;
+  }
+  .circle-map svg:not(.active):not(.ctrl) path.link {
+      cursor: pointer;
+  }
+  .circle-map .node not(.circleMapG) {
+      stroke:#fff;
+      stroke-width:1.5px;
+  }
+  .circle-map .node .circleMapSvg {
+      overflow: visible
+  }
+  .circle-map .node text {
+      stroke: darkslategrey;
+      fill: darkslategrey;
+  }
+  .circle-map .link {
+      stroke: black;
+      stroke-opacity: .6;
+  }

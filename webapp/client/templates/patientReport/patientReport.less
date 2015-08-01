@@ -1,33 +1,30 @@
+.flex-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+
+
 .component-box {
   padding: 10px;
   margin: 5px;
-  display: inline-block;
+  border-radius: 2px;
+  border: 1px solid #000;
 }
-
   .component-box h2 {
     font-size: 20px;
     margin: 0px;
   }
-
   .component-box h3 {
     font-size: 16px;
     margin: 0px;
   }
-
   .component-box ul {
     list-style-type: none;
     margin: 5px;
     padding-left: 0px;
   }
-
-.component-border {
-  border-radius: 2px;
-  border: 1px solid #000;
-}
-
-.inline-table {
-  display: inline;
-}
 
 li, td {
   font-size: 14px;
@@ -39,12 +36,19 @@ li, td {
 .signatures-box tr {
   border: solid;
   border-width: 1px 0;
+  padding: 0px;
 }
 .signatures-box tr:first-child {
   border-top: none;
 }
 .signatures-box tr:last-child {
   border-bottom: none;
+}
+.signatures-box td {
+  padding: 0px;
+}
+.signatures-box td span {
+  text-align: center;
 }
 .signatures-box h2 {
   display: inline;
@@ -53,9 +57,13 @@ li, td {
 .signatures-box select {
   float: right
 }
+.signatures-box .chart {
+  margin-top: 3px;
+  margin-bottom: 3px;
+}
 
 /*
-** about boxplots
+** about charts
 */
 
 * {
@@ -70,6 +78,9 @@ li, td {
   text-anchor: middle;
   alignment-baseline: central;
 }
+rect.highlighted-sample {
+  fill: red;
+}
 
 .axis line,
 .axis path {
@@ -78,23 +89,55 @@ li, td {
   shape-rendering: crispEdges;
 }
 
-.boxplot line {
+.chart line {
+  fill: none;
+  shape-rendering: crispEdges;
+}
+
+.chart rect {
+  stroke-width: 0;
+}
+
+.chart .inside-threshold {
+  fill: #AAA;
+  stroke: #AAA;
+}
+.chart .outside-threshold {
+  fill: #00F;
+  stroke: #00F;
+}
+.chart .no-thresholds {
+  fill: #FFF;
+  stroke: #FFF;
+}
+
+.highlighted-sample line {
+  stroke: red;
+}
+
+.chart {
+  display: flex;
+}
+
+
+
+.chart .boxAndWhisker line {
   fill: none;
   stroke: #F00;
   stroke-width: 2;
   shape-rendering: crispEdges;
 }
 
-.boxplot rect {
+.chart .boxAndWhisker rect {
   stroke-width: 0;
 }
 
-.boxplot .inside-threshold {
+.chart .boxAndWhisker .inside-threshold {
   fill: #AAA;
   stroke: #AAA;
 }
 
-.boxplot .outside-threshold {
+.chart .boxAndWhisker .outside-threshold {
   fill: #00F;
   stroke: #00F;
 }
