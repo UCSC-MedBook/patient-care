@@ -3,15 +3,19 @@ function removeSpaces(string) {
   return string.split(' ').join('_')
 }
 
+function signaturesOfType(typeName) {
+  //console.log("typeName: ", typeName);
+  return CohortSignatures.find({"type": typeName});
+}
+
 Template.signaturesOfType.helpers({
-  getSignaturesOfType: function (typeName) {
-    //console.log("typeName: ", typeName);
-    return CohortSignatures.find({"type": typeName});
+  hasSignaturesOfType: function (typeName) {
+    return signaturesOfType(typeName).count() > 0;
   },
+  getSignaturesOfType: signaturesOfType,
   upcaseFirst: function (string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
   },
-
 });
 
 Template.renderChart.helpers({
@@ -33,8 +37,8 @@ Template.renderChart.rendered = function () {
     "width": 250,
     "minimum_value": -10,
     "maximum_value": 10,
-    "lower_threshold_value": -2.5,//data.lower_threshold_value,
-    "upper_threshold_value": 2,//data.upper_threshold_value,
+    "lower_threshold_value": -1.5,//data.lower_threshold_value,
+    "upper_threshold_value": 1.5,//data.upper_threshold_value,
     "dom_selector": data.type + data.algorithm
         + removeSpaces(data.label),
     "highlighted_sample_labels":
