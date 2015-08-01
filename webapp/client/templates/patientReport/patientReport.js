@@ -33,8 +33,8 @@ Template.renderChart.rendered = function () {
     "width": 250,
     "minimum_value": -10,
     "maximum_value": 10,
-    "lower_threshold_value": data.lower_threshold_value,
-    "upper_threshold_value": data.upper_threshold_value,
+    "lower_threshold_value": -2.5,//data.lower_threshold_value,
+    "upper_threshold_value": 2,//data.upper_threshold_value,
     "dom_selector": data.type + data.algorithm
         + removeSpaces(data.label),
     "highlighted_sample_labels":
