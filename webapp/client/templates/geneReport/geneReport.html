@@ -3,7 +3,15 @@
   <!-- {{print "geneReport this ::"}}
   {{print this}} -->
 
-  {{> renderCircleMap this}}
+  {{#if network}}
+    {{#if networkHasElements network.elements}}
+      {{> renderCircleMap this}}
+    {{else}}
+      This gene is not an element in the current superpathway.
+    {{/if}}
+  {{else}}
+    Loading...
+  {{/if}}
 
 </template>
 

@@ -49,7 +49,15 @@
       <table>
       {{#each getSignaturesOfType this}}
         <tr>
-          <td align="center"><span>{{label}}</span></td>
+          <td align="center">
+            {{#if gene_label}}
+              <a href="{{ pathFor 'geneReport' gene_label=gene_label }}">
+                <span>{{label}}</span>
+              </a>
+            {{else}}
+              <span>{{label}}</span>
+            {{/if}}
+          </td>
           <td>
             {{> renderChart this}}
           </td>

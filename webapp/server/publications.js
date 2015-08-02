@@ -1,24 +1,31 @@
 Meteor.publish("PatientReport", function (patientLabel) {
 
   var patientCursor = PatientReports.find(
-    {"patient_label": patientLabel},
-    {limit: 1});
+        {"patient_label": patientLabel},
+        {limit: 1}
+      );
+
+  var cohortSignaturesCursor = CohortSignatures.find({
+        "_id": { $in: patientCursor.fetch()[0]['cohort_signature_ids'] }
+      });
 
   return [
     patientCursor,
-    CohortSignatures.find({"_id": { $in: patientCursor.fetch()[0]['cohort_signature_ids'] }}),
+    cohortSignaturesCursor,
   ];
 });
 
 // allows quick linking between patient reports
-Meteor.publish("PatientReportMetadata", function () {
-  console.log("publishing patient report metadata");
-  return PatientReports.find({}, {
-    fields: {
-      "patient_id": 1,
-      "patient_label": 1
-    }
-  });
+Meteor.publish("ReportMetadata", function () {
+  console.log("publishing report metadata");
+  return [
+    PatientReports.find({}, {
+      fields: {
+        "patient_id": 1,
+        "patient_label": 1
+      }
+    }),
+  ];
 });
 
 Meteor.publish("GeneReport", function (geneLabel) {

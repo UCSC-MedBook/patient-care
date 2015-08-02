@@ -1,7 +1,7 @@
 // allows quick linking between patient reports
 Session.setDefault("metadataReady", false);
 
-Meteor.subscribe("PatientReportMetadata", function () {
+Meteor.subscribe("ReportMetadata", function () {
   Session.set("metadataReady", true);
-  console.log("loaded PatientReportMetadata subscription");
+  console.log("loaded ReportMetadata subscription");
 });

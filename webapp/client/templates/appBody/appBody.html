@@ -4,10 +4,18 @@
 
   <div id="content-container">
     <div>
-      {{> loginButtons}}
+      <a href="{{ pathFor 'listReports' }}">
+        List all reports
+      </a>
       {{> userContext}}
+      {{> loginButtons}}
+      {{> chartPicker}}
     </div>
     <hr>
     {{> yield}}
   </div>
+</template>
+
+<template name="chartPicker">
+  <button id="change-chart-type" type="button">Change chart type</button>
 </template>
