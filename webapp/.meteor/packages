@@ -17,3 +17,5 @@ medbook:charts
 medbook:primary-collections
 less
 circlemap-graph
+erasaur:meteor-lodash
+meteorhacks:subs-manager

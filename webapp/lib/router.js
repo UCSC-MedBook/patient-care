@@ -9,6 +9,12 @@ Router.configure({
   loadingTemplate: 'appLoading',
 });
 
+// caches subscriptions
+var subs = new SubsManager({
+  cacheLimit: 100,
+  expireIn: 5, // minutes
+});
+
 Router.map(function() {
   //this.route('signin');
 
@@ -17,17 +23,20 @@ Router.map(function() {
   this.route('patientReport', {
     path: '/PatientCare/patientReport/:patient_label',
     subscriptions: function () {
-      return Meteor.subscribe("PatientReport", this.params.patient_label, function () {
+      return subs.subscribe("PatientReport", this.params.patient_label, function () {
         console.log("loaded PatientReport subscription");
       });
     },
     data: function () {
       var currentLabel = this.params.patient_label
-      var currentPatient = PatientReports.findOne({
+      var currentReport = PatientReports.findOne({
         "patient_label": currentLabel
       });
-      // TODO: check if we have a report yet for that patient
-      return currentPatient;
+      if (!currentReport) {
+        console.log(currentLabel, "doesn't have a patient report");
+        this.render("appNotFound");
+      }
+      return currentReport;
     },
     onStop: function () {
       console.log("onStop (router.js)");
@@ -49,11 +58,14 @@ Router.map(function() {
     },
     data: function () {
       var currentLabel = this.params.gene_label
-      var currentGene = GeneReports.findOne({
+      var currentReport = GeneReports.findOne({
         "gene_label": currentLabel
       });
-      // TODO: check if we have a report yet for that gene
-      return currentGene;
+      if (!currentReport) {
+        console.log(currentLabel, "doesn't have a gene report");
+        this.render("appNotFound");
+      }
+      return currentReport;
     },
     onStop: function () {
       console.log("onStop (router.js)");
