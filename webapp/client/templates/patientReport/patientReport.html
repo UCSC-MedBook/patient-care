@@ -10,11 +10,11 @@
   <div id="top-part" class="flex-container">
     {{> demographics this}}
 
-    <!-- clinical information -->
-
     {{#if samples}}
       {{> samples this}}
     {{/if}}
+
+    <!-- {{> treatments this}} -->
   </div>
 
   <div id="dataInformation" class="flex-container">
@@ -35,7 +35,7 @@
   <!-- TODO: make a loop for this -->
   {{> signaturesOfType "kinase"}}
   {{> signaturesOfType "tf"}}
-  {{> signaturesOfType "subtype"}}
+  {{> signaturesOfType "other"}}
 </template>
 
 <template name="signaturesOfType">
@@ -82,16 +82,20 @@
       {{#if ../gender}} <li>Gender: {{../gender}}</li> {{/if}}
       {{#if ../race}} <li>Race: {{../race}}</li> {{/if}}
       {{#if ../ethnicity}} <li>Ethnicity: {{../ethnicity}}</li> {{/if}}
+      {{#if ../study_site}} <li>Study site: {{../study_site}}</li> {{/if}}
     </ul>
   </div>
 </template>
 
-<template name="clinicalInformation">
-
-  {{#if ../age}} <li>Age: {{../age}}</li> {{/if}} <br />
-  {{#if ../gender}} <li>Gender: {{../gender}}</li> {{/if}} <br />
-  {{#if ../race}} <li>Race: {{../race}}</li> {{/if}} <br />
-
+<template name="treatments">
+  <div class="component-box">
+    <h2>Treatments</h2>
+    <ul>
+      {{#each treatments}}
+        treatment
+      {{/each}}
+    </ul>
+  </div>
 </template>
 
 <template name="samples">
@@ -113,8 +117,37 @@
     <ul>
       <!-- {{#if site_of_metastasis}} <li>Site of metastasis: {{site_of_metastasis}}</li> {{/if}}
       {{#if procedure_day}} <li>Procedure day: {{procedure_day}}</li> {{/if}} -->
-      {{#if ../site_of_biopsy}} <li>Site of biopsy: {{../site_of_biopsy}}</li> {{/if}}
-      {{#if ../trichotomy_call}} <li>Trichotomy call: {{../trichotomy_call}}</li> {{/if}}
+      {{#if site_of_biopsy}} <li>Site of biopsy: {{site_of_biopsy}}</li> {{/if}}
+      {{#if trichotomy_call}} <li>Trichotomy call: {{trichotomy_call}}</li> {{/if}}
+      {{#if abiraterone}} <li>Abiraterone: {{abiraterone}}</li> {{/if}}
+      {{#if enzalutamide}} <li>Enzalutamide: {{enzalutamide}}</li> {{/if}}
+
+      {{#if prior_treatments}}
+        <li>
+          Prior treatments:
+          <ul class="treatments">
+            {{#each prior_treatments}}
+              <li>{{> showTreatment}}</li>
+            {{/each}}
+          </ul>
+        </li>
+      {{/if}}
+      {{#if subsequent_treatments}}
+        <li>
+          Subsequent treatments:
+          <ul class="treatments">
+            {{#each subsequent_treatments}}
+              <li>{{> showTreatment}}</li>
+            {{/each}}
+          </ul>
+        </li>
+      {{/if}}
     </ul>
   </div>
+</template>
+
+<template name="showTreatment">
+  <span>
+    {{trimTedsDomElementInMongo this}}
+  </span>
 </template>
