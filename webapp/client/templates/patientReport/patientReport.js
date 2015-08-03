@@ -1,16 +1,59 @@
 function removeSpaces(string) {
   // used to create html id from "Adeno vs nonAdeno"
-  return string.split(' ').join('_')
+  return string.split(' ').join('_');
+}
+
+function getPatientSampleLabels() {
+  // walks up the Template.parentData tree until it finds where samples are
+  var parentIndex = 0;
+  var parentData;
+  do {
+    parentData = Template.parentData(parentIndex);
+    if (parentData && parentData.samples) {
+      return _.pluck(parentData.samples, "sample_label");
+    }
+    parentIndex++;
+  } while (parentData);
+  return undefined;
 }
 
 function signaturesOfType(typeName) {
-  // NOTE: filtered by publication (metadata ones will show)
-  return CohortSignatures.find({"type": typeName});
+  var patientSampleLabels = getPatientSampleLabels();
+  if (patientSampleLabels !== undefined) {
+    var documents = CohortSignatures.find({
+      "type": typeName,
+      "sample_values": {
+        $elemMatch: {
+          sample_label: {
+            $in: getPatientSampleLabels()
+          }
+        }
+      }
+    }).fetch();
+
+    function findPercentThrough(cohortSignature, sample_label) {
+      return  lodash.findIndex(cohortSignature['sample_values'], function (current) {
+        return current.sample_label == sample_label;
+      }) / cohortSignature['sample_values'].length;
+    }
+
+    var sampleToSortBy = patientSampleLabels[patientSampleLabels.length - 1];
+
+    function compareHighestSample(first, second) {
+      return findPercentThrough(second, sampleToSortBy)
+          - findPercentThrough(first, sampleToSortBy);
+    }
+
+    var sorted = documents.sort(compareHighestSample);
+
+    return sorted.slice(0, 10);
+  }
+  return [];
 }
 
 Template.signaturesOfType.helpers({
   hasSignaturesOfType: function (typeName) {
-    return signaturesOfType(typeName).count() > 0;
+    return signaturesOfType(typeName).length > 0;
   },
   getSignaturesOfType: signaturesOfType,
   upcaseFirst: function (string) {
@@ -41,10 +84,9 @@ Template.renderChart.rendered = function () {
       "maximum_value": 10,
       //"lower_threshold_value": -1.5,//data.lower_threshold_value,
       //"upper_threshold_value": 1.5,//data.upper_threshold_value,
-      "dom_selector": data.type + data.algorithm
-          + removeSpaces(data.label),
-      "highlighted_sample_labels":
-          _.pluck(Template.parentData(3).samples, "sample_label"),
+      "dom_selector": data.type + data.algorithm +
+          removeSpaces(data.label),
+      "highlighted_sample_labels": getPatientSampleLabels(),
       "show_axis": true,
       "show_axis_labels": true,
     };
@@ -52,7 +94,8 @@ Template.renderChart.rendered = function () {
     // remove previous chart
     $("#" + context.dom_selector).empty();
 
-    Charts.render(data['sample_values'], context);
+    console.log("data in renderChart.rendered: ", data);
+    Charts.render(data.sample_values, context);
   });
 };
 
