@@ -78,24 +78,24 @@
   <div class="component-box">
     <h2>Demographics</h2>
     <ul>
-      {{#if ../age}} <li>Age: {{../age}}</li> {{/if}}
-      {{#if ../gender}} <li>Gender: {{../gender}}</li> {{/if}}
-      {{#if ../race}} <li>Race: {{../race}}</li> {{/if}}
-      {{#if ../ethnicity}} <li>Ethnicity: {{../ethnicity}}</li> {{/if}}
-      {{#if ../study_site}} <li>Study site: {{../study_site}}</li> {{/if}}
+      {{> informationItem description="Age: " information=age}}
+      {{> informationItem description="Gender: " information=gender}}
+      {{> informationItem description="Race: " information=race}}
+      {{> informationItem description="Ethnicity: " information=ethnicity}}
+      {{> informationItem description="Study site: " information=study_site}}
     </ul>
   </div>
 </template>
 
-<template name="treatments">
-  <div class="component-box">
-    <h2>Treatments</h2>
-    <ul>
-      {{#each treatments}}
-        treatment
-      {{/each}}
-    </ul>
-  </div>
+<template name="informationItem">
+  {{#if information}}
+    <li>
+      <span class="information-item-description">
+        {{description}}
+      </span>
+      {{information}}
+    </li>
+  {{/if}}
 </template>
 
 <template name="samples">
@@ -115,16 +115,17 @@
   <div id="{{../sample_label}}" class="component-box">
     <h3>{{../sample_label}}</h3>
     <ul>
-      <!-- {{#if site_of_metastasis}} <li>Site of metastasis: {{site_of_metastasis}}</li> {{/if}}
-      {{#if procedure_day}} <li>Procedure day: {{procedure_day}}</li> {{/if}} -->
-      {{#if site_of_biopsy}} <li>Site of biopsy: {{site_of_biopsy}}</li> {{/if}}
-      {{#if trichotomy_call}} <li>Trichotomy call: {{trichotomy_call}}</li> {{/if}}
-      {{#if abiraterone}} <li>Abiraterone: {{abiraterone}}</li> {{/if}}
-      {{#if enzalutamide}} <li>Enzalutamide: {{enzalutamide}}</li> {{/if}}
+      {{> informationItem description="Site of biopsy: " information=site_of_biopsy}}
+      {{> informationItem description="Trichotomy call: " information=trichotomy_call}}
+      {{> informationItem description="Abirateroe: " information=abiraterone}}
+      {{> informationItem description="Enzalutamie: " information=enzalutamide}}
+      {{> informationItem description="Site of biopsy: " information=site_of_biopsy}}
 
       {{#if prior_treatments}}
         <li>
-          Prior treatments:
+          <span class="information-item-description">
+            Prior treatments:
+          </span>
           <ul class="treatments">
             {{#each prior_treatments}}
               <li>{{> showTreatment}}</li>
@@ -134,7 +135,9 @@
       {{/if}}
       {{#if subsequent_treatments}}
         <li>
-          Subsequent treatments:
+          <span class="information-item-description">
+            Subsequent treatments:
+          </span>
           <ul class="treatments">
             {{#each subsequent_treatments}}
               <li>{{> showTreatment}}</li>
