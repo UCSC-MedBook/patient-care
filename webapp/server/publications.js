@@ -36,9 +36,14 @@ Meteor.publish("GeneReport", function (geneLabel) {
 
   var geneNames = _.pluck(currentReport.network.elements, 'name');
   var expression2Cursor = expression2.find({"gene": { $in: geneNames }});
+  var cohortSignaturesCursor = CohortSignatures.find({
+    "algorithm": "viper",
+    "label": geneLabel
+  });
 
   return [
     geneReportCursor,
     expression2Cursor,
+    cohortSignaturesCursor,
   ];
 });
