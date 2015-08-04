@@ -54,10 +54,10 @@ Router.map(function() {
       var currentReport = GeneReports.findOne({
         "gene_label": currentLabel
       });
-      if (!currentReport) {
-        console.log(currentLabel, "doesn't have a gene report");
-        this.render("appNotFound");
-      }
+      // if (!currentReport) {
+      //   console.log(currentLabel, "doesn't have a gene report");
+      //   this.render("appNotFound");
+      // }
       return currentReport;
     },
     onStop: function () {
