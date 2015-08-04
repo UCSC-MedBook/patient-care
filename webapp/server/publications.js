@@ -44,16 +44,20 @@ Meteor.publish("GeneReport", function (geneLabel) {
   if (currentReport) { // in case we don't have one
     var geneNames = _.pluck(currentReport.network.elements, 'name');
     var expression2Cursor = expression2.find({"gene": { $in: geneNames }});
+    var cohortSignaturesCursor = CohortSignatures.find({
+      "algorithm": "viper",
+      "label": geneLabel
+    });
 
     return [
       geneReportCursor,
       expression2Cursor,
+      cohortSignaturesCursor,
     ];
   } else {
     // must return this for Meteor to say the subscription is ready
     return [];
   }
-
 });
 
 // allows quick linking between patient reports

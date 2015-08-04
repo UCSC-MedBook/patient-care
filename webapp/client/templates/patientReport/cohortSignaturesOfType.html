@@ -1,4 +1,4 @@
-<template name="cohortSignaturesOfType">
+<template name="cohortSignaturesTypeBox">
   {{#if hasSignaturesOfType this}}
     <div class="component-box signatures-box">
       <h2>{{upcaseFirst this}} signatures</h2>
@@ -8,24 +8,28 @@
       </select>
       <table>
       {{#each getSignaturesOfType this}}
-        <tr>
-          <td align="center">
-            {{#if gene_label}}
-              <a href="{{ pathFor 'geneReport' gene_label=gene_label }}">
-                <span>{{label}}</span>
-              </a>
-            {{else}}
-              <span>{{label}}</span>
-            {{/if}}
-          </td>
-          <td>
-            {{> renderChart this}}
-          </td>
-        </tr>
+        {{> signatureRow}}
       {{/each}}
       </table>
     </div>
   {{/if}}
+</template>
+
+<template name="signatureRow">
+  <tr>
+    <td align="center">
+      {{#if gene_label}}
+        <a href="{{ pathFor 'geneReport' gene_label=gene_label }}">
+          <span>{{label}}</span>
+        </a>
+      {{else}}
+        <span>{{label}}</span>
+      {{/if}}
+    </td>
+    <td>
+      {{> renderChart this}}
+    </td>
+  </tr>
 </template>
 
 <template name="renderChart">

@@ -34,63 +34,15 @@ var setTypeChartLimits = function (typeName, cohortSignatures) {
   typeChartLimitsDep.changed();
 };
 
-function getPatientSampleLabels() {
-  // walks up the Template.parentData tree until it finds where samples are
-  var parentIndex = 0;
-  var parentData;
-  do {
-    parentData = Template.parentData(parentIndex);
-    if (parentData && parentData.samples) {
-      return _.pluck(parentData.samples, "sample_label");
-    }
-    parentIndex++;
-  } while (parentData);
-  return undefined;
-}
-
-function cohortSignaturesOfType(typeName) {
-  var patientSampleLabels = getPatientSampleLabels();
-  if (patientSampleLabels !== undefined) {
-    var documents = CohortSignatures.find({
-      "type": typeName,
-      "sample_values": {
-        $elemMatch: {
-          sample_label: {
-            $in: patientSampleLabels
-          }
-        }
-      }
-    }).fetch();
-
-    function findPercentThrough(cohortSignature, sample_label) {
-      return  lodash.findIndex(cohortSignature.sample_values, function (current) {
-        return current.sample_label == sample_label;
-      }) / cohortSignature.sample_values.length;
-    }
-
-    // TODO: don't assume if there's a Pro it's in every signature
-    // (if lodash.findIndex == -1, move on)
-    var sampleToSortBy = patientSampleLabels[patientSampleLabels.length - 1];
-
-    function compareHighestSample(first, second) {
-      return findPercentThrough(second, sampleToSortBy)
-          - findPercentThrough(first, sampleToSortBy);
-    }
-
-    var sorted = documents.sort(compareHighestSample).slice(0, 10);
-
-    setTypeChartLimits(typeName, sorted);
-
-    return sorted;
-  }
-  return [];
-}
-
-Template.cohortSignaturesOfType.helpers({
+Template.cohortSignaturesTypeBox.helpers({
   hasSignaturesOfType: function (typeName) {
-    return cohortSignaturesOfType(typeName).length > 0;
+    return cohortSignaturesOfType(typeName).count() > 0;
   },
-  getSignaturesOfType: cohortSignaturesOfType,
+  getSignaturesOfType: function (typeName) {
+    var array = topCohortSignaturesOfType(typeName);
+    setTypeChartLimits(typeName, array);
+    return array;
+  },
   upcaseFirst: function (string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
   },
