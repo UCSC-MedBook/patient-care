@@ -12,8 +12,6 @@ Router.configure({
 Router.map(function() {
   //this.route('signin');
 
-  // root ==> list of patients, list of studies
-
   this.route('patientReport', {
     path: '/PatientCare/patientReport/:patient_label',
     subscriptions: function () {

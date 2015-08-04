@@ -34,12 +34,29 @@ var setTypeChartLimits = function (typeName, cohortSignatures) {
   typeChartLimitsDep.changed();
 };
 
+function getPatientReport() {
+  // walks up the Template.parentData tree until it finds where samples are
+  var parentIndex = 0;
+  var parentData;
+  do {
+    parentData = Template.parentData(parentIndex);
+    parentIndex++;
+  } while (parentData && parentData.samples === undefined);
+
+  // couldn't find it in parent templates
+  if (parentData === null
+      || parentData.samples === undefined) {
+    return undefined;
+  }
+  return parentData;
+}
+
 Template.cohortSignaturesTypeBox.helpers({
   hasSignaturesOfType: function (typeName) {
-    return cohortSignaturesOfType(typeName).count() > 0;
+    return cohortSignaturesOfType(typeName, getPatientReport()).count() > 0;
   },
   getSignaturesOfType: function (typeName) {
-    var array = topCohortSignaturesOfType(typeName);
+    var array = topCohortSignaturesOfType(typeName, getPatientReport());
     setTypeChartLimits(typeName, array);
     return array;
   },
@@ -78,7 +95,7 @@ Template.renderChart.rendered = function () {
       //"upper_threshold_value": 1.5,//data.upper_threshold_value,
       "dom_selector": data.type + data.algorithm +
           removeSpaces(data.label),
-      "highlighted_sample_labels": getPatientSampleLabels(),
+      "highlighted_sample_labels": getPatientSampleLabels(getPatientReport()),
       "show_axis": true,
       "show_axis_labels": true,
     };

@@ -1,34 +1,16 @@
 getPatientSampleLabels = function(patientReport) {
-
-  if (patientReport === undefined) {
-    // walks up the Template.parentData tree until it finds where samples are
-    var parentIndex = 0;
-    var parentData;
-    do {
-      parentData = Template.parentData(parentIndex);
-      parentIndex++;
-    } while (parentData && parentData.samples === undefined);
-
-    // couldn't find it in parent templates
-    if (parentData === null
-        || parentData.samples === undefined) {
-      return undefined;
-    }
-
-    patientReport = parentData;
-  }
-
   return _.pluck(patientReport.samples, "sample_label");
 }
 
-cohortSignaturesOfType = function (typeName) {
-  var patientSampleLabels = getPatientSampleLabels();
+cohortSignaturesOfType = function (typeName, patientReport) {
 
-  if (patientSampleLabels === undefined) {
+  var patientSampleLabels
+
+  if (patientReport === undefined) {
     patientSampleLabels = [];
+  } else {
+    patientSampleLabels = getPatientSampleLabels(patientReport);
   }
-
-  console.log("returning a new cursor with ", patientSampleLabels);
 
   return CohortSignatures.find({
     "type": typeName,
@@ -42,17 +24,19 @@ cohortSignaturesOfType = function (typeName) {
   });
 }
 
-topCohortSignaturesOfType = function(typeName) {
+topCohortSignaturesOfType = function(typeName, patientReport) {
 
-  var patientSampleLabels = getPatientSampleLabels();
+  var patientSampleLabels = getPatientSampleLabels(patientReport);
 
   if (patientSampleLabels !== undefined) {
-    var documents = cohortSignaturesOfType.fetch();
+    var documents = cohortSignaturesOfType(typeName, patientReport).fetch();
 
     function findPercentThrough(cohortSignature, sample_label) {
-      var index = lodash.findIndex(cohortSignature.sample_values, function (current) {
-        return current.sample_label == sample_label;
-      });
+      var index = lodash.findIndex(cohortSignature.sample_values,
+        function (current) {
+          return current.sample_label == sample_label;
+        }
+      );
       if (index === -1) {
         return 0;
       }
@@ -71,7 +55,9 @@ topCohortSignaturesOfType = function(typeName) {
       return 0;
     }
 
-    return documents.sort(compareHighestSample).slice(0, 10);
+    var toRet = documents.sort(compareHighestSample).slice(0, 10);
+
+    return toRet;
   }
   return [];
 }
