@@ -1,0 +1,35 @@
+<template name="cohortSignaturesOfType">
+  {{#if hasSignaturesOfType this}}
+    <div class="component-box signatures-box">
+      <h2>{{upcaseFirst this}} signatures</h2>
+      <select name="select">
+        <option value="viper" selected>viper</option>
+        <option value="paradigm">paradigm</option>
+      </select>
+      <table>
+      {{#each getSignaturesOfType this}}
+        <tr>
+          <td align="center">
+            {{#if gene_label}}
+              <a href="{{ pathFor 'geneReport' gene_label=gene_label }}">
+                <span>{{label}}</span>
+              </a>
+            {{else}}
+              <span>{{label}}</span>
+            {{/if}}
+          </td>
+          <td>
+            {{> renderChart this}}
+          </td>
+        </tr>
+      {{/each}}
+      </table>
+    </div>
+  {{/if}}
+</template>
+
+<template name="renderChart">
+  <div class="inline" id="{{type}}{{algorithm}}{{removeSpaces label}}">
+    <!-- should attach here -->
+  </div>
+</template>

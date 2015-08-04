@@ -18,60 +18,11 @@
   </div>
 
   <div id="dataInformation" class="flex-container">
-    {{> signatures}}
+    {{> cohortSignatures}}
 
     <!-- {{> circleOfDeath}} -->
   </div>
 
-</template>
-
-<template name="circleOfDeath">
-  <div class="component-box">
-    <img src="/PatientCare/images/circle_of_death.png">
-  </div>
-</template>
-
-<template name="signatures">
-  <!-- TODO: make a loop for this -->
-  {{> signaturesOfType "kinase"}}
-  {{> signaturesOfType "tf"}}
-  {{> signaturesOfType "other"}}
-</template>
-
-<template name="signaturesOfType">
-  {{#if hasSignaturesOfType this}}
-    <div class="component-box signatures-box">
-      <h2>{{upcaseFirst this}} signatures</h2>
-      <select name="select">
-        <option value="viper" selected>viper</option>
-        <option value="paradigm">paradigm</option>
-      </select>
-      <table>
-      {{#each getSignaturesOfType this}}
-        <tr>
-          <td align="center">
-            {{#if gene_label}}
-              <a href="{{ pathFor 'geneReport' gene_label=gene_label }}">
-                <span>{{label}}</span>
-              </a>
-            {{else}}
-              <span>{{label}}</span>
-            {{/if}}
-          </td>
-          <td>
-            {{> renderChart this}}
-          </td>
-        </tr>
-      {{/each}}
-      </table>
-    </div>
-  {{/if}}
-</template>
-
-<template name="renderChart">
-  <div class="inline" id="{{type}}{{algorithm}}{{removeSpaces label}}">
-    <!-- should attach here -->
-  </div>
 </template>
 
 <template name="demographics">
@@ -83,30 +34,6 @@
       {{#if ../race}} <li>Race: {{../race}}</li> {{/if}}
       {{#if ../ethnicity}} <li>Ethnicity: {{../ethnicity}}</li> {{/if}}
       {{#if ../study_site}} <li>Study site: {{../study_site}}</li> {{/if}}
-    </ul>
-  </div>
-</template>
-
-<template name="treatments">
-  <div class="component-box">
-    <h2>Treatments</h2>
-    <ul>
-      {{#each treatments}}
-        treatment
-      {{/each}}
-    </ul>
-  </div>
-</template>
-
-<template name="samples">
-  <div class="component-box">
-    <h2>Samples</h2>
-      <ul>
-        <div class="flex-container">
-        {{#each ../samples}}
-          <li>{{> sample this}}</li>
-        {{/each}}
-      </div>
     </ul>
   </div>
 </template>
@@ -142,6 +69,43 @@
           </ul>
         </li>
       {{/if}}
+    </ul>
+  </div>
+</template>
+
+<template name="treatments">
+  <div class="component-box">
+    <h2>Treatments</h2>
+    <ul>
+      {{#each treatments}}
+        treatment
+      {{/each}}
+    </ul>
+  </div>
+</template>
+
+<template name="circleOfDeath">
+  <div class="component-box">
+    <img src="/PatientCare/images/circle_of_death.png">
+  </div>
+</template>
+
+<template name="cohortSignatures">
+  <!-- TODO: make a loop for this -->
+  {{> cohortSignaturesOfType "kinase"}}
+  {{> cohortSignaturesOfType "tf"}}
+  {{> cohortSignaturesOfType "other"}}
+</template>
+
+<template name="samples">
+  <div class="component-box">
+    <h2>Samples</h2>
+      <ul>
+        <div class="flex-container">
+        {{#each ../samples}}
+          <li>{{> sample this}}</li>
+        {{/each}}
+      </div>
     </ul>
   </div>
 </template>
