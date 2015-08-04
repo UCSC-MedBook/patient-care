@@ -9,12 +9,6 @@ Router.configure({
   loadingTemplate: 'appLoading',
 });
 
-// caches subscriptions
-var subs = new SubsManager({
-  cacheLimit: 100,
-  expireIn: 5, // minutes
-});
-
 Router.map(function() {
   //this.route('signin');
 
@@ -23,19 +17,18 @@ Router.map(function() {
   this.route('patientReport', {
     path: '/PatientCare/patientReport/:patient_label',
     subscriptions: function () {
-      return subs.subscribe("PatientReport", this.params.patient_label, function () {
-        console.log("loaded PatientReport subscription");
-      });
+      return subsManager.subscribe("PatientReport",
+        this.params.patient_label,
+        function () {
+          console.log("loaded PatientReport subscription");
+        }
+      );
     },
     data: function () {
       var currentLabel = this.params.patient_label
       var currentReport = PatientReports.findOne({
         "patient_label": currentLabel
       });
-      if (!currentReport) {
-        console.log(currentLabel, "doesn't have a patient report");
-        this.render("appNotFound");
-      }
       return currentReport;
     },
     onStop: function () {
