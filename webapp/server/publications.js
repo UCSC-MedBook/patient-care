@@ -28,7 +28,6 @@ function sortByRank(first, second) {
 
 Meteor.publish("topCohortSignatures",
   function(typeName, maxCount, sampleLabels) {
-
     console.log("publishing topCohortSignatures  typeName:", typeName,
         "  maxCount:", maxCount,
         "  sampleLabels:", sampleLabels);
@@ -97,8 +96,6 @@ Meteor.publish("topCohortSignatures",
       handle.stop();
     });
 
-    // Meteor._sleepForMs(100000);
-
     self.ready();
   }
 );
@@ -132,12 +129,29 @@ Meteor.publish("GeneReport", function (geneLabel) {
 // allows quick linking between patient reports
 Meteor.publish("ReportMetadata", function () {
   console.log("publishing report metadata");
-  return [
-    PatientReports.find({}, {
-      fields: {
-        "patient_id": 1,
-        "patient_label": 1
-      }
-    }),
-  ];
+
+  var self = this;
+
+  var handle = PatientReports
+      .find({})
+      .observeChanges({
+        added: function (id, newOne) {
+          self.added("patient_reports", id, {
+            "patient_label": newOne.patient_label,
+            "sample_labels": _.pluck(newOne.samples, "sample_label"),
+          });
+        },
+        removed: function (id) {
+          console.log("something was removed in PatientReports");
+        },
+        changed: function (id) {
+          console.log("something changed in PatientReports");
+        }
+      });
+
+  self.onStop(function () {
+    handle.stop();
+  });
+
+  self.ready();
 });

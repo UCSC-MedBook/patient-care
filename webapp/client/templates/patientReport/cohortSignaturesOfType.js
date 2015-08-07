@@ -22,7 +22,7 @@ Template.cohortSignaturesTypeBox.onCreated(function () {
             }
           }
         }, {
-          "sort": {"rank": -1}
+      "sort": { "rank": -1 }
         });
   };
 
