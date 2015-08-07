@@ -6,24 +6,31 @@
       <option value="paradigm">paradigm</option>
     </select> -->
 
-    <table>
-      {{#each getCohortSignatures}}
-        {{> signatureRow}}
-      {{/each}}
-      <tr>
-        <td colspan="2">
-          {{#if Template.subscriptionsReady}}
-            {{#if hasMoreSignatures}}
-              <a class="load-more" href="#">Load More</a>
+    {{#if hasAnySignatures}}
+      <table>
+        {{#each getCohortSignatures}}
+          {{> signatureRow}}
+        {{/each}}
+        <tr>
+          <td colspan="2">
+            {{#if Template.subscriptionsReady}}
+              {{#if hasMoreSignatures}}
+                <a class="load-more" href="#">Load More</a>
+              {{/if}}
+            {{else}}
+              <div class="loading">
+                {{>spinner}}
+              </div>
             {{/if}}
-          {{else}}
-            <div class="loading">
-              {{>spinner}}
-            </div>
-          {{/if}}
-        </td>
-      </tr>
-    </table>
+          </td>
+        </tr>
+      </table>
+    {{else}}
+      <div>
+        There are no signatures of this type
+        associated with this patients' samples.
+      </div>
+    {{/if}}
   </div>
 </template>
 

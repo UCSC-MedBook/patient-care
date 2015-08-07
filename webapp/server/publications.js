@@ -39,7 +39,7 @@ Meteor.publish("topCohortSignatures",
 
     var self = this;
     var initializing = true;
-    var lowestPublishedRank;
+    var lowestPublishedRank = -1;
 
     function addTopOnes() {
       var allOfType = CohortSignatures.find({
@@ -53,19 +53,21 @@ Meteor.publish("topCohortSignatures",
         }
       }).fetch();
 
-      // assign ranks
-      for (var index in allOfType) {
-        allOfType[index].rank = rankCohortSignature(allOfType[index],
-            sampleLabels);
-      }
+      if (allOfType.length > 0) {
+        // assign ranks
+        for (var index in allOfType) {
+          allOfType[index].rank = rankCohortSignature(allOfType[index],
+              sampleLabels);
+        }
 
-      var toPublish = allOfType.sort(sortByRank).slice(0, maxCount);
-      lowestPublishedRank = toPublish[toPublish.length - 1].rank;
+        var toPublish = allOfType.sort(sortByRank).slice(0, maxCount);
+        lowestPublishedRank = toPublish[toPublish.length - 1].rank;
 
-      // publish top ones according to rank
-      for (var current in toPublish) {
-        self.added("cohort_signatures", toPublish[current]._id,
-            toPublish[current]);
+        // publish top ones according to rank
+        for (var current in toPublish) {
+          self.added("cohort_signatures", toPublish[current]._id,
+              toPublish[current]);
+        }
       }
     }
 

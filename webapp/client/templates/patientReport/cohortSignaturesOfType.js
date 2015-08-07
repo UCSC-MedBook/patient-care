@@ -69,6 +69,9 @@ Template.cohortSignaturesTypeBox.helpers({
     var instance = Template.instance();
     return instance.getCohortSignatures().count() >= instance.limit.get();
   },
+  hasAnySignatures: function() {
+    return Template.instance().getCohortSignatures().count() > 0;
+  },
 });
 
 Template.cohortSignaturesTypeBox.events({
