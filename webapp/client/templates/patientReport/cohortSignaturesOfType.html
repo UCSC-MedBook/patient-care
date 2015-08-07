@@ -1,18 +1,30 @@
 <template name="cohortSignaturesTypeBox">
-  {{#if hasSignaturesOfType this}}
-    <div class="component-box signatures-box">
-      <h2>{{upcaseFirst this}} signatures</h2>
-      <select name="select">
-        <option value="viper" selected>viper</option>
-        <option value="paradigm">paradigm</option>
-      </select>
-      <table>
-      {{#each getSignaturesOfType this}}
+  <div class="component-box signatures-box">
+    <h2>{{upcaseFirst this}} signatures</h2>
+    <!-- <select name="select">
+      <option value="viper" selected>viper</option>
+      <option value="paradigm">paradigm</option>
+    </select> -->
+
+    <table>
+      {{#each getCohortSignatures}}
         {{> signatureRow}}
       {{/each}}
-      </table>
-    </div>
-  {{/if}}
+      <tr>
+        <td colspan="2">
+          {{#if Template.subscriptionsReady}}
+            {{#if hasMoreSignatures}}
+              <a class="load-more" href="#">Load More</a>
+            {{/if}}
+          {{else}}
+            <div class="loading">
+              {{>spinner}}
+            </div>
+          {{/if}}
+        </td>
+      </tr>
+    </table>
+  </div>
 </template>
 
 <template name="signatureRow">
@@ -34,6 +46,6 @@
 
 <template name="renderChart">
   <div class="inline" id="{{type}}{{algorithm}}{{removeSpaces label}}">
-    <!-- should attach here -->
+    {{!-- should attach here --}}
   </div>
 </template>
