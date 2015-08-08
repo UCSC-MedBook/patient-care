@@ -20,3 +20,19 @@ Template.showTreatment.helpers({
     return saveTheText(theEvidence, firstPart.length, secondPart.length);
   },
 });
+
+Template.cohortSignatures.onCreated(function () {
+  var instance = this;
+  instance.chartType = new ReactiveVar("waterfall");
+});
+
+Template.cohortSignatures.events({
+  "click #change-chart-type": function (event, instance) {
+    console.log("instance: ", instance);
+    if (instance.chartType.get() === "waterfall") {
+      instance.chartType.set("boxAndWhisker");
+    } else {
+      instance.chartType.set("waterfall");
+    }
+  }
+});

@@ -5,6 +5,7 @@ Template.cohortSignaturesTypeBox.onCreated(function () {
 
   instance.loaded = new ReactiveVar(0);
   instance.limit = new ReactiveVar(5);
+  instance.loadedFirstData = new ReactiveVar(false);
   instance.chartMaximum = new ReactiveVar(10);
   instance.chartMinimum = new ReactiveVar(-10);
   instance.sampleLabels = new ReactiveVar(
@@ -52,7 +53,9 @@ Template.cohortSignaturesTypeBox.onCreated(function () {
           instance.chartMaximum.set(maximum);
           instance.chartMinimum.set(minimum);
 
+          // change variables to reload html
           instance.loaded.set(limit);
+          instance.loadedFirstData.set(true);
         }
     );
   });
@@ -71,6 +74,9 @@ Template.cohortSignaturesTypeBox.helpers({
   },
   hasAnySignatures: function() {
     return Template.instance().getCohortSignatures().count() > 0;
+  },
+  loadedFirstData: function () {
+    return Template.instance().loadedFirstData.get();
   },
 });
 
@@ -99,26 +105,25 @@ Template.renderChart.rendered = function () {
   var instance = this;
 
   // reactive variables for drawing chart
-  cohortSignatureInstance = instance.parentTemplate(2);
-  var chartMaximum = cohortSignatureInstance.chartMaximum;
-  var chartMinimum = cohortSignatureInstance.chartMinimum;
-  var sampleLabels = cohortSignatureInstance.sampleLabels;
+  var doubleParent = instance.parentTemplate(2);
 
   // TODO: use update function instead of removing it using jQuery
   this.autorun(function (first) {
+    var chartType = instance.parentTemplate(3).chartType.get();
+
     // maybe split context into two variables:
     // one specific to that chart type, one specific to that chart
     var context = {
-      "chart_type": Session.get("chartToRender"),
-      "height": Session.get("chartToRender") === "waterfall" ? 100 : 50,
+      "chart_type": chartType,
+      "height": chartType === "waterfall" ? 100 : 50,
       "width": 150,
-      "minimum_value": chartMinimum.get(),
-      "maximum_value": chartMaximum.get(),
+      "minimum_value": doubleParent.chartMinimum.get(),
+      "maximum_value": doubleParent.chartMaximum.get(),
       //"lower_threshold_value": -1.5,//data.lower_threshold_value,
       //"upper_threshold_value": 1.5,//data.upper_threshold_value,
       "dom_selector": data.type + data.algorithm +
           removeSpaces(data.label),
-      "highlighted_sample_labels": sampleLabels.get(),
+      "highlighted_sample_labels": doubleParent.sampleLabels.get(),
       "show_axis": true,
       "show_axis_labels": true,
     };

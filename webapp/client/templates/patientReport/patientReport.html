@@ -118,9 +118,15 @@
 </template>
 
 <template name="cohortSignatures">
-  {{> cohortSignaturesTypeBox "kinase"}}
-  {{> cohortSignaturesTypeBox "tf"}}
-  {{> cohortSignaturesTypeBox "other"}}
+  <div class="component-box">
+    <h2>Signatures</h2>
+    <button id="change-chart-type" type="button">Change chart type</button>
+    <div class="flex-container">
+      {{> cohortSignaturesTypeBox "kinase"}}
+      {{> cohortSignaturesTypeBox "tf"}}
+      {{> cohortSignaturesTypeBox "other"}}
+    </div>
+  </div>
 </template>
 
 <template name="showTreatment">
