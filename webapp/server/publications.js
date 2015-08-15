@@ -129,29 +129,10 @@ Meteor.publish("GeneReport", function (geneLabel) {
 // allows quick linking between patient reports
 Meteor.publish("ReportMetadata", function () {
   console.log("publishing report metadata");
-
-  var self = this;
-
-  var handle = PatientReports
-      .find({})
-      .observeChanges({
-        added: function (id, newOne) {
-          self.added("patient_reports", id, {
-            "patient_label": newOne.patient_label,
-            "sample_labels": _.pluck(newOne.samples, "sample_label"),
-          });
-        },
-        removed: function (id) {
-          console.log("something was removed in PatientReports");
-        },
-        changed: function (id) {
-          console.log("something changed in PatientReports");
-        }
-      });
-
-  self.onStop(function () {
-    handle.stop();
+  return PatientReports.find({}, {
+    fields: {
+      "patient_label": 1,
+      "metadata": 1,
+    }
   });
-
-  self.ready();
 });

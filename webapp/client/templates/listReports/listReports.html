@@ -1,17 +1,28 @@
+
+<template name="server_side">
+		<!-- <h2>Server side search</h2> -->
+  <span class=".twitter-typeahead">
+	   <input class="form-control typeahead" name="search" type="text" placeholder="Type to query"
+		    autocomplete="off" spellcheck="off"
+		    data-source="search"/>
+  </span>
+</template>
+
 <template name="listReports">
+
   <ul>
     <div id="list-reports" class="flex-container">
 
-      <div id="patient-reports" class="component-box">
-        <h2>Patients</h2>
-        <ul>
-          {{#each getPatientReports}}
-            <li>
-              {{> patientReportListItem this}}
-            </li>
-          {{/each}}
-        </ul>
-      </div>
+      {{!-- <div id="trying" class="component-box">
+
+        {{> server_side}}
+
+        <!-- http://getbootstrap.com/components/ -->
+        <!-- http://silviomoreto.github.io/bootstrap-select/ -->
+
+      </div>--}}
+
+      {{> listPatients}}
 
       <div id="gene-reports" class="component-box">
         <h2>Genes</h2>
@@ -36,6 +47,29 @@
       </div>
     </div>
   </ul>
+</template>
+
+<template name="listPatients">
+  <div id="patient-reports" class="component-box">
+    <h2>Patients</h2>
+    
+    <label id="filter-with-progression" class="list-report-filter">
+      <input type="checkbox" checked="{{filterWithProgression}}" />
+      Filter with progression
+    </label>
+    <label id="filter-with-rna-seek" class="list-report-filter">
+      <input type="checkbox" checked="{{filterWithRNASeek}}" />
+      Filter with RNA seek
+    </label>
+
+    <ul>
+      {{#each getPatientReports}}
+        <li>
+          {{> patientReportListItem this}}
+        </li>
+      {{/each}}
+    </ul>
+  </div>
 </template>
 
 <template name="patientReportListItem">
