@@ -27,19 +27,16 @@ Template.listPatients.onCreated(function () {
         context = {};
       }
 
-      console.log("setting instance variables from profile");
       if (context.filter_with_progression !== undefined) {
         instance.filterWithProgression.set(
           context.filter_with_progression
         );
-        console.log("instance.filterWithProgression.get(): ", instance.filterWithProgression.get());
       }
 
       if (context.filter_with_rna_seek !== undefined) {
         instance.filterWithRNASeek.set(
           context.filter_with_rna_seek
         );
-        console.log("instance.filterWithRNASeek.get(): ", instance.filterWithRNASeek.get());
       }
     }
   });
@@ -91,11 +88,9 @@ Template.listPatients.helpers({
 
 Template.listPatients.events({
   "change #filter-with-progression input": function (event, instance) {
-    console.log("filter-with-progression input changed:", event.target.checked);
     instance.filterWithProgression.set(event.target.checked);
   },
   "change #filter-with-rna-seek input": function (event, instance) {
-    console.log("filter-with-rna-seek input changed:", event.target.checked);
     instance.filterWithRNASeek.set(event.target.checked);
   },
 });
