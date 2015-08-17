@@ -14,7 +14,7 @@ Template.listPatients.onCreated(function () {
 
   // set them to defaults
   instance.filterWithProgression = new ReactiveVar(false);
-  instance.filterWithRNASeek = new ReactiveVar(false);
+  instance.filterWithRNAseq = new ReactiveVar(false);
 
   // set checkmarks to match user profile
   var loadedUserId = new ReactiveVar(undefined);
@@ -33,9 +33,9 @@ Template.listPatients.onCreated(function () {
         );
       }
 
-      if (context.filter_with_rna_seek !== undefined) {
-        instance.filterWithRNASeek.set(
-          context.filter_with_rna_seek
+      if (context.filter_with_rna_seq !== undefined) {
+        instance.filterWithRNAseq.set(
+          context.filter_with_rna_seq
         );
       }
     }
@@ -52,11 +52,11 @@ Template.listPatients.onCreated(function () {
 
       // make sure something's changed
       if (context.filter_with_progression !== instance.filterWithProgression.get() ||
-          context.filter_with_rna_seek !== instance.filterWithRNASeek.get()) {
+          context.filter_with_rna_seq !== instance.filterWithRNAseq.get()) {
         Meteor.users.update({ _id: Meteor.user()._id }, {
           $set: {
             "profile.patient_care.filter_with_progression": instance.filterWithProgression.get(),
-            "profile.patient_care.filter_with_rna_seek": instance.filterWithRNASeek.get()
+            "profile.patient_care.filter_with_rna_seq": instance.filterWithRNAseq.get()
           }
         });
       }
@@ -72,7 +72,7 @@ Template.listPatients.helpers({
     if (instance.filterWithProgression.get()) {
       findObject["metadata.sample_labels_count"] = { $gt: 1 };
     }
-    if (instance.filterWithRNASeek.get()) {
+    if (instance.filterWithRNAseq.get()) {
       findObject["metadata.is_in_signatures"] = true;
     }
 
@@ -81,8 +81,8 @@ Template.listPatients.helpers({
   filterWithProgression: function () {
     return Template.instance().filterWithProgression.get();
   },
-  filterWithRNASeek: function () {
-    return Template.instance().filterWithRNASeek.get();
+  filterWithRNAseq: function () {
+    return Template.instance().filterWithRNAseq.get();
   },
 });
 
@@ -90,8 +90,8 @@ Template.listPatients.events({
   "change #filter-with-progression input": function (event, instance) {
     instance.filterWithProgression.set(event.target.checked);
   },
-  "change #filter-with-rna-seek input": function (event, instance) {
-    instance.filterWithRNASeek.set(event.target.checked);
+  "change #filter-with-rna-seq input": function (event, instance) {
+    instance.filterWithRNAseq.set(event.target.checked);
   },
 });
 
