@@ -15,6 +15,10 @@
     {{/if}}
 
     <!-- {{> treatments this}} -->
+
+    {{! robert's stuff}}
+    {{> drugSensitivity}}
+    {{> outcomeBasedOnVariance}}
   </div>
 
   <div id="dataInformation" class="flex-container">
@@ -23,6 +27,18 @@
     <!-- {{> circleOfDeath}} -->
   </div>
 
+</template>
+
+<template name="drugSensitivity">
+  <div class="component-box">
+    <h2>Drug sensitivity</h2>
+  </div>
+</template>
+
+<template name="outcomeBasedOnVariance">
+  <div class="component-box">
+    <h2>Outcome based on variance</h2>
+  </div>
 </template>
 
 <template name="demographics">
