@@ -74,8 +74,11 @@
 
 <template name="patientReportListItem">
   <a href="{{ pathFor 'patientReport' patient_label=this.patient_label }}">
-    {{this.patient_label}}
+    <span>{{this.patient_label}}</span>
   </a>
+  {{#if this.metadata.has_drug_sensitivity}}
+    <span>Drug</span>
+  {{/if}}
 </template>
 
 <template name="geneReportListItem">
