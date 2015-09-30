@@ -1,11 +1,85 @@
+
+<template name="server_side">
+		<!-- <h2>Server side search</h2> -->
+  <span class=".twitter-typeahead">
+	   <input class="form-control typeahead" name="search" type="text" placeholder="Type to query"
+		    autocomplete="off" spellcheck="off"
+		    data-source="search"/>
+  </span>
+</template>
+
 <template name="listReports">
+
   <ul>
-    {{#each getReports}}
-      <li>
-        <a href="{{ pathFor 'patientReport' patientLabel=this.patient_label }}">
-          {{this.patient_label}}
-        </a>
-      </li>
-    {{/each}}
+    <div id="list-reports" class="flex-container">
+
+      {{!-- <div id="trying" class="component-box">
+
+        {{> server_side}}
+
+        <!-- http://getbootstrap.com/components/ -->
+        <!-- http://silviomoreto.github.io/bootstrap-select/ -->
+
+      </div>--}}
+
+      {{> listPatients}}
+
+      <div id="gene-reports" class="component-box">
+        <h2>Genes</h2>
+        <ul>
+          {{#each getGeneReports}}
+            <li>
+              {{> geneReportListItem this}}
+            </li>
+          {{/each}}
+        </ul>
+      </div>
+
+      <div id="pathway-reports" class="component-box">
+        <h2>Pathways</h2>
+        <ul>
+          {{#each getPathwayReports}}
+            <li>
+              {{this}}
+            </li>
+          {{/each}}
+        </ul>
+      </div>
+    </div>
   </ul>
+</template>
+
+<template name="listPatients">
+  <div id="patient-reports" class="component-box">
+    <h2>Patients</h2>
+
+    <label id="filter-with-progression" class="list-report-filter">
+      <input type="checkbox" checked="{{filterWithProgression}}" />
+      Filter with progression
+    </label>
+    <label id="filter-with-rna-seq" class="list-report-filter">
+      <input type="checkbox" checked="{{filterWithRNAseq}}" />
+      Filter with RNAseq
+    </label>
+
+    <ul>
+      {{#each getPatientReports}}
+        <li>
+          {{> patientReportListItem this}}
+        </li>
+      {{/each}}
+    </ul>
+  </div>
+</template>
+
+<template name="patientReportListItem">
+  <a href="{{ pathFor 'patientReport' patient_label=this.patient_label }}">
+    {{this.patient_label}}
+  </a>
+</template>
+
+<template name="geneReportListItem">
+  <a href="{{ pathFor 'geneReport' gene_label=this.gene_label }}">
+    {{this.gene_label}}
+  </a>
 </template>

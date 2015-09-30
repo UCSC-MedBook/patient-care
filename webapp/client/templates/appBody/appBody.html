@@ -4,10 +4,15 @@
 
   <div id="content-container">
     <div>
-      {{> loginButtons}}
+      <a href="{{ pathFor 'listReports' }}">
+        List all reports
+      </a>
       {{> userContext}}
+      {{> loginButtons}}
     </div>
     <hr>
+
     {{> yield}}
+    
   </div>
 </template>

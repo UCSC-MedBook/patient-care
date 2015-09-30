@@ -14,3 +14,12 @@ medbook:user-context
 accounts-password
 accounts-ui
 medbook:charts
+medbook:primary-collections
+less
+circlemap-graph
+erasaur:meteor-lodash
+meteorhacks:subs-manager
+reactive-var
+sacha:spin
+sergeyt:typeahead
+twbs:bootstrap

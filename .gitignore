@@ -1,2 +1,6 @@
 data/*.tab
-scripts/*.json
+data/*.csv
+data/*.sif
+.project
+.gitignore
+my_dev.mak

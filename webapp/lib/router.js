@@ -12,22 +12,25 @@ Router.configure({
 Router.map(function() {
   //this.route('signin');
 
-  // root ==> list of patients, list of studies
-
   this.route('patientReport', {
     path: '/PatientCare/patientReport/:patient_label',
+    waitOn: function () {
+      console.log("waitOn: we'll wait for the subscriptions to be ready");
+    },
     subscriptions: function () {
-      return Meteor.subscribe("PatientReport", this.params.patient_label, function () {
-        console.log("loaded PatientReport subscription");
-      });
+      return Meteor.subscribe("PatientReport",
+        this.params.patient_label,
+        function () {
+          console.log("loaded PatientReport subscription");
+        }
+      );
     },
     data: function () {
-      var currentLabel = this.params.patient_label
-      var currentPatient = PatientReports.findOne({
+      var currentLabel = this.params.patient_label;
+      var currentReport = PatientReports.findOne({
         "patient_label": currentLabel
       });
-      // check if we have a report yet for that patient
-      return currentPatient;
+      return currentReport;
     },
     onStop: function () {
       console.log("onStop (router.js)");
@@ -36,6 +39,33 @@ Router.map(function() {
 
   this.route('listReports', {
     path: '/PatientCare/',
+  });
+
+  this.route('geneReport', {
+    path: '/PatientCare/geneReport/:gene_label',
+    subscriptions: function () {
+      Session.set("geneReportLoaded", false);
+      return Meteor.subscribe("GeneReport", this.params.gene_label,
+          function () {
+            Session.set("geneReportLoaded", true);
+            console.log("loaded GeneReport subscription");
+          }
+      );
+    },
+    data: function () {
+      var currentLabel = this.params.gene_label;
+      var currentReport = GeneReports.findOne({
+        "gene_label": currentLabel
+      });
+      // if (!currentReport) {
+      //   console.log(currentLabel, "doesn't have a gene report");
+      //   this.render("appNotFound");
+      // }
+      return currentReport;
+    },
+    onStop: function () {
+      console.log("onStop (router.js)");
+    },
   });
 
 });

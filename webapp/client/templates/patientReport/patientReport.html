@@ -1,50 +1,158 @@
 <template name="patientReport">
-  <h1>
-    {{patient_label}}
-  </h1>
-
-  {{> demographics this}}
-
-  <!-- clinical information -->
-
-  {{#if samples}}
-    {{> samples this}}
-  {{/if}}
 
   {{print "patientReport this :: "}}
   {{print this}}
 
+  <h1>
+    {{patient_label}}
+  </h1>
+
+  <div id="top-part" class="flex-container">
+    {{> demographics this}}
+
+    {{#if samples}}
+      {{> samples this}}
+    {{/if}}
+
+    <!-- {{> treatments this}} -->
+  </div>
+
+  <div id="dataInformation" class="flex-container">
+    {{> cohortSignatures}}
+
+    <!-- {{> circleOfDeath}} -->
+  </div>
+
+</template>
+
+<template name="drugSensitivity">
+  <div class="component-box">
+    {{#if isDrug}}
+    <h2>Drug Sensitivity</h2>
+      {{> informationItem description="Variant: " information=geneLabelAndVariant}}
+	     {{> informationItem description="Drug: " information=drug}}
+	     {{> informationItem description="Clinical Significance: " information=clinical_significance}}
+	     {{> informationItem description="Disease: " information=disease}}
+    {{else}}
+       <h2>Outcome based on variant</h2>
+         {{> informationItem description="Variant: " information=geneLabelAndVariant}}
+   	     {{> informationItem description="Clinical Significance: " information=clinical_significance}}
+   	     {{> informationItem description="Disease: " information=disease}}
+    {{/if}}
+	  </div>
 </template>
 
 <template name="demographics">
-  <div class="component-box component-border">
+  <div class="component-box">
     <h2>Demographics</h2>
     <ul>
-      {{#if ../age}} <li>Age: {{../age}}</li> {{/if}}
-      {{#if ../gender}} <li>Gender: {{../gender}}</li> {{/if}}
-      {{#if ../race}} <li>Race: {{../race}}</li> {{/if}}
-      {{#if ../ethnicity}} <li>Ethnicity: {{../ethnicity}}</li> {{/if}}
+      {{> informationItem description="Age: " information=age}}
+      {{> informationItem description="Gender: " information=gender}}
+      {{> informationItem description="Race: " information=race}}
+      {{> informationItem description="Ethnicity: " information=ethnicity}}
+      {{> informationItem description="Study site: " information=study_site}}
     </ul>
   </div>
 </template>
 
-<template name="clinicalInformation">
-
-  {{#if ../age}} <li>Age: {{../age}}</li> {{/if}} <br />
-  {{#if ../gender}} <li>Gender: {{../gender}}</li> {{/if}} <br />
-  {{#if ../race}} <li>Race: {{../race}}</li> {{/if}} <br />
-
-
+<template name="informationItem">
+  {{#if information}}
+    <li>
+      <span class="information-item-description">
+        {{description}}
+      </span>
+      {{information}}
+    </li>
+  {{/if}}
 </template>
 
 <template name="samples">
-  <div class="component-box component-border">
+  <div class="component-box">
     <h2>Samples</h2>
-    <ul>
+      <ul>
+        <div class="flex-container">
+        {{#each ../samples}}
+          <li>{{> sample this}}</li>
+        {{/each}}
+      </div>
+    </ul>
+  </div>
+</template>
 
-      {{#each ../samples}}
-        <li>{{> sample this}}</li>
+<template name="sample">
+  <div id="{{../sample_label}}" class="component-box">
+    <h3>{{../sample_label}}</h3>
+    <ul>
+      {{> informationItem description="Site of biopsy: " information=site_of_biopsy}}
+      {{> informationItem description="Trichotomy call: " information=trichotomy_call}}
+      {{> informationItem description="Abirateroe: " information=abiraterone}}
+      {{> informationItem description="Enzalutamie: " information=enzalutamide}}
+      {{> informationItem description="Site of biopsy: " information=site_of_biopsy}}
+
+      {{#if prior_treatments}}
+        <li>
+          <span class="information-item-description">
+            Prior treatments:
+          </span>
+          <ul class="treatments">
+            {{#each prior_treatments}}
+              <li>{{> showTreatment}}</li>
+            {{/each}}
+          </ul>
+        </li>
+      {{/if}}
+      {{#if subsequent_treatments}}
+        <li>
+          <span class="information-item-description">
+            Subsequent treatments:
+          </span>
+          <ul class="treatments">
+            {{#each subsequent_treatments}}
+              <li>{{> showTreatment}}</li>
+            {{/each}}
+          </ul>
+        </li>
+      {{/if}}
+    </ul>
+	
+	{{#each drugs}}
+    {{print this}}
+    {{> drugSensitivity}}
+  {{/each}}
+</div>
+</template>
+
+<template name="treatments">
+  <div class="component-box">
+    <h2>Treatments</h2>
+    <ul>
+      {{#each treatments}}
+        treatment
       {{/each}}
     </ul>
   </div>
+</template>
+
+<template name="circleOfDeath">
+  <div class="component-box">
+    <img src="/PatientCare/images/circle_of_death.png">
+  </div>
+</template>
+
+<template name="cohortSignatures">
+  <div class="component-box">
+    <h2>Signatures</h2>
+    <button id="change-chart-type" type="button">Change chart type</button>
+    <div class="flex-container">
+      {{> cohortSignaturesTypeBox "kinase"}}
+      {{> cohortSignaturesTypeBox "tf"}}
+      {{> cohortSignaturesTypeBox "other"}}
+    </div>
+  </div>
+</template>
+
+<template name="showTreatment">
+  <span>
+    {{trimTedsDomElementInMongo this}}
+  </span>
 </template>

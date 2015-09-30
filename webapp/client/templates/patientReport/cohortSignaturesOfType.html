@@ -1,0 +1,62 @@
+<template name="cohortSignaturesTypeBox">
+  <div class="component-box signatures-box">
+    <h3>{{upcaseFirst this}} signatures</h3>
+    {{#if loadedFirstData}}
+      {{#if hasAnySignatures}}
+        <table>
+
+          {{#each getCohortSignatures}}
+            {{> signatureRow}}
+          {{/each}}
+
+          {{#if Template.subscriptionsReady}}
+            {{#if hasMoreSignatures}}
+              <tr>
+                <td colspan="2">
+                  <a class="load-more" href="#">Load More</a>
+                </td>
+              </tr>
+            {{/if}}
+          {{else}}
+            <tr> {{!-- not the greatest to repeat this --}}
+              <td colspan="2">
+                <div class="loading">{{> spinner}}</div>
+              </td>
+            </tr>
+          {{/if}}
+
+        </table>
+      {{else}}
+        <div>
+          There are no signatures of this type
+          associated with this patients' samples.
+        </div>
+      {{/if}}
+    {{else}} {{!-- loaded first data --}}
+      <div class="loading">{{> spinner}}</div>
+    {{/if}}
+  </div>
+</template>
+
+<template name="signatureRow">
+  <tr>
+    <td align="center">
+      {{#if gene_label}}
+        <a href="{{ pathFor 'geneReport' gene_label=gene_label }}">
+          <span>{{label}}</span>
+        </a>
+      {{else}}
+        <span>{{label}}</span>
+      {{/if}}
+    </td>
+    <td>
+      {{> renderChart this}}
+    </td>
+  </tr>
+</template>
+
+<template name="renderChart">
+  <div class="inline" id="{{type}}{{algorithm}}{{removeSpaces label}}">
+    {{!-- should attach here --}}
+  </div>
+</template>
