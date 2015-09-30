@@ -27,6 +27,12 @@ Template.renderCircleMap.rendered = function() {
             var geneReport = GeneReports.find().fetch()[0];
             var expressionData = expression2.find().fetch();
             var viperSignaturesData = CohortSignatures.find().fetch();
+
+            // add in sample_values
+            _.each(viperSignaturesData, function (value) {
+              value.sample_values = value.samples;
+            });
+
             chrisCodeHere(geneReport, expressionData, viperSignaturesData);
             first.stop();
         }
