@@ -15,10 +15,6 @@
     {{/if}}
 
     <!-- {{> treatments this}} -->
-
-    {{! robert's stuff}}
-    {{> drugSensitivity}}
-    {{> outcomeBasedOnVariance}}
   </div>
 
   <div id="dataInformation" class="flex-container">
@@ -31,14 +27,19 @@
 
 <template name="drugSensitivity">
   <div class="component-box">
-    <h2>Drug sensitivity</h2>
-  </div>
-</template>
-
-<template name="outcomeBasedOnVariance">
-  <div class="component-box">
-    <h2>Outcome based on variance</h2>
-  </div>
+    {{#if isDrug}}
+    <h2>Drug Sensitivity</h2>
+      {{> informationItem description="Variant: " information=geneLabelAndVariant}}
+	     {{> informationItem description="Drug: " information=drug}}
+	     {{> informationItem description="Clinical Significance: " information=clinical_significance}}
+	     {{> informationItem description="Disease: " information=disease}}
+    {{else}}
+       <h2>Outcome based on variant</h2>
+         {{> informationItem description="Variant: " information=geneLabelAndVariant}}
+   	     {{> informationItem description="Clinical Significance: " information=clinical_significance}}
+   	     {{> informationItem description="Disease: " information=disease}}
+    {{/if}}
+	  </div>
 </template>
 
 <template name="demographics">
@@ -113,7 +114,12 @@
         </li>
       {{/if}}
     </ul>
-  </div>
+	
+	{{#each drugs}}
+    {{print this}}
+    {{> drugSensitivity}}
+  {{/each}}
+</div>
 </template>
 
 <template name="treatments">

@@ -128,7 +128,8 @@ Meteor.publish("GeneReport", function (geneLabel) {
 
 // allows quick linking between patient reports
 Meteor.publish("ReportMetadata", function () {
-  console.log("publishing report metadata");
+	var count = PatientReports.find({}).count();
+  console.log("publishing report metadata. PatientReports count=",count);
   return PatientReports.find({}, {
     fields: {
       "patient_label": 1,
