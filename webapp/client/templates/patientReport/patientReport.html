@@ -85,8 +85,8 @@
     <ul>
       {{> informationItem description="Site of biopsy: " information=site_of_biopsy}}
       {{> informationItem description="Trichotomy call: " information=trichotomy_call}}
-      {{> informationItem description="Abirateroe: " information=abiraterone}}
-      {{> informationItem description="Enzalutamie: " information=enzalutamide}}
+      {{> informationItem description="Abiraterone: " information=abiraterone}}
+      {{> informationItem description="Enzalutamide: " information=enzalutamide}}
       {{> informationItem description="Site of biopsy: " information=site_of_biopsy}}
 
       {{#if prior_treatments}}
@@ -114,7 +114,7 @@
         </li>
       {{/if}}
     </ul>
-	
+
 	{{#each drugs}}
     {{print this}}
     {{> drugSensitivity}}
