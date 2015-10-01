@@ -30,7 +30,9 @@ Template.renderCircleMap.rendered = function() {
 
             // add in sample_values
             _.each(viperSignaturesData, function (value) {
-              value.sample_values = value.samples;
+              if (!value.sample_values) {
+                value.sample_values = value.samples;
+              }
             });
 
             chrisCodeHere(geneReport, expressionData, viperSignaturesData);
