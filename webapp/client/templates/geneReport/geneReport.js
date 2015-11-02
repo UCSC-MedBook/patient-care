@@ -25,7 +25,7 @@ Template.renderCircleMap.rendered = function() {
     Deps.autorun(function(first) {
         if (Session.get("geneReportLoaded") === true) {
             var geneReport = GeneReports.find().fetch()[0];
-            var expressionData = expression2.find().fetch();
+            var expressionData = Expression2.find().fetch();
             var viperSignaturesData = CohortSignatures.find().fetch();
 
             // add in sample_values
