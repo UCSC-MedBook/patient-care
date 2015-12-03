@@ -22,7 +22,10 @@ Template.listPatients.onCreated(function () {
     if (Meteor.user() && Meteor.userId() !== loadedUserId.get()) {
       loadedUserId.set(Meteor.userId()); // don't run again for this user
 
-      var context = Meteor.user().profile.patient_care;
+      var context;
+      if (Meteor.user().profile) {
+        context = Meteor.user().profile.patient_care;
+      }
       if (context === undefined) {
         context = {};
       }
@@ -45,7 +48,10 @@ Template.listPatients.onCreated(function () {
   this.autorun(function() {
     // have to try to load before profile
     if (loadedUserId.get() !== undefined) {
-      var context = Meteor.user().profile.patient_care;
+      var context;
+      if (Meteor.user().profile) {
+        context = Meteor.user().profile.patient_care;
+      }
       if (context === undefined) {
         context = {};
       }
