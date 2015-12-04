@@ -9,7 +9,7 @@ Router.configure({
   loadingTemplate: 'appLoading',
 });
 
-Router.map(function() {
+Router.map(function () {
   //this.route('signin');
 
   this.route('patientReport', {
@@ -18,12 +18,9 @@ Router.map(function() {
       console.log("waitOn: we'll wait for the subscriptions to be ready");
     },
     subscriptions: function () {
-      return Meteor.subscribe("PatientReport",
-        this.params.patient_label,
-        function () {
-          console.log("loaded PatientReport subscription");
-        }
-      );
+      return Meteor.subscribe("PatientReport", this.params.patient_label, function () {
+        console.log("loaded PatientReport subscription");
+      });
     },
     data: function () {
       var currentLabel = this.params.patient_label;
@@ -45,14 +42,16 @@ Router.map(function() {
     path: '/PatientCare/geneReport/:gene_label',
     subscriptions: function () {
       Session.set("geneReportLoaded", false);
-      return Meteor.subscribe("GeneReport", this.params.gene_label,
-          function () {
-            Session.set("geneReportLoaded", true);
-            console.log("loaded GeneReport subscription");
-          }
-      );
+      return Meteor.subscribe("GeneReport", this.params.gene_label, function () {
+        Session.set("geneReportLoaded", true);
+        console.log("loaded GeneReport subscription");
+      });
     },
     data: function () {
+      // TODO get sample labels for patient
+      var patient_label = this.params.query.patient_label;
+      console.log("patient_label from query string", patient_label);
+
       var currentLabel = this.params.gene_label;
       var currentReport = GeneReports.findOne({
         "gene_label": currentLabel
