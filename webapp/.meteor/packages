@@ -16,7 +16,7 @@ accounts-ui
 medbook:charts
 medbook:primary-collections
 less
-circlemap-graph
+medbook:circlemap-graph
 erasaur:meteor-lodash
 meteorhacks:subs-manager
 reactive-var
