@@ -100,6 +100,13 @@ Meteor.publish("topCohortSignatures",
   }
 );
 
+var getTargettingDrugs = function(genes){
+	var ignoreDrugs = ["N/A", ""];
+	var cursor = ClinicalEvidenceSummaries.find({"gene": { $in: genes },"evidence_direction":"Supports","clinical_significance":"Sensitivity", "drugs": {$nin: ignoreDrugs}},
+	{fields:{gene:1,drugs:1,pubmed_id:1}});
+	return cursor;
+};
+
 Meteor.publish("GeneReport", function (geneLabel) {
   var geneReportCursor = GeneReports.find(
     {"gene_label": geneLabel},
@@ -109,6 +116,9 @@ Meteor.publish("GeneReport", function (geneLabel) {
 
   if (currentReport) { // in case we don't have one
     var geneNames = _.pluck(currentReport.network.elements, 'name');
+    geneNames = _.uniq(geneNames);
+    // TODO get targetting drugs
+    var targettingDrugsCursor = getTargettingDrugs(geneNames);
     var expression2Cursor = Expression2.find({"gene": { $in: geneNames }});
     var cohortSignaturesCursor = CohortSignatures.find({
       "algorithm": "viper",
@@ -119,6 +129,7 @@ Meteor.publish("GeneReport", function (geneLabel) {
       geneReportCursor,
       expression2Cursor,
       cohortSignaturesCursor,
+      targettingDrugsCursor
     ];
   } else {
     // must return this for Meteor to say the subscription is ready
