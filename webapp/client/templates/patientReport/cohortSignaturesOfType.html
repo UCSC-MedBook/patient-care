@@ -4,7 +4,6 @@
     {{#if loadedFirstData}}
       {{#if hasAnySignatures}}
         <table>
-
           {{#each getCohortSignatures}}
             {{> signatureRow}}
           {{/each}}
@@ -42,7 +41,8 @@
   <tr>
     <td align="center">
       {{#if gene_label}}
-        <a href="{{ pathFor 'geneReport' gene_label=gene_label }}">
+      	<!-- getQuery is a helper function that builds a query string for this URL -->
+        <a href="{{ pathFor 'geneReport' gene_label=gene_label query=getQuery}}">
           <span>{{label}}</span>
         </a>
       {{else}}
