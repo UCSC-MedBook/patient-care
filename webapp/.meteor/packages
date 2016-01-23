@@ -16,10 +16,14 @@ accounts-ui
 medbook:charts
 medbook:primary-collections
 less
+<<<<<<< HEAD
 medbook:circlemap-graph
+=======
+>>>>>>> be645045a55d11bfc9a182d3d00b99759a024011
 erasaur:meteor-lodash
 meteorhacks:subs-manager
 reactive-var
 sacha:spin
 sergeyt:typeahead
 twbs:bootstrap
+medbook:circlemap-graph
