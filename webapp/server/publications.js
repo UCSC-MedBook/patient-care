@@ -148,3 +148,9 @@ Meteor.publish("ReportMetadata", function () {
     }
   });
 });
+
+Meteor.publish("mutations", function (samples) {
+  return Mutations.find({
+    sample_label: { $in: samples },
+  });
+});
