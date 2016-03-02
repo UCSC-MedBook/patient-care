@@ -5,18 +5,11 @@
 
   {{#if network}}
     {{#if networkHasElements network.elements}}
-      {{> renderCircleMap this}}
+      {{> circleMapTemplate this}}
     {{else}}
       This gene is not an element in the current superpathway.
     {{/if}}
   {{else}}
     Loading...
   {{/if}}
-
-</template>
-
-<template name="renderCircleMap">
-  <div class="circle-map" id="render-circle-map-here">
-    <!-- yes it is hardcoded -->
-  </div>
 </template>
