@@ -23,6 +23,10 @@
     <!-- {{> circleOfDeath}} -->
   </div>
 
+  <div class="mutations">
+    {{> mutations}}
+  </div>
+
 </template>
 
 <template name="drugSensitivity">
@@ -155,4 +159,49 @@
   <span>
     {{trimTedsDomElementInMongo this}}
   </span>
+</template>
+
+<template name="mutations">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Mutations</h3>
+    </div>
+
+    <div class="panel-body">
+      <p>
+        Something about mutations...
+      </p>
+
+      {{#unless Template.subscriptionsReady}}
+        <p>
+          Loading...
+        </p>
+      {{/unless}}
+    </div>
+
+    {{#if Template.subscriptionsReady}}
+      {{#if length getMutations}}
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Gene</th>
+              <th>Chromosome</th>
+              <th>Sequence Ontology</th>
+              <th>Another field</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each getMutations}}
+              <tr>
+                <th scope="row">{{gene_label}}</th>
+                <td>{{chromosome}}</td>
+                <td>{{sequence_ontology}}</td>
+                <td>Field name here</td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      {{/if}}
+    {{/if}}
+  </div>
 </template>

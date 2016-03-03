@@ -23,9 +23,9 @@ Template.showTreatment.helpers({
   trimTedsDomElementInMongo: function (theEvidence) {
     var firstPart;
     if (theEvidence.includes("Prior")) {
-      firstPart = "<div style='width:300px;'><a href='/CRF/lists/SU2C_Prior_TX_V3/7snEyTx8m2hzSWzJn/'>";
+      firstPart = "<div style='width:300px;'><a href='/CRF/prad_wcdt/SU2C_Prior_TX_V3/?q=DTB-055'>";
     } else {
-      firstPart = "<div style='width:300px;'><a href='/CRF/lists/SU2C_Subsequent_Treatment_V1/Toa2hxBxyZshCMtNS/'>";
+      firstPart = "<div style='width:300px;'><a href='/CRF/prad_wcdt/SU2C_Subsequent_Treatment_V1/?q=DTB-055'>";
     }
     var secondPart = "</a></div>";
 
@@ -47,4 +47,19 @@ Template.cohortSignatures.events({
       instance.chartType.set("waterfall");
     }
   }
+});
+
+// Template.mutations
+
+Template.mutations.onCreated(function () {
+  var instance = this;
+
+  var samples = _.pluck(instance.data.samples, "sample_label");
+  instance.subscribe("mutations", samples);
+});
+
+Template.mutations.helpers({
+  getMutations: function () {
+    return Mutations.find({});
+  },
 });
