@@ -1,0 +1,43 @@
+<template name="appBody">
+  <div class="ui container">
+    <div style="margin-bottom: 10px;">
+      <div class="ui breadcrumb large">
+        {{#if params.study_label}}
+          <a href="{{pathFor 'home'}}">
+            Home
+          </a>
+
+          <span class="divider">/</span>
+          {{#if isActiveRoute "study"}}
+            <div class="section active">
+              {{getShortName}}
+            </div>
+          {{else}}
+            <a href="{{pathFor 'study' study_label=params.study_label}}"
+                class="section">
+              {{getShortName}}
+            </a>
+          {{/if}}
+
+          {{#if params.patient_label}}
+            <span class="divider">/</span>
+            <div class="section {{isActiveRoute "patient"}}">
+              {{params.patient_label}}
+            </div>
+          {{/if}}
+        {{else}}
+          <div class="section {{isActiveRoute "home"}}">
+            Home
+          </div>
+        {{/if}}
+      </div>
+
+      <div style="float: right;">
+        {{> loginButtons}}
+      </div>
+    </div>
+
+
+    {{>Template.dynamic template=content data=params}}
+  </div>
+</template>

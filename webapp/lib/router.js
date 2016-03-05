@@ -1,70 +1,29 @@
-Router.configure({
-  // we use the  appBody template to define the layout for the entire app
-  layoutTemplate: 'appBody',
-
-  // the appNotFound template is used for unknown routes and missing lists
-  notFoundTemplate: 'appNotFound',
-
-  // show the appLoading template whilst the subscriptions below load their data
-  loadingTemplate: 'appLoading',
+FlowRouter.route("/", {
+  name: "home",
+  action: function(params) {
+    BlazeLayout.render("appBody", {
+      content: "home",
+      params
+    });
+  }
 });
 
-Router.map(function () {
-  //this.route('signin');
+FlowRouter.route("/:study_label", {
+  name: "study",
+  action: function(params) {
+    BlazeLayout.render("appBody", {
+      content: "study",
+      params
+    });
+  }
+});
 
-  this.route('patientReport', {
-    path: '/PatientCare/patientReport/:patient_label',
-    waitOn: function () {
-      console.log("waitOn: we'll wait for the subscriptions to be ready");
-    },
-    subscriptions: function () {
-      return Meteor.subscribe("PatientReport", this.params.patient_label, function () {
-        console.log("loaded PatientReport subscription");
-      });
-    },
-    data: function () {
-      var currentLabel = this.params.patient_label;
-      var currentReport = PatientReports.findOne({
-        "patient_label": currentLabel
-      });
-      return currentReport;
-    },
-    onStop: function () {
-      console.log("onStop (router.js)");
-    },
-  });
-
-  this.route('listReports', {
-    path: '/PatientCare/',
-  });
-
-  this.route('geneReport', {
-    path: '/PatientCare/geneReport/:gene_label',
-    subscriptions: function () {
-      Session.set("geneReportLoaded", false);
-      return Meteor.subscribe("GeneReport", this.params.gene_label, function () {
-        Session.set("geneReportLoaded", true);
-        console.log("loaded GeneReport subscription");
-      });
-    },
-    data: function () {
-      // TODO get sample labels for patient
-      var patient_label = this.params.query.patient_label;
-      console.log("patient_label from query string", patient_label);
-
-      var currentLabel = this.params.gene_label;
-      var currentReport = GeneReports.findOne({
-        "gene_label": currentLabel
-      });
-      // if (!currentReport) {
-      //   console.log(currentLabel, "doesn't have a gene report");
-      //   this.render("appNotFound");
-      // }
-      return currentReport;
-    },
-    onStop: function () {
-      console.log("onStop (router.js)");
-    },
-  });
-
+FlowRouter.route("/:study_label/:patient_label", {
+  name: "patient",
+  action: function(params) {
+    BlazeLayout.render("appBody", {
+      content: "patient",
+      params
+    });
+  }
 });

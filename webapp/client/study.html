@@ -1,0 +1,49 @@
+<template name="study">
+  {{#if Template.subscriptionsReady}}
+    {{#with getStudy}}
+      <h1 class="ui header">{{name}}</h1>
+      {{#if length Patient_IDs}}
+        <h2 class="ui header">Select a patient</h2>
+        <div class="ui list">
+          {{#each Patient_IDs}}
+            <div class="item">
+              <i class="fa fa-user icon"></i>
+              <div class="content">
+                <a href={{pathFor "patient" study_label=(param "study_label")
+                        patient_label=this}}
+                    class="header">
+                  {{this}}
+                </a>
+              </div>
+            </div>
+          {{/each}}
+        </div>
+      {{else}}
+        <div class="ui message massive">
+          <div class="content">
+            <div class="header">
+              No patients
+            </div>
+            <p>
+              There are no patients in this study yet.
+            </p>
+          </div>
+        </div>
+      {{/if}}
+    {{/with}}
+
+    {{#unless getStudy}}
+      <div class="ui icon message massive">
+        <i class="warning sign icon"></i>
+        <div class="content">
+          <div class="header">
+            Uh oh...
+          </div>
+          <p>We couldn't find the study with that id.</p>
+        </div>
+      </div>
+    {{/unless}}
+  {{else}}
+    {{> dataLoading}}
+  {{/if}}
+</template>

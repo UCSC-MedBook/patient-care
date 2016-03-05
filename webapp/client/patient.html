@@ -1,0 +1,168 @@
+<template name="patient">
+  {{#if Template.subscriptionsReady}}
+    {{#with getPatient}}
+      <h1 class="title ui">
+        <i class="fa fa-user"></i>
+        {{patient_label}}
+      </h1>
+
+      {{> questions}}
+    {{/with}}
+
+    {{#unless getPatient}}
+      <div class="ui icon message massive">
+        <i class="warning sign icon"></i>
+        <div class="content">
+          <div class="header">
+            Uh oh...
+          </div>
+          <p>We couldn't find the patient with that id</p>
+        </div>
+      </div>
+    {{/unless}}
+  {{else}}
+    {{> dataLoading}}
+  {{/if}}
+</template>
+
+
+
+<template name="questions">
+  <div class="ui fluid styled accordion">
+    {{#if length samples}}
+      <h2 class="title ui">
+        <i class="dropdown icon"></i>
+        Which data have been loaded?
+      </h2>
+      <div class="content">
+        {{> patientLoadedData}}
+      </div>
+
+
+      <h2 class="title ui">
+        <i class="dropdown icon"></i>
+        Which cancers is this cancer most like?
+      </h2>
+      <div class="content">
+        {{> patientTumorMap}}
+      </div>
+    {{else}}
+      {{! error message if there are no samples}}
+      <div class="ui warning message">
+        This patient has no samples associated with it.
+        Questions that provide sample-level information have been hidden.
+      </div>
+    {{/if}}
+
+
+    <!-- <h2 class="title ui">
+      <i class="dropdown icon"></i>
+      Which genes are most up/down-regulated?
+    </h2>
+    <div class="content">
+      <p>
+        There are many breeds of dogs.
+        Each breed varies in size and temperament.
+        Owners often select a breed of dog that they find to be compatible
+        with their own lifestyle and desires from a companion.
+      </p>
+    </div> -->
+
+
+    <!-- <h2 class="title ui">
+      <i class="dropdown icon"></i>
+      Are there clinically actionable mutations in any samples?
+    </h2>
+    <div class="content">
+      <p>No</p>
+    </div> -->
+  </div>
+</template>
+
+
+
+<template name="patientLoadedData">
+  <h3>Gene expression</h3>
+  <table class="ui celled structured table">
+    <thead>
+      <tr>
+        <th>Sample</th>
+        <th>Quantile counts</th>
+        <th>FPKM</th>
+        <th>TPM</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each samples}}
+        <tr>
+          <td><i class="fa fa-flask"></i>{{this}}</td>
+          <td class="center aligned">
+            <i class="large icon {{geneExpExists "quantile_counts_log"}}"></i>
+          </td>
+          <td class="center aligned">
+            <i class="large icon {{geneExpExists "tpm"}}"></i>
+          </td>
+          <td class="center aligned">
+            <i class="large icon {{geneExpExists "fpkm"}}"></i>
+          </td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</template>
+
+<template name="patientTumorMap">
+  <p>
+    <a href="#">TumorMap</a> clusters samples based on expression values or other genomic
+    data such as mutations.
+  </p>
+
+  <table class="ui structured celled table">
+    <thead>
+      <tr>
+        <th rowspan="2">Sample</th>
+        <th colspan="3">Cluster by...</th>
+      </tr>
+      <tr>
+        {{#each mapTypes}}
+          <th>{{title}}</th>
+        {{/each}}
+      </tr>
+    </thead>
+    <tbody>
+      {{#each samples}}
+        <tr>
+          <td><i class="fa fa-flask"></i>{{this}}</td>
+          {{! #let here so that we can get to it inside the #each}}
+          {{#let sample_label=this}}
+            {{#each mapTypes}}
+              <td>
+                {{#if compare mapLabel "gene_expression"}} {{! XXX}}
+                  {{> tumorMapButton mapLabel=this.mapLabel
+                      sample_label=sample_label}}
+                {{else}}
+                  No data
+                {{/if}}
+              </td>
+            {{/each}}
+          {{/let}}
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</template>
+
+<template name="tumorMapButton">
+  {{print 'this ::' this}}
+  {{print 'sample_label ::' sample_label}}
+  {{#if bookmarkExists}}
+    <div class="ui primary button tiny">
+      View
+    </div>
+  {{else}}
+    <div class="ui secondary button tiny
+        {{#if creatingBookmark}}loading{{else}}generate-bookmark{{/if}}">
+      Generate
+    </div>
+  {{/if}}
+</template>
