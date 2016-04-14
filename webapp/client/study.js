@@ -11,7 +11,7 @@ Template.study.onCreated(function () {
 
 Template.study.helpers({
   getStudy: function () {
-    return Studies.findOne({study_label: Template.currentData().study_label});
+    return Studies.findOne({id: Template.currentData().study_label});
   },
   getStudyLabel: function () {
     return Template.currentData().study_label;

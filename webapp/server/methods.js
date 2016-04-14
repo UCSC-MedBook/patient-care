@@ -4,21 +4,37 @@ Meteor.methods({
     check([study_label, sample_label, mapLabel], [String]);
 
     var user = MedBook.ensureUser(this.userId);
-    user.ensureAccess(Studies.findOne({study_label}));
+    let study = Studies.findOne({id: study_label});
+    user.ensureAccess(study);
 
-    // XXX
-    let bookmark = "https://google.com/";
+    // don't *need* to call referentialIntegrity, but we'll be safe
+    MedBook.referentialIntegrity.studies_expression3({ id: study_label });
+    let sampleIndex = study.gene_expression_index[sample_label];
 
-    // HTTP.call( 'METHOD', 'http://url.to/call', { "options": "to set" }, function( error, response ) {
-    //   // Handle the error or response here.
-    // });
-
-    let setObj = {
-      [ "tumor_map_bookmarks." + mapLabel ]: bookmark,
-    };
-
-    Samples.update({ study_label, sample_label }, {
-      $set: setObj
+    let sampleExpressionData = {};
+    Expression3.find({ study_label }).forEach((doc) => {
+      sampleExpressionData[doc.gene_label] = doc.rsem_quan_log2[sampleIndex];
     });
+
+    console.log("done");
+
+    apiResponse = HTTP.call("POST", "http://hexmap.sdsc.edu:8111/query/overlayNodes", {
+      data: {
+        map: "CKCC/v1",
+        layout: "mRNA",
+        nodes: {
+          [sample_label]: sampleExpressionData,
+        }
+      }
+    });
+    console.log("apiResponse:", apiResponse);
+
+    // let setObj = {
+    //   [ "tumor_map_bookmarks." + mapLabel ]: bookmark,
+    // };
+    //
+    // Samples.update({ study_label, sample_label }, {
+    //   $set: setObj
+    // });
   },
 });

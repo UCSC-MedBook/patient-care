@@ -5,7 +5,7 @@ Template.patient.onCreated(function () {
   const { study_label, patient_label } = instance.data;
 
   instance.autorun(function () {
-    Meteor.userId();
+    Meteor.userId(); // resubscribe when this changes
     instance.subscribe("study", study_label);
     instance.subscribe("patientSamples", study_label, patient_label);
   });
@@ -13,7 +13,7 @@ Template.patient.onCreated(function () {
   instance.study = new ReactiveVar();
   instance.patient = new ReactiveVar(); // from the study's `patients` list
   instance.autorun(function () {
-    const study = Studies.findOne({ study_label });
+    const study = Studies.findOne({ id: study_label });
     instance.study.set(study);
 
     let patient;
@@ -52,7 +52,7 @@ Template.patientLoadedData.helpers({
     const sample_label = this.toString(); // IDK why `typeof this` === "object"
     const study = Template.instance().parent(2).study.get();
 
-    const samples = study.gene_expression.samples[normalization];
+    const samples = study.gene_expression;
     if (samples && samples.includes(sample_label)) {
       return "green checkmark";
     } else {
@@ -89,7 +89,6 @@ Template.tumorMapButton.helpers({
   bookmarkExists: function () {
     const sample = Samples.findOne({sample_label: this.sample_label});
 
-    console.log("sample:", sample);
     return !!sample.tumor_map_bookmarks &&
         sample.tumor_map_bookmarks[this.mapLabel.toString()];
   },

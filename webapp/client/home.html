@@ -7,7 +7,7 @@
     {{#if length getStudies}}
       <div class="ui cards">
         {{#each getStudies}}
-          <a href={{pathFor 'study' study_label=study_label}} class="ui card">
+          <a href={{pathFor "study" study_label=id}} class="ui card">
             <div class="content">
               <div class="header">{{short_name}}</div>
               <!-- <div class="meta">

@@ -21,7 +21,7 @@ Template.appBody.onCreated(function () {
 Template.appBody.helpers({
   getShortName: function () {
     const { study_label } = Template.currentData().params();
-    const study = Studies.findOne({ study_label });
+    const study = Studies.findOne({ id: study_label });
     if (study) {
       return study.short_name;
     }
