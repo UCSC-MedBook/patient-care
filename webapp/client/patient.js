@@ -87,13 +87,17 @@ Template.tumorMapButton.onCreated(function () {
 
 Template.tumorMapButton.helpers({
   bookmarkExists: function () {
-    const sample = Samples.findOne({sample_label: this.sample_label});
+    let sample = Samples.findOne({sample_label: this.sample_label});
 
     return !!sample.tumor_map_bookmarks &&
         sample.tumor_map_bookmarks[this.mapLabel.toString()];
   },
   creatingBookmark: function () {
     return Template.instance().creatingBookmark.get();
+  },
+  getBookmark: function () {
+    let sample = Samples.findOne({sample_label: this.sample_label});
+    return sample.tumor_map_bookmarks[this.mapLabel.toString()];
   },
 });
 
@@ -103,6 +107,28 @@ Template.tumorMapButton.events({
 
     const { study_label } = instance.parent(3).data;
     const { sample_label, mapLabel } = instance.data;
-    Meteor.call("createTumorMapBookmark", study_label, sample_label, mapLabel);
+    Meteor.call("createTumorMapBookmark", study_label, sample_label, mapLabel,
+        function (error, result) {
+      // regardless of result, stop "creatingBookmark"
+      instance.creatingBookmark.set(false);
+    });
   },
+});
+
+
+
+// Template.upDownGenes
+
+Template.upDownGenes.onCreated(function () {
+  const instance = this;
+
+  console.log("instance.data:", instance.data);
+  let { study_label } = instance.parent(2).data;
+  console.log("study_label:", study_label);
+  instance.subscribe("upDownGenes", study_label, instance.data.sample_label);
+  // instance.
+});
+
+Template.upDownGenes.helpers({
+
 });

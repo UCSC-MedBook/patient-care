@@ -32,6 +32,11 @@ Meteor.publish("patientSamples", function (study_label, patient_label) {
   var asArray = cursor.fetch();
   var sample_labels = _.pluck(asArray, "sample_label");
   var patient = _.findWhere(study.patients, { patient_label });
+  if (!patient) {
+    this.ready();
+    return;
+  }
+
   _.each(patient.sample_labels, (sample_label) => {
     if (sample_labels.indexOf(sample_label) === -1) {
       Samples.insert({

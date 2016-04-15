@@ -11,6 +11,7 @@ Meteor.methods({
     MedBook.referentialIntegrity.studies_expression3({ id: study_label });
     let sampleIndex = study.gene_expression_index[sample_label];
 
+    console.log("loading data");
     let sampleExpressionData = {};
     Expression3.find({ study_label }).forEach((doc) => {
       sampleExpressionData[doc.gene_label] = doc.rsem_quan_log2[sampleIndex];
@@ -18,7 +19,9 @@ Meteor.methods({
 
     console.log("done");
 
-    apiResponse = HTTP.call("POST", "http://hexmap.sdsc.edu:8111/query/overlayNodes", {
+    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+    apiResponse = HTTP.call("POST",
+        "https://tumormap.ucsc.edu:8343/query/overlayNodes", {
       data: {
         map: "CKCC/v1",
         layout: "mRNA",
@@ -27,14 +30,14 @@ Meteor.methods({
         }
       }
     });
-    console.log("apiResponse:", apiResponse);
 
-    // let setObj = {
-    //   [ "tumor_map_bookmarks." + mapLabel ]: bookmark,
-    // };
-    //
-    // Samples.update({ study_label, sample_label }, {
-    //   $set: setObj
-    // });
+    console.log("apiResponse:", apiResponse);
+    if (apiResponse.statusCode === 200) {
+      Samples.update({ study_label, sample_label }, {
+        $set: {
+          [ "tumor_map_bookmarks." + mapLabel ]: apiResponse.data.bookmark,
+        }
+      });
+    }
   },
 });
