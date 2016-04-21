@@ -31,7 +31,6 @@ Meteor.methods({
       }
     });
 
-    console.log("apiResponse:", apiResponse);
     if (apiResponse.statusCode === 200) {
       Samples.update({ study_label, sample_label }, {
         $set: {

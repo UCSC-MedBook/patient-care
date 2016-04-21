@@ -2,33 +2,30 @@
   <div class="ui container">
     <div style="margin-bottom: 10px;">
       <div class="ui breadcrumb large">
+        {{#breadcrumbItem isActive=(isActiveRoute "home")
+            href=(pathFor 'home')}}
+          Home
+        {{/breadcrumbItem}}
+
         {{#if params.study_label}}
-          <a href="{{pathFor 'home'}}">
-            Home
-          </a>
+          {{#breadcrumbItem isActive=(isActiveRoute "study")
+              href=(pathFor "study" study_label=params.study_label)}}
+            {{getShortName}}
+          {{/breadcrumbItem}}
+        {{/if}}
 
-          <span class="divider">/</span>
-          {{#if isActiveRoute "study"}}
-            <div class="section active">
-              {{getShortName}}
-            </div>
-          {{else}}
-            <a href="{{pathFor 'study' study_label=params.study_label}}"
-                class="section">
-              {{getShortName}}
-            </a>
-          {{/if}}
+        {{#if params.patient_label}}
+          {{#breadcrumbItem isActive=(isActiveRoute "patient")
+              href=(pathFor "patient" study_label=params.study_label patient_label=params.patient_label)}}
+            {{params.patient_label}}
+          {{/breadcrumbItem}}
+        {{/if}}
 
-          {{#if params.patient_label}}
-            <span class="divider">/</span>
-            <div class="section {{isActiveRoute "patient"}}">
-              {{params.patient_label}}
-            </div>
-          {{/if}}
-        {{else}}
-          <div class="section {{isActiveRoute "home"}}">
-            Home
-          </div>
+        {{#if params.job_id}}
+          {{#breadcrumbItem isActive=(isActiveRoute "upDownGenes")
+              href="TODO"}}
+            Gene Outlier Analysis
+          {{/breadcrumbItem}}
         {{/if}}
       </div>
 
@@ -41,3 +38,24 @@
     {{>Template.dynamic template=content data=params}}
   </div>
 </template>
+
+<template name="breadcrumbItem">
+  {{#if isActive}}
+    <div class="section active">
+      {{> UI.contentBlock}}
+    </div>
+  {{else}}
+    <a href={{href}}>
+      {{> UI.contentBlock}}
+    </a>
+    <span class="divider">/</span>
+  {{/if}}
+</template>
+
+<!-- <template name="upDownGenesBreadcrumbDesc">
+  {{#if Template.subscriptionsReady}}
+
+  {{else}}
+    loading
+  {{/if}}
+</template> -->

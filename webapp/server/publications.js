@@ -49,3 +49,40 @@ Meteor.publish("patientSamples", function (study_label, patient_label) {
 
   return cursor;
 });
+
+Meteor.publish("upDownGenes", function (study_label, patient_label) {
+  check([study_label, patient_label], [String]);
+
+  let user = MedBook.ensureUser(this.userId);
+  let study = Studies.findOne({id: study_label});
+  user.ensureAccess(study);
+
+  // var patient = _.findWhere(study.patients, { patient_label });
+  return Jobs.find({
+    name: "UpDownGenes",
+    status: { $ne: "creating" },
+    "args.study_label": study_label,
+    "args.patient_label": patient_label,
+  });
+});
+
+Meteor.publish("upDownGenesJob", function (jobId) {
+  check(jobId, String);
+
+  let user = MedBook.ensureUser(this.userId);
+  let job = Jobs.findOne({
+    _id: jobId,
+    name: "UpDownGenes",
+  });
+  let study = Studies.findOne({id: job.args.study_label});
+  user.ensureAccess(study);
+
+  return Jobs.find({ _id: jobId });
+});
+
+Meteor.publish("blob", function (blobId) {
+  check(blobId, String);
+
+  // NOTE: no security... if they have the _id they can have it
+  return Blobs.find(blobId);
+});

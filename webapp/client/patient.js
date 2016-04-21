@@ -10,15 +10,16 @@ Template.patient.onCreated(function () {
     instance.subscribe("patientSamples", study_label, patient_label);
   });
 
-  instance.study = new ReactiveVar();
   instance.patient = new ReactiveVar(); // from the study's `patients` list
   instance.autorun(function () {
-    const study = Studies.findOne({ id: study_label });
-    instance.study.set(study);
+    let study = Studies.findOne({ id: study_label });
 
     let patient;
     if (study) {
       patient = _.findWhere(study.patients, { patient_label });
+      _.extend(patient, {
+        study_label: study.id
+      });
     }
     instance.patient.set(patient);
   });
@@ -50,7 +51,7 @@ Template.questions.onRendered(function () {
 Template.patientLoadedData.helpers({
   geneExpExists: function (normalization) {
     const sample_label = this.toString(); // IDK why `typeof this` === "object"
-    const study = Template.instance().parent(2).study.get();
+    const study = Studies.findOne({id: Template.instance().data.study_label});
 
     const samples = study.gene_expression;
     if (samples && samples.includes(sample_label)) {
@@ -117,18 +118,36 @@ Template.tumorMapButton.events({
 
 
 
-// Template.upDownGenes
+// Template.patientUpDownGenes
 
-Template.upDownGenes.onCreated(function () {
+Template.patientUpDownGenes.onCreated(function () {
   const instance = this;
 
-  console.log("instance.data:", instance.data);
-  let { study_label } = instance.parent(2).data;
-  console.log("study_label:", study_label);
-  instance.subscribe("upDownGenes", study_label, instance.data.sample_label);
-  // instance.
+  let { data } = instance;
+  instance.subscribe("upDownGenes", data.study_label, data.patient_label);
 });
 
-Template.upDownGenes.helpers({
+Template.patientUpDownGenes.helpers({
+  getJobs: function () {
+    let { data } = Template.instance();
+    return Jobs.find({
+      name: "UpDownGenes",
+      "args.sample_label": { $in: data.sample_labels },
+      "args.study_label": data.study_label,
+    });
+  },
+});
 
+Template.patientUpDownGenes.events({
+  "click #create-up-down-genes": function (event, instance) {
+    let options = _.pick(instance.data, "study_label", "patient_label");
+
+    Meteor.call("createUpDownGenes", options, function (error, job_id) {
+      if (error) {
+        console.log("error:", error);
+      } else {
+        FlowRouter.go("upDownGenes", _.extend(options, { job_id }));
+      }
+    });
+  },
 });

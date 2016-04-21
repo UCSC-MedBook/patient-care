@@ -53,7 +53,7 @@
         What are the most up/down-regulated genes?
       </h2>
       <div class="content">
-        {{> upDownGenes}}
+        {{> patientUpDownGenes}}
       </div>
     {{else}}
       {{! error message if there are no samples}}
@@ -163,9 +163,59 @@
 
 
 
-<template name="upDownGenes">
+<template name="patientUpDownGenes">
   {{#if Template.subscriptionsReady}}
-
+    {{#if length getJobs}}
+      <table class="ui single line table">
+        <thead>
+          <tr>
+            <th>Sample</th>
+            <th>Comparison sample group</th>
+            <th>Upregulated genes</th>
+            <th>Downregulated genes</th>
+            <th>
+              <div class="ui small primary labeled icon button"
+                  id="create-up-down-genes">
+                <i class="plus icon"></i> Create new
+              </div>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each getJobs}}
+            <tr>
+              <td><i class="fa fa-flask"></i>{{this.args.sample_label}}</td>
+              <td>{{this.args.sample_group_name}}</td>
+              <td>{{this.output.up_genes.length}}</td>
+              <td>{{this.output.down_genes.length}}</td>
+              <td>
+                <a href={{pathFor "upDownGenes" study_label=(param "study_label")
+                        patient_label=(param "patient_label") job_id=this._id}}
+                    class="ui right labeled icon button">
+                  <i class="right arrow icon"></i>
+                  View
+                </a>
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    {{else}}
+      <div class="ui message">
+        <div class="content">
+          <div class="header">
+            No analyses
+          </div>
+          <p>
+            No analyses have been run for this patient.
+            <div class="ui small primary labeled icon button float right"
+                id="create-up-down-genes">
+              <i class="plus icon"></i> Create new
+            </div>
+          </p>
+        </div>
+      </div>
+    {{/if}}
   {{else}}
     {{> dataLoading}}
   {{/if}}

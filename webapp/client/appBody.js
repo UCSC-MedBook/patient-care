@@ -35,3 +35,12 @@ Template.appBody.helpers({
     return "loading";
   },
 });
+
+
+
+// // Tempalte.upDownGenesBreadcrumbDesc
+//
+// Template.upDownGenesBreadcrumbDesc.onCreated(function () {
+//   const instance = this;
+//   instance.subscribe("upDownGenesJob", instance.data.params().job_id);
+// });

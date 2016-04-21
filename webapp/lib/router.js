@@ -27,3 +27,13 @@ FlowRouter.route("/:study_label/:patient_label", {
     });
   }
 });
+
+FlowRouter.route("/:study_label/:patient_label/upDownGenes/:job_id", {
+  name: "upDownGenes",
+  action: function(params) {
+    BlazeLayout.render("appBody", {
+      content: "upDownGenesJob",
+      params
+    });
+  }
+});
