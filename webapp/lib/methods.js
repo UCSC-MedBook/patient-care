@@ -7,6 +7,7 @@ Meteor.methods({
 
     let user = MedBook.ensureUser(Meteor.userId());
 
+    // TODO: cron job to delete "creating" jobs that are old.
     return Jobs.insert({
       name: "UpDownGenes",
       user_id: user._id,

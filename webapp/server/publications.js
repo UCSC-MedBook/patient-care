@@ -57,7 +57,6 @@ Meteor.publish("upDownGenes", function (study_label, patient_label) {
   let study = Studies.findOne({id: study_label});
   user.ensureAccess(study);
 
-  // var patient = _.findWhere(study.patients, { patient_label });
   return Jobs.find({
     name: "UpDownGenes",
     status: { $ne: "creating" },

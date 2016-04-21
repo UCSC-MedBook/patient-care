@@ -2,17 +2,17 @@
   {{#if Template.subscriptionsReady}}
     {{#with getStudy}}
       <h1 class="ui header">{{name}}</h1>
-      {{#if length Patient_IDs}}
+      {{#if length patients}}
         <h2 class="ui header">Select a patient</h2>
         <div class="ui list">
-          {{#each Patient_IDs}}
+          {{#each patients}}
             <div class="item">
               <i class="fa fa-user icon"></i>
               <div class="content">
                 <a href={{pathFor "patient" study_label=(param "study_label")
-                        patient_label=this}}
+                        patient_label=patient_label}}
                     class="header">
-                  {{this}}
+                  {{patient_label}}
                 </a>
               </div>
             </div>

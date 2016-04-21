@@ -20,7 +20,11 @@
             <div class="extra content">
               <div>
                 <i class="users icon"></i>
-                {{length Patient_IDs}} Patients
+                {{#if length patients}}
+                  {{length patients}} Patients
+                {{else}}
+                  No patients
+                {{/if}}
               </div>
             </div>
           </a>

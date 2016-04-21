@@ -132,8 +132,6 @@ Template.patientUpDownGenes.helpers({
     let { data } = Template.instance();
     return Jobs.find({
       name: "UpDownGenes",
-      "args.sample_label": { $in: data.sample_labels },
-      "args.study_label": data.study_label,
     });
   },
 });
