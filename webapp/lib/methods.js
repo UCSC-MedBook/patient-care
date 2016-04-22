@@ -15,6 +15,9 @@ Meteor.methods({
       args,
     });
   },
+  // Set the rest of the arguments to the UpDownGenes job and start it.
+  // If the job has already been run with other arguments, return the _id
+  // of the job that has those arguments.
   startUpDownGenes: function (jobId, args) {
     check(jobId, String);
     check(args, new SimpleSchema({
@@ -31,6 +34,14 @@ Meteor.methods({
     let user = MedBook.ensureUser(Meteor.userId());
     let study = Studies.findOne({id: args.study_label});
     user.ensureAccess(study);
+
+    // check to see if a job like this one has already been run,
+    // and if so, return that job's _id
+    let duplicateJob = Jobs.findOne({ args });
+    if (duplicateJob) {
+      Jobs.remove(jobId);
+      return duplicateJob._id;
+    }
 
     Jobs.update({
       _id: jobId,

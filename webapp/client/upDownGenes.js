@@ -77,7 +77,16 @@ Template.setOutlierAnalysisOptions.events({
       sample_label: instance.selectedSample.get()
     });
 
-    Meteor.call("startUpDownGenes", instance.data.job._id, options);
+    Meteor.call("startUpDownGenes", instance.data.job._id, options,
+        (err, result) => {
+      if (result) {
+        FlowRouter.go("upDownGenes", {
+          study_label: options.study_label,
+          patient_label: options.patient_label,
+          job_id: result,
+        });
+      }
+    });
   },
 });
 
