@@ -43,6 +43,8 @@ Meteor.methods({
       return duplicateJob._id;
     }
 
+    // NOTE: I believe there could be a race condition here, but at the same
+    // time I don't think Meteor handles more than one Meteor method at once.
     Jobs.update({
       _id: jobId,
       name: "UpDownGenes",
