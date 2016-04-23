@@ -1,5 +1,6 @@
 data/*.tab
 data/*.csv
+data/*.sif
 .project
 .gitignore
 my_dev.mak

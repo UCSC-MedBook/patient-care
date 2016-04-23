@@ -1,0 +1,184 @@
+<template name="upDownGenesJob">
+  {{#if Template.subscriptionsReady}}
+    {{#with getJob}}
+      <h1 class="title ui">
+        <!-- <i class="fa fa-user"></i> -->
+        Gene Outlier Analysis
+      </h1>
+
+      {{#if compare status "creating"}}
+        {{> setOutlierAnalysisOptions job=getJob patient=getPatient}}
+      {{/if}}
+
+      {{#if compare status "done"}}
+        {{> outlierAnalysis getJob}}
+      {{/if}}
+
+      {{#if compare status "waiting"}}
+        <div class="ui info message">
+          <div class="header">
+            Waiting...
+          </div>
+          Your job will be run soon.
+        </div>
+      {{/if}}
+
+      {{#if compare status "running"}}
+        <div class="ui info message">
+          <div class="header">
+            Running!
+          </div>
+          Your job is running!
+        </div>
+      {{/if}}
+
+      {{#if compare status "error"}}
+        <div class="ui error message">
+          <div class="header">
+            Error running job.
+          </div>
+          We have encountered an error running your job.
+        </div>
+      {{/if}}
+    {{/with}}
+
+    {{#unless getJob}}
+      <div class="ui icon message massive">
+        <i class="warning sign icon"></i>
+        <div class="content">
+          <div class="header">
+            Uh oh...
+          </div>
+          <p>We couldn't find that job.</p>
+        </div>
+      </div>
+    {{/unless}}
+  {{else}}
+    {{> dataLoading}}
+  {{/if}}
+</template>
+
+<template name="setOutlierAnalysisOptions">
+  <div class="ui info message">
+    <div class="header">
+      No selectable sample group... yet!
+    </div>
+    Currently you can't select a custom sample group and the outlier analysis
+    will run using the PanCan33+1 cohort as background.
+    The custom sample group creator is coming soon!
+  </div>
+
+  <form class="ui form">
+    <div class="three fields">
+      <div class="field">
+        <label>Study</label>
+        <input readonly="" type="text" value={{getStudy.short_name}}>
+      </div>
+
+      <div class="field">
+        <label>Patient</label>
+        <input readonly="" type="text" value={{patient.patient_label}}>
+      </div>
+
+      <div class="field">
+        <label>Sample</label>
+        <select class="ui search dropdown select-sample">
+          <option value="">Select a sample</option>
+          {{#each patient.sample_labels}}
+            <option>{{this}}</option>
+          {{/each}}
+        </select>
+      </div>
+    </div>
+
+    <button class="ui submit button submit-job {{disabledIfNotReady}}"
+        type="submit">
+      Submit
+    </button>
+  </form>
+</template>
+
+<template name="outlierAnalysis">
+  <h2>Options</h2>
+  <p>
+    Study: {{args.study_label}}<br>
+    Patient: {{args.patient_label}}<br>
+    Sample: {{args.sample_label}}<br>
+  </p>
+
+  {{#if Template.subscriptionsReady}}
+    {{> outlierGenesTable title="Upregulated genes" data=output.up_genes
+        url=(getBlobUrl output.up_blob_id)}}
+
+    {{> outlierGenesTable title="Downregulated genes" data=output.down_genes
+        url=(getBlobUrl output.down_blob_id)}}
+  {{else}}
+    {{> dataLoading}}
+  {{/if}}
+</template>
+
+<template name="outlierGenesTable">
+  <div>
+    <h2 style="display: inline;">
+      {{title}}
+      <a href={{url}} class="ui labeled icon button" target="_blank">
+        <i class="download icon"></i>
+        Download
+      </a>
+    </h2>
+
+    <div class="ui search filter-text"
+        style="display: inline-block; float: right;">
+      <div class="ui icon input">
+        <input class="prompt" type="text" placeholder="Filter by gene...">
+        <i class="search icon"></i>
+      </div>
+    </div>
+  </div>
+
+  <table class="ui celled table">
+    <thead>
+      <tr>
+        <th>Gene</th>
+        <th>Background median</th>
+        <th>Sample value</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each currentPageData}}
+        <tr>
+          <td>{{gene_label}}</td>
+          <td>{{fewDecimals background_median}}</td>
+          <td>{{fewDecimals sample_value}}</td>
+        </tr>
+      {{/each}}
+    </tbody>
+    <tfoot>
+      <tr>
+        <th colspan="3">
+          <div class="ui right floated pagination menu">
+            {{#unless compare pageNumber 1}}
+              <a class="icon item previous-page">
+                <i class="left chevron icon"></i>
+              </a>
+            {{/unless}}
+
+            {{#each pagesToShow}}
+              <a class="item go-to-page
+                  {{#if compare this "..."}}disabled{{/if}}
+                  {{#if compare this pageNumber}}active{{/if}}">
+                {{this}}
+              </a>
+            {{/each}}
+
+            {{#unless compare pageNumber maxPageNumber}}
+              <a class="icon item next-page">
+                <i class="right chevron icon"></i>
+              </a>
+            {{/unless}}
+          </div>
+        </th>
+      </tr>
+    </tfoot>
+  </table>
+</template>
