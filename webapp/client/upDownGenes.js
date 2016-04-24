@@ -163,6 +163,22 @@ Template.outlierGenesTable.onCreated(function () {
   });
 });
 
+Template.outlierGenesTable.onRendered(function () {
+  let instance = this;
+
+  let clipboard = new Clipboard(instance.$('.copy-genes-to-clipboard')[0], {
+    text: () => {
+      return _.pluck(instance.data.data, "gene_label").join("\n");
+    }
+  });
+  clipboard.on("success", (e) => {
+    // TODO: switch to a tooltip
+    instance.$(e.trigger).transition("jiggle", {
+      duration: 250,
+    });
+  });
+});
+
 Template.outlierGenesTable.helpers({
   currentPageData: function () {
     return Template.instance().currentPageData.get();
@@ -172,6 +188,9 @@ Template.outlierGenesTable.helpers({
   },
   maxPageNumber: function () { // not pageIndex
     return Template.instance().maxPageIndex.get() + 1;
+  },
+  totalRows: function () {
+    return Template.instance().filteredData.get().length;
   },
   pagesToShow: function () {
     let instance = Template.instance();
@@ -237,6 +256,13 @@ Template.outlierGenesTable.events({
   "click .go-to-page": function (event, instance) {
     if (this.valueOf() !== "...") {
       instance.pageIndex.set(this - 1);
+    }
+  },
+  "change .results-per-page": function (event, instance) {
+    let newValue = parseInt(event.target.value, 10);
+
+    if (newValue) {
+      instance.rowsPerPage.set(newValue);
     }
   },
 });

@@ -125,6 +125,11 @@
         <i class="download icon"></i>
         Download
       </a>
+      <button class="ui labeled icon button copy-genes-to-clipboard"
+          data-content="Add users to your feed">
+        <i class="copy icon"></i>
+        Copy genes
+      </button>
     </h2>
 
     <div class="ui search filter-text"
@@ -156,6 +161,14 @@
     <tfoot>
       <tr>
         <th colspan="3">
+          <span>
+            Showing
+            <div class="ui input" style="width: 80px;">
+              <input placeholder="# results" class="results-per-page"
+                  value={{getInstanceReactive "rowsPerPage"}} type="text">
+            </div>
+            of {{totalRows}} results</span>
+
           <div class="ui right floated pagination menu">
             {{#unless compare pageNumber 1}}
               <a class="icon item previous-page">

@@ -164,6 +164,70 @@
 
 
 <template name="patientUpDownGenes">
+  <form id="create-up-down-genes" class="ui form">
+    <div style="font-size: 16px;">
+      Calculate misregulated genes in
+      <!-- <button class="ui tiny labeled icon dropdown button" type="button">
+        <i class="flask icon"></i> -->
+      <button class="ui tiny dropdown button" type="button">
+        <span class="text">Sample</span>
+        <div class="menu">
+          {{#each sample_labels}}
+            <div class="item choose-sample-label">{{this}}</div>
+          {{/each}}
+        </div>
+      </button>
+      compared to
+      <button class="ui tiny dropdown button field" type="button">
+        <span class="text">
+          Background
+        </span>
+
+        <div class="menu">
+          <div class="item choose-custom-sample-group">
+            <i class="plus icon"></i>
+            Create new
+          </div>
+
+          {{#each getSampleGroups}}
+            <div class="item choose-sample-group">
+              {{name}}
+            </div>
+          {{/each}}
+        </div>
+      </button>.
+
+      {{#unless getInstanceReactive "customSampleGroup"}}
+        <button class="ui tiny primary labeled icon button
+              {{#if getInstanceReactive "waitingForResponse"}}loading{{/if}}"
+            id="create-up-down-genes" type="submit">
+          <i class="arrow right icon"></i> Go!
+        </button>
+      {{/unless}}
+    </div>
+  </form>
+
+  {{#if getInstanceReactive "customSampleGroup"}}
+    <div class="ui warning message">
+      <div class="header">
+        Not ready yet!
+      </div>
+      Creating sample groups on the fly isn't ready just yet.
+    </div>
+  {{/if}}
+
+  {{#with getInstanceReactive "error"}}
+    <div class="ui error message">
+      <i class="close icon close-error-message"></i>
+      <div class="header">{{header}}</div>
+      {{{message}}}
+    </div>
+  {{/with}}
+
+  {{> patientUpDownGenesTable}}
+</template>
+
+<template name="patientUpDownGenesTable">
   {{#if Template.subscriptionsReady}}
     {{#if length getJobs}}
       <table class="ui single line table">
@@ -173,12 +237,7 @@
             <th>Comparison sample group</th>
             <th>Upregulated genes</th>
             <th>Downregulated genes</th>
-            <th>
-              <div class="ui small primary labeled icon button"
-                  id="create-up-down-genes">
-                <i class="plus icon"></i> Create new
-              </div>
-            </th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -208,10 +267,7 @@
           </div>
           <p>
             No analyses have been run for this patient.
-            <div class="ui small primary labeled icon button float right"
-                id="create-up-down-genes">
-              <i class="plus icon"></i> Create new
-            </div>
+            Use the form above to run a new analysis.
           </p>
         </div>
       </div>

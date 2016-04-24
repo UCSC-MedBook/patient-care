@@ -85,3 +85,11 @@ Meteor.publish("blob", function (blobId) {
   // NOTE: no security... if they have the _id they can have it
   return Blobs.find(blobId);
 });
+
+Meteor.publish("sampleGroups", function () {
+  let user = MedBook.ensureUser(this.userId);
+
+  return SampleGroups.find({
+    collaborations: { $in: user.getCollaborations() },
+  });
+});

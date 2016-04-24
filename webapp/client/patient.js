@@ -122,31 +122,110 @@ Template.tumorMapButton.events({
 
 Template.patientUpDownGenes.onCreated(function () {
   const instance = this;
-
   let { data } = instance;
-  instance.subscribe("upDownGenes", data.study_label, data.patient_label);
+
+  instance.sampleGroupsSub = instance.subscribe("sampleGroups");
+
+  instance.sampleLabel = new ReactiveVar();
+  instance.sampleGroupId = new ReactiveVar();
+  instance.customSampleGroup = new ReactiveVar(false);
+  instance.error = new ReactiveVar(); // { header: "Uh oh", message: "hi" }
+  instance.waitingForResponse = new ReactiveVar(false);
 });
 
 Template.patientUpDownGenes.helpers({
+  getSampleGroups: function () {
+    return SampleGroups.find({});
+  },
+});
+
+Template.patientUpDownGenes.onRendered(function () {
+  let instance = this;
+
+  instance.$(".ui.dropdown").dropdown();
+});
+
+Template.patientUpDownGenes.events({
+  "click .choose-sample-label": function (event, instance) {
+    instance.sampleLabel.set(this.valueOf());
+  },
+  "click .choose-custom-sample-group": function (event, instance) {
+    instance.customSampleGroup.set(true);
+    instance.sampleGroupId.set(null);
+  },
+  "click .choose-sample-group": function (event, instance) {
+    instance.sampleGroupId.set(this._id);
+    instance.customSampleGroup.set(false);
+  },
+  "click .close-error-message": function (event, instance) {
+    instance.error.set(null);
+  },
+  "submit #create-up-down-genes": function (event, instance) {
+    event.preventDefault();
+
+    // reset the errors from last time
+    instance.error.set(null);
+
+    let sample_label = instance.sampleLabel.get();
+    let sample_group_id = instance.sampleGroupId.get();
+
+    if (!sample_label) {
+      instance.error.set({
+        header: "Uh oh!",
+        message: "Please select a sample to continue."
+      });
+      return;
+    }
+
+    if (!sample_group_id) {
+      instance.error.set({
+        header: "What about the background?",
+        message: "Please select a background sample group above to continue."
+      });
+      return;
+    }
+
+    // submit to the server for consideration
+    instance.waitingForResponse.set(true);
+    let args = _.pick(instance.data, "study_label", "patient_label");
+    _.extend(args, { sample_label, sample_group_id });
+
+    Meteor.call("createUpDownGenes", args, function (error, job_id) {
+      instance.waitingForResponse.set(false);
+
+      if (error) {
+        console.log("error:", error);
+        instance.error.set({
+          header: "Internal error",
+          message: "We had a problem processing your request... If this " +
+              "messages persists, please " + contactTeoText,
+        });
+      } else {
+
+        FlowRouter.go("upDownGenes", _.extend(args, { job_id }));
+      }
+    });
+
+  },
+});
+
+
+
+// Template.patientUpDownGenesTable
+
+Template.patientUpDownGenesTable.onCreated(function () {
+  let instance = this;
+  let { data } = instance;
+
+  instance.subscribe("upDownGenes", data.study_label, data.patient_label);
+});
+
+Template.patientUpDownGenesTable.helpers({
   getJobs: function () {
     let { data } = Template.instance();
     return Jobs.find({
       name: "UpDownGenes",
       status: { $ne: "creating" },
-    });
-  },
-});
-
-Template.patientUpDownGenes.events({
-  "click #create-up-down-genes": function (event, instance) {
-    let options = _.pick(instance.data, "study_label", "patient_label");
-
-    Meteor.call("createUpDownGenes", options, function (error, job_id) {
-      if (error) {
-        console.log("error:", error);
-      } else {
-        FlowRouter.go("upDownGenes", _.extend(options, { job_id }));
-      }
     });
   },
 });
