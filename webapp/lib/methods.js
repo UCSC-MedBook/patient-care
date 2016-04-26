@@ -7,6 +7,7 @@ Meteor.methods({
       patient_label: { type: String },
       sample_label: { type: String },
       sample_group_id: { type: String },
+      iqr_multiplier: { type: Number, decimal: true },
     }));
 
     let user = MedBook.ensureUser(Meteor.userId());

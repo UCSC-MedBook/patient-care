@@ -2,13 +2,8 @@
   {{#if Template.subscriptionsReady}}
     {{#with getJob}}
       <h1 class="title ui">
-        <!-- <i class="fa fa-user"></i> -->
         Gene Outlier Analysis
       </h1>
-
-      {{#if compare status "creating"}}
-        {{> setOutlierAnalysisOptions job=getJob patient=getPatient}}
-      {{/if}}
 
       {{#if compare status "done"}}
         {{> outlierAnalysis getJob}}
@@ -58,52 +53,13 @@
   {{/if}}
 </template>
 
-<template name="setOutlierAnalysisOptions">
-  <div class="ui info message">
-    <div class="header">
-      No selectable sample group... yet!
-    </div>
-    Currently you can't select a custom sample group and the outlier analysis
-    will run using the PanCan33+1 cohort as background.
-    The custom sample group creator is coming soon!
-  </div>
-
-  <form class="ui form">
-    <div class="three fields">
-      <div class="field">
-        <label>Study</label>
-        <input readonly="" type="text" value={{getStudy.short_name}}>
-      </div>
-
-      <div class="field">
-        <label>Patient</label>
-        <input readonly="" type="text" value={{patient.patient_label}}>
-      </div>
-
-      <div class="field">
-        <label>Sample</label>
-        <select class="ui search dropdown select-sample">
-          <option value="">Select a sample</option>
-          {{#each patient.sample_labels}}
-            <option>{{this}}</option>
-          {{/each}}
-        </select>
-      </div>
-    </div>
-
-    <button class="ui submit button submit-job {{disabledIfNotReady}}"
-        type="submit">
-      Submit
-    </button>
-  </form>
-</template>
-
 <template name="outlierAnalysis">
   <h2>Options</h2>
   <p>
     Study: {{args.study_label}}<br>
     Patient: {{args.patient_label}}<br>
     Sample: {{args.sample_label}}<br>
+    IQR multiplier: {{args.iqr_multiplier}}<br>
   </p>
 
   {{#if Template.subscriptionsReady}}

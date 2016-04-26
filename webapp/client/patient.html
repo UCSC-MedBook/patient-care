@@ -28,10 +28,8 @@
 
 
 <template name="questions">
-  <!-- <div class="ui fluid styled accordion"> -->
     {{#if length sample_labels}}
       <h2 class="title ui">
-        <!-- <i class="dropdown icon"></i> -->
         Which data have been loaded?
       </h2>
       <div class="content">
@@ -40,7 +38,6 @@
 
 
       <h2 class="title ui">
-        <!-- <i class="dropdown icon"></i> -->
         Which cancers is this cancer most like?
       </h2>
       <div class="content">
@@ -49,8 +46,7 @@
 
 
       <h2 class="title ui">
-        <!-- <i class="dropdown icon"></i> -->
-        What are the most up/down-regulated genes?
+        Which genes are gene-expression outliers?
       </h2>
       <div class="content">
         {{> patientUpDownGenes}}
@@ -62,26 +58,13 @@
         Questions that provide sample-level information have been hidden.
       </div>
     {{/if}}
-
-
-    <!-- <h2 class="title ui">
-      <i class="dropdown icon"></i>
-      Are there clinically actionable mutations in any samples?
-    </h2>
-    <div class="content">
-      <p>No</p>
-    </div> -->
-  <!-- </div> -->
 </template>
 
 
 
 <template name="patientLoadedData">
   <p>
-    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-    Proin non urna est. Nullam non nisi tortor.
-    Nulla mollis quam sed lorem bibendum imperdiet.
-    Nulla convallis at felis efficitur maximus.
+    This panel is an overview of which data are loaded into MedBook.
   </p>
 
   <h3>Gene expression</h3>
@@ -118,13 +101,6 @@
     <a href="https://tumormap.ucsc.edu/">TumorMap</a>
     clusters samples based on expression values or other genomic
     data such as mutations.
-  </p>
-
-  <p>
-    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-    Proin non urna est. Nullam non nisi tortor.
-    Nulla mollis quam sed lorem bibendum imperdiet.
-    Nulla convallis at felis efficitur maximus.
   </p>
 
   <table class="ui structured celled table">
@@ -179,18 +155,17 @@
 
 <template name="patientUpDownGenes">
   <p>
-    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-    Proin non urna est. Nullam non nisi tortor.
-    Nulla mollis quam sed lorem bibendum imperdiet.
-    Nulla convallis at felis efficitur maximus.
+    Outlier genes are defined as being more than N IQRs away from the median.
+
+    The maximum number of genes returned is 5% of the total number of genes.
+    If there are more than 5% of the total number of genes that are outliers,
+    only the top 5% of the outliers will be returned.
   </p>
 
   <h3>Create a new analysis</h3>
   <form id="create-up-down-genes" class="ui form">
-    <div style="font-size: 16px;">
-      Calculate misregulated genes in
-      <!-- <button class="ui tiny labeled icon dropdown button" type="button">
-        <i class="flask icon"></i> -->
+    <!-- <div style="font-size: 16px;"> -->
+      Calculate outlier genes in
       <button class="ui tiny dropdown button" type="button">
         <span class="text">Sample</span>
         <div class="menu">
@@ -217,14 +192,19 @@
             </div>
           {{/each}}
         </div>
-      </button>.
+      </button>
+
+      with an IQR multiplier of
+      <div class="ui tiny input" style="width: 60px;">
+        <input type="text" placeholder="IQR" value="1.5" class="set-iqr">
+      </div>.
 
         <button class="ui tiny primary labeled icon button
               {{#if getInstanceReactive "waitingForResponse"}}loading{{/if}}"
             id="create-up-down-genes" type="submit">
           <i class="arrow right icon"></i> Go!
         </button>
-    </div>
+    <!-- </div> -->
   </form>
 
   {{#if getInstanceReactive "createCustomSampleGroup"}}
@@ -415,6 +395,7 @@
           <tr>
             <th>Sample</th>
             <th>Comparison sample group</th>
+            <th>IQR multiplier</th>
             <th>Upregulated genes</th>
             <th>Downregulated genes</th>
             <th></th>
@@ -425,6 +406,7 @@
             <tr>
               <td><i class="fa fa-flask"></i>{{this.args.sample_label}}</td>
               <td>{{this.args.sample_group_name}}</td>
+              <td>{{this.args.iqr_multiplier}}</td>
               <td>{{this.output.up_genes.length}}</td>
               <td>{{this.output.down_genes.length}}</td>
               <td>

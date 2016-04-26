@@ -174,7 +174,7 @@ Template.outlierGenesTable.onRendered(function () {
   clipboard.on("success", (e) => {
     // TODO: switch to a tooltip
     instance.$(e.trigger).transition("jiggle", {
-      duration: 250,
+      duration: 400,
     });
   });
 });

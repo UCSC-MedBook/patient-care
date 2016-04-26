@@ -132,6 +132,7 @@ Template.patientUpDownGenes.onCreated(function () {
   instance.createCustomSampleGroup = new ReactiveVar(false);
   // the custom sample group data (initialized if needed in sub-template)
   instance.customSampleGroup = new ReactiveVar();
+  instance.iqrMultiplier = new ReactiveVar(1.5); // error if null
   instance.error = new ReactiveVar(); // { header: "Uh oh", message: "hi" }
   instance.waitingForResponse = new ReactiveVar(false);
 });
@@ -163,6 +164,14 @@ Template.patientUpDownGenes.events({
     instance.sampleGroupId.set(this._id);
     instance.createCustomSampleGroup.set(false);
   },
+  "keyup .set-iqr": function (event, instance) {
+    let newString = event.target.value;
+    let newNumber = NaN;
+    if (!isNaN(newString)) {
+      newNumber = parseFloat(newString);
+    }
+    instance.iqrMultiplier.set(parseFloat(newNumber));
+  },
   "click .close-error-message": function (event, instance) {
     instance.error.set(null);
   },
@@ -181,11 +190,20 @@ Template.patientUpDownGenes.events({
       return;
     }
 
+    let iqr_multiplier = instance.iqrMultiplier.get();
+    if (isNaN(iqr_multiplier)) {
+      instance.error.set({
+        header: "Not a number",
+        message: "Please input a number in the IQR multiplier field."
+      });
+      return;
+    }
+
     // sometimes we have to make two trips to the server, so we need to be
     // able to call this from async code (after a Meteor method has been run)
     function createUpDownGenes (sample_group_id) {
       let args = _.pick(instance.data, "study_label", "patient_label");
-      _.extend(args, { sample_label, sample_group_id });
+      _.extend(args, { sample_label, sample_group_id, iqr_multiplier });
 
       // submit to the server for consideration
       Meteor.call("createUpDownGenes", args, function (error, job_id) {
