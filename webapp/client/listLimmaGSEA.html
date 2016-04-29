@@ -1,0 +1,98 @@
+<template name="listLimmaGSEA">
+  <h1>
+    Limma <i class="right arrow icon"></i> GSEA
+  </h1>
+
+  <p>
+    This tool runs Limma on a contrast and then feeds the output from Limma
+    into GSEA.
+  </p>
+
+  <h2>Run a new analysis</h2>
+
+  <div style="position: relative; margin-bottom: 14px; margin-top: 14px;">
+    <div class="ui two column very relaxed stackable grid">
+      <div class="column">
+        {{> limmaGSEAGroupSelector group=groupA}}
+      </div>
+      <div class="ui vertical divider">
+        vs.
+      </div>
+      <div class="column">
+        {{> limmaGSEAGroupSelector group=groupB}}
+      </div>
+    </div>
+  </div>
+
+  <form class="ui form create-limma-gsea
+      {{#unless Template.subscriptionsReady}}loading{{/unless}}">
+    <div class="fields">
+      <div class="four wide field">
+        <label>Top genes count for Limma</label>
+        <input type="number" min="1" placeholder="Genes count"
+            name="limmaTopGenes">
+      </div>
+
+      <div class="six wide field">
+        <label>Gene sets</label>
+        <div class="ui fluid search selection dropdown gene-sets-dropdown">
+          <input type="hidden" name="geneSetCollection">
+          <i class="dropdown icon"></i>
+          <div class="default text">Gene sets for GSEA</div>
+          <div class="menu">
+            {{#each getSampleGroupCollections}}
+              <div class="item" data-value={{_id}}>
+                {{name}}
+              </div>
+            {{/each}}
+          </div>
+        </div>
+      </div>
+
+      <div class="six wide field">
+        <label>&nbsp;</label> {{! empty label}}
+        <button type="submit"
+            class="ui fluid primary button {{#if creatingJob}}loading{{/if}}">
+          Submit
+        </button>
+      </div>
+    </div>
+  </form>
+
+  {{> showErrorMessage error}}
+
+  {{> previouslyRunLimmaGSEA}}
+</template>
+
+<template name="limmaGSEAGroupSelector">
+  <h4 style="text-align: center;">{{group.title}}</h4>
+
+  <div class="ui fluid search selection dropdown">
+    <input type="hidden" name={{group.name}}>
+    <i class="dropdown icon"></i>
+    <div class="default text">Select a sample group</div>
+    <div class="menu">
+      <div class="item create-new-sample-group" data-customize=true>
+        <i class="plus icon"></i> Create new
+      </div>
+
+      {{#each getSampleGroups}}
+        <div class="item select-sample-group" data-value={{_id}}>
+          {{name}}
+        </div>
+      {{/each}}
+    </div>
+  </div>
+
+  {{#if getInstanceReactive "customize"}}
+    {{> editSampleGroup sampleGroup=customSampleGroup}}
+  {{/if}}
+</template>
+
+<template name="previouslyRunLimmaGSEA">
+  <h2>Previously run analyses</h2>
+
+  <p>
+    TODO
+  </p>
+</template>

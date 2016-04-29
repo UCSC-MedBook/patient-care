@@ -93,3 +93,11 @@ Meteor.publish("sampleGroups", function () {
     collaborations: { $in: user.getCollaborations() },
   });
 });
+
+Meteor.publish("geneSetCollections", function () {
+  let user = MedBook.ensureUser(this.userId);
+
+  return GeneSetCollections.find({
+    collaborations: { $in: user.getCollaborations() },
+  });
+});

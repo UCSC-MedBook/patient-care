@@ -8,7 +8,9 @@ FlowRouter.route("/", {
   }
 });
 
-FlowRouter.route("/:study_label", {
+// patient-view
+
+FlowRouter.route("/patients/:study_label", {
   name: "study",
   action: function(params) {
     BlazeLayout.render("appBody", {
@@ -18,7 +20,7 @@ FlowRouter.route("/:study_label", {
   }
 });
 
-FlowRouter.route("/:study_label/:patient_label", {
+FlowRouter.route("/patients/:study_label/:patient_label", {
   name: "patient",
   action: function(params) {
     BlazeLayout.render("appBody", {
@@ -28,11 +30,23 @@ FlowRouter.route("/:study_label/:patient_label", {
   }
 });
 
-FlowRouter.route("/:study_label/:patient_label/upDownGenes/:job_id", {
+FlowRouter.route("/patients/:study_label/:patient_label/upDownGenes/:job_id", {
   name: "upDownGenes",
   action: function(params) {
     BlazeLayout.render("appBody", {
       content: "upDownGenesJob",
+      params
+    });
+  }
+});
+
+// tools
+
+FlowRouter.route("/tools/limmaGSEA", {
+  name: "listLimmaGSEA",
+  action: function(params) {
+    BlazeLayout.render("appBody", {
+      content: "listLimmaGSEA",
       params
     });
   }

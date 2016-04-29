@@ -1,6 +1,6 @@
-// Template.home
+// Template.studiesForPatients
 
-Template.home.onCreated(function () {
+Template.studiesForPatients.onCreated(function () {
   let instance = this;
 
   instance.autorun(function () {
@@ -9,7 +9,7 @@ Template.home.onCreated(function () {
   });
 });
 
-Template.home.helpers({
+Template.studiesForPatients.helpers({
   getStudies: function () {
     return Studies.find({});
   },

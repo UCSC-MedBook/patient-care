@@ -1,7 +1,43 @@
 <template name="home">
   {{> homeWelcome}}
 
-  <h1>Pick a study</h1>
+  {{> studiesForPatients}}
+
+  {{> listTools}}
+</template>
+
+
+
+<template name="homeWelcome">
+  {{#if shouldWelcome}}
+    <div class="row">
+      <div class="column">
+        <div class="ui icon massive info message">
+          <!-- <i class="fa fa-heartbeat icon"></i>
+          <i class="fa fa-user-md icon"></i>
+          <i class="fa fa-medkit icon"></i> -->
+          <i class="treatment icon"></i>
+          <i class="close icon never-show-again"></i>
+
+          <div class="content">
+            <div class="ui header">
+              Welcome to PatientCare
+            </div>
+            <p>
+              PatientCare helps doctors and researchers make
+              personalized treatment decisions for cancer patients.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  {{/if}}
+</template>
+
+
+
+<template name="studiesForPatients">
+  <h1>Pick a study to access patient views</h1>
 
   {{#if Template.subscriptionsReady}}
     {{#if length getStudies}}
@@ -48,42 +84,19 @@
 
 
 
-<template name="dataLoading">
-  <div class="ui icon message">
-    <i class="notched circle loading icon"></i>
-    <div class="content">
-      <div class="header">
-        Just one second
-      </div>
-      <p>We're fetching that data for you.</p>
-    </div>
-  </div>
-</template>
+<template name="listTools">
+  <h1>Tools</h1>
 
-
-
-<template name="homeWelcome">
-  {{#if shouldWelcome}}
-    <div class="row">
-      <div class="column">
-        <div class="ui icon massive info message">
-          <!-- <i class="fa fa-heartbeat icon"></i>
-          <i class="fa fa-user-md icon"></i>
-          <i class="fa fa-medkit icon"></i> -->
-          <i class="treatment icon"></i>
-          <i class="close icon never-show-again"></i>
-
-          <div class="content">
-            <div class="ui header">
-              Welcome to PatientCare
-            </div>
-            <p>
-              PatientCare helps doctors and researchers make
-              personalized treatment decisions for cancer patients.
-            </p>
-          </div>
+  <div class="ui cards">
+    <a href={{pathFor "listLimmaGSEA"}} class="ui card">
+      <div class="content">
+        <div class="header">
+          Limma <i class="right arrow icon"></i> GSEA
+        </div>
+        <div class="description">
+          Run Limma on a contrast and then run GSEA on the output.
         </div>
       </div>
-    </div>
-  {{/if}}
+    </a>
+  </div>
 </template>

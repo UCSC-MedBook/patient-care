@@ -27,6 +27,12 @@
             Gene Outlier Analysis
           {{/breadcrumbItem}}
         {{/if}}
+
+        {{#if isActiveRoute "listLimmaGSEA"}}
+          {{#breadcrumbItem isActive=true}}
+            Limma <i class="right arrow icon"></i> GSEA
+          {{/breadcrumbItem}}
+        {{/if}}
       </div>
 
       <div style="float: right;">
@@ -34,8 +40,35 @@
       </div>
     </div>
 
-
-    {{>Template.dynamic template=content data=params}}
+    {{#if loggingIn}}
+      <div class="ui massive icon message">
+        <i class="notched circle loading icon"></i>
+        <div class="content">
+          <div class="header">
+            Logging in...
+          </div>
+          <p>
+            You'll be on your way in just a moment!
+          </p>
+        </div>
+      </div>
+    {{else}}
+      {{#if currentMedBookUser}}
+        {{>Template.dynamic template=content data=params}}
+      {{else}}
+        <div class="ui massive icon message">
+          <i class="warning sign icon"></i>
+          <div class="content">
+            <div class="header">
+              Not logged in!
+            </div>
+            <p>
+              Please log in to continue
+            </p>
+          </div>
+        </div>
+      {{/if}}
+    {{/if}}
   </div>
 </template>
 
@@ -50,4 +83,28 @@
     </a>
     <span class="divider">/</span>
   {{/if}}
+</template>
+
+
+
+<template name="dataLoading">
+  <div class="ui icon message">
+    <i class="notched circle loading icon"></i>
+    <div class="content">
+      <div class="header">
+        One moment please...
+      </div>
+      <p>We're fetching that data for you.</p>
+    </div>
+  </div>
+</template>
+
+<template name="showErrorMessage">
+  {{#with getError}}
+    <div class="ui error message">
+      <i class="close icon close-error-message"></i>
+      <div class="header">{{header}}</div>
+      {{{message}}}
+    </div>
+  {{/with}}
 </template>

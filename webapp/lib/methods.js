@@ -66,10 +66,12 @@ Meteor.methods({
     // feel like rewriting most of the schema for SampleGroups for the
     // check function (above)
 
-    let user = MedBook.findUser(Meteor.userId());
+    let user = MedBook.ensureUser(Meteor.userId());
     user.ensureAccess(sampleGroup);
 
     // make sure the version is correct (aka don't trust the user)
+    // TODO: when should we increment the version?
+    // What if the samples are the same?
     sampleGroup.version =
         Meteor.call("getSampleGroupVersion", sampleGroup.name);
 
@@ -120,5 +122,54 @@ Meteor.methods({
     });
 
     return SampleGroups.insert(sampleGroup)
+  },
+  removeSampleGroup: function (sampleGroupId) {
+    check(sampleGroupId, String);
+
+    let user = MedBook.ensureUser(Meteor.userId());
+    user.ensureAccess(SampleGroups.findOne(sampleGroupId));
+
+    SampleGroups.remove(sampleGroupId);
+  },
+  createLimmaGSEA: function (args) {
+    check(args, new SimpleSchema({
+      sample_group_id_a: { type: String },
+      sample_group_id_b: { type: String },
+      limma_top_genes_count: { type: Number, min: 1 },
+      gene_set_collection_id: { type: String },
+    }));
+
+    let user = MedBook.ensureUser(Meteor.userId());
+
+    user.ensureAccess(GeneSetCollections.findOne(args.gene_set_collection_id));
+
+    // ensure access to sample group, studies inside
+    _.each([
+      args.sample_group_id_a,
+      args.sample_group_id_b
+    ], (sampleGroupId) => {
+      let sampleGroup = SampleGroups.findOne(sampleGroupId);
+      user.ensureAccess(sampleGroup);
+
+      // studies not necessarily loaded on client
+      if (Meteor.isServer) {
+        _.each(sampleGroup.studies, (study) => {
+          user.ensureAccess(Studies.findOne({id: study.study_label}));
+        });
+      }
+    });
+
+    // if it's been run before return that
+    let duplicateJob = Jobs.findOne({ args });
+    if (duplicateJob) {
+      return duplicateJob._id;
+    }
+
+    return Jobs.insert({
+      name: "RunLimmaGSEA",
+      status: "waiting",
+      user_id: user._id,
+      args,
+    });
   },
 });
