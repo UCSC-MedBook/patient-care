@@ -93,9 +93,10 @@ Template.listLimmaGSEA.events({
     let groupAPromise = getSampleGroupId(groupA, instance);
     let groupBPromise = getSampleGroupId(groupB, instance);
 
+    // TODO: move this to a Meteor method
     Promise.all([ groupAPromise, groupBPromise ])
       .then((values) => {
-        let [sample_group_id_a, sample_group_id_b] = values;
+        let [sample_group_a_id, sample_group_b_id] = values;
 
         // get the other form variables and make sure they're okay
 
@@ -115,7 +116,7 @@ Template.listLimmaGSEA.events({
         // create the job and hope for the best!
         return new Promise((resolve, reject) => {
           Meteor.call("createLimmaGSEA", {
-            sample_group_id_a, sample_group_id_b,
+            sample_group_a_id, sample_group_b_id,
             limma_top_genes_count, gene_set_collection_id
           }, (error, result) => {
             if (error) {
@@ -130,7 +131,8 @@ Template.listLimmaGSEA.events({
       .then((result) => {
         console.log("JOB CREATED:", result);
 
-        // stop the spinner on the submit button
+        // clear the form, stop the spinner on the submit button
+        instance.$(".dropdown").dropdown("clear");
         instance.creatingJob.set(false);
       })
       .catch((error) => {
@@ -178,7 +180,12 @@ Template.limmaGSEAGroupSelector.onRendered(function () {
 
   instance.$(".dropdown").dropdown({
     onChange: function(value, text, $selectedItem) {
-      instance.customize.set($selectedItem.data().customize);
+      let newCustomizeValue = false;
+
+      if ($selectedItem) {
+        newCustomizeValue = $selectedItem.data().customize;
+      }
+      instance.customize.set(newCustomizeValue);
     }
   });
 });
@@ -189,5 +196,61 @@ Template.limmaGSEAGroupSelector.helpers({
   },
   customSampleGroup: function () {
     return Template.instance().customSampleGroup;
+  },
+});
+
+
+
+// Template.previouslyRunLimmaGSEA
+
+Template.previouslyRunLimmaGSEA.onCreated(function () {
+  let instance = this;
+
+  instance.subscribe("limmaGSEAJobs");
+});
+
+Template.previouslyRunLimmaGSEA.helpers({
+  getJobs: function () {
+    return Jobs.find({ name: "RunLimmaGSEA" }, {
+      sort: { date_created: -1 }
+    });
+  },
+});
+
+
+
+// Template.showLimmaGSEAJob
+
+Template.showLimmaGSEAJob.onCreated(function () {
+  let instance = this;
+
+  instance.autorun(function () {
+    let data = Template.currentData();
+
+    if (data && data.output) {
+      let blobId = data.output.gsea_report_zipped_blob_id;
+
+      if (blobId) {
+        instance.subscribe("blob", blobId);
+      }
+    }
+  });
+});
+
+Template.showLimmaGSEAJob.helpers({
+  zippedReportBlobUrl: function () {
+    let data = Template.currentData();
+
+    if (data && data.output) {
+      let blobId = data.output.gsea_report_zipped_blob_id;
+
+      if (blobId) {
+        let blob = Blobs.findOne(blobId);
+
+        if (blob) {
+          return blob.url();
+        }
+      }
+    }
   },
 });

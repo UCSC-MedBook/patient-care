@@ -10,7 +10,10 @@
 
   <h2>Run a new analysis</h2>
 
-  <div style="position: relative; margin-bottom: 14px; margin-top: 14px;">
+  <!-- {{! surround in a segment so that we make sure the user doesn't change stuff
+      while we're going to the server, etc.}}
+  <div class="ui segment {{#if creatingJob}}loading{{/if}}"> -->
+  <div style="position: relative; margin-bottom: 14px">
     <div class="ui two column very relaxed stackable grid">
       <div class="column">
         {{> limmaGSEAGroupSelector group=groupA}}
@@ -92,7 +95,56 @@
 <template name="previouslyRunLimmaGSEA">
   <h2>Previously run analyses</h2>
 
-  <p>
-    TODO
-  </p>
+  {{#if Template.subscriptionsReady}}
+    {{#if length getJobs}}
+      <table class="ui single line table">
+        <thead>
+          <tr>
+            <th>Group A</th>
+            <th>Group B</th>
+            <th>Top genes count for Limma</th>
+            <th>Gene sets</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each getJobs}}
+            {{> showLimmaGSEAJob}}
+          {{/each}}
+        </tbody>
+      </table>
+    {{else}}
+      <div class="ui message">
+        <div class="content">
+          <div class="header">
+            No analyses... yet!
+          </div>
+          <p>
+            You haven't run any Limma/GSEA analyses yet.
+          </p>
+        </div>
+      </div>
+    {{/if}}
+  {{/if}}
+</template>
+
+<template name="showLimmaGSEAJob">
+  <tr>
+    <td>{{args.sample_group_a_name}}</td>
+    <td>{{args.sample_group_b_name}}</td>
+    <td>{{args.limma_top_genes_count}}</td>
+    <td>{{args.gene_set_collection_name}}</td>
+    <td>
+      {{#if compare status "done"}}
+        <a href={{zippedReportBlobUrl}} target="_blank"
+            class="ui right labeled icon button
+                {{#unless zippedReportBlobUrl}}loading{{/unless}}">
+          <i class="download icon"></i>
+          Download result
+        </a>
+      {{else}}
+        {{status}}
+      {{/if}}
+    </td>
+  </tr>
 </template>

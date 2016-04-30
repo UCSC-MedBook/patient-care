@@ -133,20 +133,21 @@ Meteor.methods({
   },
   createLimmaGSEA: function (args) {
     check(args, new SimpleSchema({
-      sample_group_id_a: { type: String },
-      sample_group_id_b: { type: String },
+      sample_group_a_id: { type: String },
+      sample_group_b_id: { type: String },
       limma_top_genes_count: { type: Number, min: 1 },
       gene_set_collection_id: { type: String },
     }));
 
     let user = MedBook.ensureUser(Meteor.userId());
 
-    user.ensureAccess(GeneSetCollections.findOne(args.gene_set_collection_id));
+    let geneSetColl = GeneSetCollections.findOne(args.gene_set_collection_id);
+    user.ensureAccess(geneSetColl);
 
     // ensure access to sample group, studies inside
     _.each([
-      args.sample_group_id_a,
-      args.sample_group_id_b
+      args.sample_group_a_id,
+      args.sample_group_b_id
     ], (sampleGroupId) => {
       let sampleGroup = SampleGroups.findOne(sampleGroupId);
       user.ensureAccess(sampleGroup);
@@ -157,6 +158,14 @@ Meteor.methods({
           user.ensureAccess(Studies.findOne({id: study.study_label}));
         });
       }
+    });
+
+    // add the sample group names in there to make joins on the client easy
+    // TODO: don't do to SampleGroups.findOne()s
+    _.extend(args, {
+      sample_group_a_name: SampleGroups.findOne(args.sample_group_a_id).name,
+      sample_group_b_name: SampleGroups.findOne(args.sample_group_b_id).name,
+      gene_set_collection_name: geneSetColl.name,
     });
 
     // if it's been run before return that
