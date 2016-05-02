@@ -49,7 +49,7 @@ Template.questions.onRendered(function () {
 // Template.patientLoadedData
 
 Template.patientLoadedData.helpers({
-  geneExpExists: function (normalization) {
+  geneExpExists: function(normalization) {
     const sample_label = this.toString(); // IDK why `typeof this` === "object"
     const study = Studies.findOne({id: Template.instance().data.study_label});
 
@@ -67,7 +67,7 @@ Template.patientLoadedData.helpers({
 // Template.patientTumorMap
 
 Template.patientTumorMap.helpers({
-  mapTypes: function () {
+  mapTypes: function() {
     return [
       { title: "Gene Expression", mapLabel: "gene_expression" },
       { title: "Copy Number", mapLabel: "copy_number" },
@@ -80,7 +80,7 @@ Template.patientTumorMap.helpers({
 
 // Template.tumorMapButton
 
-Template.tumorMapButton.onCreated(function () {
+Template.tumorMapButton.onCreated(function() {
   const instance = this;
 
   instance.creatingBookmark = new ReactiveVar(false);
@@ -153,6 +153,24 @@ Template.patientUpDownGenes.onRendered(function () {
   let instance = this;
 
   instance.$(".ui.dropdown").dropdown();
+
+  instance.$(".dropdown.sample-label").dropdown({
+    onChange: (value, text, $selectedItem) => {
+      instance.sampleLabel.set(value);
+    }
+  });
+
+  instance.$(".dropdown.sample-group").dropdown({
+    onChange: (value, text, $selectedItem) => {
+      if (value === "create-new-sample-group") {
+        instance.createCustomSampleGroup.set(true);
+        instance.sampleGroupId.set(null);
+      } else {
+        instance.sampleGroupId.set(this._id);
+        instance.createCustomSampleGroup.set(false);
+      }
+    }
+  });
 });
 
 Template.patientUpDownGenes.helpers({
@@ -168,18 +186,7 @@ Template.patientUpDownGenes.helpers({
 });
 
 Template.patientUpDownGenes.events({
-  "click .choose-sample-label": function (event, instance) {
-    instance.sampleLabel.set(this.valueOf());
-  },
-  "click .choose-custom-sample-group": function (event, instance) {
-    instance.createCustomSampleGroup.set(true);
-    instance.sampleGroupId.set(null);
-  },
-  "click .choose-sample-group": function (event, instance) {
-    instance.sampleGroupId.set(this._id);
-    instance.createCustomSampleGroup.set(false);
-  },
-  "keyup .set-iqr": function (event, instance) {
+  "keyup .set-iqr": function(event, instance) {
     let newString = event.target.value;
     let newNumber = NaN;
     if (!isNaN(newString)) {
@@ -187,7 +194,7 @@ Template.patientUpDownGenes.events({
     }
     instance.iqrMultiplier.set(parseFloat(newNumber));
   },
-  "submit #create-up-down-genes": function (event, instance) {
+  "submit #create-up-down-genes": function(event, instance) {
     event.preventDefault();
 
     // reset the errors from last time
@@ -213,7 +220,7 @@ Template.patientUpDownGenes.events({
 
     // sometimes we have to make two trips to the server, so we need to be
     // able to call this from async code (after a Meteor method has been run)
-    function createUpDownGenes (sample_group_id) {
+    function createUpDownGenes(sample_group_id) {
       let args = _.pick(instance.data, "study_label", "patient_label");
       _.extend(args, { sample_label, sample_group_id, iqr_multiplier });
 
