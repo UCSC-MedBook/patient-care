@@ -24,6 +24,12 @@ Template.editSampleGroup.onCreated(function () {
         //       options: {
         //         sample_labels: [ "DTB-001", "DTB-002" ]
         //       }
+        //     },
+        //     {
+        //       type: "data_loaded",
+        //       options: {
+        //         gene_expression: false,
+        //       },
         //     }
         //   ]
         // }
@@ -136,6 +142,20 @@ Template.addStudyMenu.events({
 
 // Template.addFilterButton
 
+Template.addFilterButton.onCreated(function () {
+  let instance = this;
+
+  instance.addFilterToStudy = function(filterObject) {
+    // the popup moves down weirdly, so hide it
+    instance.$(".dropdown").popup("hide");
+
+    // add the filter to the study
+    let sampleGroup = instance.data.sampleGroup.get();
+    sampleGroup.studies[instance.data.studyIndex].filters.push(filterObject);
+    instance.data.sampleGroup.set(sampleGroup);
+  }
+});
+
 Template.addFilterButton.onRendered(function () {
   let instance = this;
 
@@ -147,19 +167,28 @@ Template.addFilterButton.onRendered(function () {
 
 Template.addFilterButton.events({
   "click .add-sample-label-list-filter": function (event, instance) {
-    // the popup moves down weirdly, so hide it
-    instance.$(".dropdown").popup("hide");
-
-    let sampleGroup = instance.data.sampleGroup.get();
-
-    sampleGroup.studies[instance.data.studyIndex].filters.push({
+    instance.addFilterToStudy({
       type: "sample_label_list",
       options: {
         sample_labels: []
       },
     });
-
-    instance.data.sampleGroup.set(sampleGroup);
+  },
+  "click .add-exclude-sample-label-list-filter": function (event, instance) {
+    instance.addFilterToStudy({
+      type: "exclude_sample_label_list",
+      options: {
+        sample_labels: []
+      },
+    });
+  },
+  "click .add-data-loaded-filter": function (event, instance) {
+    instance.addFilterToStudy({
+      type: "data_loaded",
+      options: {
+        gene_expression: false,
+      },
+    });
   },
 });
 
@@ -172,7 +201,6 @@ Template.showFilter.onCreated(function () {
   let instance = this;
 
   instance.sampleGroup = instance.data.sampleGroup;
-  instance.editing = new ReactiveVar(false);
 
   instance.setOptions = function (newOptions) {
     let sampleGroup = instance.sampleGroup.get();
@@ -196,12 +224,6 @@ Template.showFilter.helpers({
   setOptions: function () {
     return Template.instance().setOptions;
   },
-  editing: function () {
-    return Template.instance().editing; // returns ReactiveVar
-  },
-  getEditing: function () {
-    return Template.instance().editing.get();
-  },
   study_label: function () {
     let instance = Template.instance();
     return instance.sampleGroup.get()
@@ -210,10 +232,8 @@ Template.showFilter.helpers({
 });
 
 Template.showFilter.events({
-  "click .edit-filter-toggle": function (event, instance) {
-    instance.editing.set(!instance.editing.get());
-  },
   "click .remove-filter": function (event, instance) {
+    // define a button with this class in a sub-template to make it work
     let sampleGroup = instance.sampleGroup.get();
 
     let { filterIndex, studyIndex } = instance.data;
@@ -230,6 +250,7 @@ Template.showFilter.events({
 Template.sampleLabelListFilter.onCreated(function () {
   let instance = this;
 
+  instance.editing = new ReactiveVar(false);
   instance.invalidSampleLabels = new ReactiveVar(null);
 });
 
@@ -240,6 +261,9 @@ Template.sampleLabelListFilter.helpers({
   getInvalidSampleLabels: function () {
     return Template.instance().invalidSampleLabels.get();
   },
+  getEditing: function () {
+    return Template.instance().editing.get();
+  },
 });
 
 Template.sampleLabelListFilter.events({
@@ -249,20 +273,14 @@ Template.sampleLabelListFilter.events({
 
     // let's gooo (split by whitespace characters, get rid of spaces)
     let textareaSampleLabels = instance.$("textarea").val().split(/[\s,;]+/);
-    let sample_labels = _.filter(textareaSampleLabels, (value) => {
-      return value; // remove falsey
-    });
+    let sample_labels = _.chain(textareaSampleLabels)
+      .filter((value) => { return value; }) // remove falsey
+      .uniq() // uniques only
+      .value();
 
     // make sure we don't have any bad values
     let study = Studies.findOne({id: instance.data.study_label});
-    let studySampleLabelMap = _.reduce(study.Sample_IDs, (memo, label) => {
-      memo[label] = true;
-      return memo;
-    }, {});
-
-    let badValues = _.filter(sample_labels, (label) => {
-      return !studySampleLabelMap[label];
-    });
+    let badValues = _.difference(sample_labels, study.Sample_IDs);
 
     if (badValues.length) {
       instance.invalidSampleLabels.set(badValues);
@@ -273,9 +291,36 @@ Template.sampleLabelListFilter.events({
     instance.data.setOptions({
       sample_labels
     });
-    instance.data.editing.set(false);
+    instance.editing.set(false);
+  },
+  "click .edit-filter": function (event, instance) {
+    instance.editing.set(true);
   },
   "click .close-sample-error-message": function (event, instance) {
     instance.invalidSampleLabels.set(null);
   },
+});
+
+
+
+// Template.dataLoadedFilter
+
+Template.dataLoadedFilter.onRendered(function () {
+  let instance = this;
+
+  $geneExpression = instance.$(".gene-expression.checkbox");
+
+  $geneExpression.checkbox({
+    onChecked: () => {
+      instance.data.setOptions({ gene_expression: true });
+    },
+    onUnchecked: () => {
+      instance.data.setOptions({ gene_expression: false });
+    },
+  });
+
+  // check if it's checked
+  if (instance.data.options.gene_expression) {
+    $geneExpression.checkbox("check");
+  }
 });

@@ -90,7 +90,17 @@
   <div class="ui flowing popup">
     <div class="ui list" style="padding: 0px;">
       <a class="item add-sample-label-list-filter">
-        Specific samples
+        Include Specific samples
+      </a>
+    </div>
+    <div class="ui list" style="padding: 0px;">
+      <a class="item add-exclude-sample-label-list-filter">
+        Exclude Specific samples
+      </a>
+    </div>
+    <div class="ui list" style="padding: 0px;">
+      <a class="item add-data-loaded-filter">
+        Require data loaded
       </a>
     </div>
   </div>
@@ -102,29 +112,28 @@
     <div class="content" style="width: 100%;">
       {{#with getFilter}}
         {{#if compare type "sample_label_list"}}
-          {{> sampleLabelListFilter editing=editing getEditing=getEditing
-              options=getFilter.options setOptions=setOptions
-              study_label=study_label}}
+          {{> sampleLabelListFilter options=getFilter.options
+              setOptions=setOptions study_label=study_label
+              title="Include specific samples"}}
         {{/if}}
 
-        <div class="ui mini buttons">
-          {{#unless getEditing}}
-            <button class="ui icon button edit-filter-toggle">
-              <i class="edit icon"></i> Edit filter
-            </button>
+        {{#if compare type "exclude_sample_label_list"}}
+          {{> sampleLabelListFilter options=getFilter.options
+              setOptions=setOptions study_label=study_label
+              title="Exclude specific samples"}}
+        {{/if}}
 
-            <button class="ui icon button remove-filter">
-              <i class="minus icon"></i> Remove filter
-            </button>
-          {{/unless}}
-        </div>
+        {{#if compare type "data_loaded"}}
+          {{> dataLoadedFilter study_label=study_label
+              options=getFilter.options setOptions=setOptions}}
+        {{/if}}
       {{/with}}
     </div>
   </div>
 </template>
 
 <template name="sampleLabelListFilter">
-  Specific samples:
+  {{title}}:
   {{#if getEditing}}
     <div class="ui form">
       <div class="field">
@@ -160,5 +169,27 @@
     {{else}}
       None
     {{/if}}
+
+    <div class="ui mini buttons">
+      <button class="ui icon mini button edit-filter">
+        <i class="edit icon"></i> Edit filter
+      </button>
+
+      <button class="ui icon button remove-filter">
+        <i class="minus icon"></i> Remove filter
+      </button>
+    </div>
   {{/if}}
+</template>
+
+<template name="dataLoadedFilter">
+  Require the following data:
+  <div class="ui grid" style="margin-left: 0px; margin-top: -4px;">
+    <div class="row">
+      <div class="ui checkbox gene-expression">
+        <input type="checkbox" name="example">
+        <label>Gene expression</label>
+      </div>
+    </div>
+  </div>
 </template>

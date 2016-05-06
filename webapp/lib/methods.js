@@ -92,26 +92,26 @@ Meteor.methods({
       let sample_labels = study.Sample_IDs;
 
       _.each(sampleGroupStudy.filters, (filter) => {
+        let { options } = filter;
+
         if (filter.type === "sample_label_list") {
-          // for good measure, make sure all the sample labels are in the array
-          let studySampleLabelMap =
-              _.reduce(study.Sample_IDs, (memo, label) => {
-            memo[label] = true;
-            return memo;
-          }, {});
-
-          let badValues = _.filter(filter.options.sample_labels, (label) => {
-            return !studySampleLabelMap[label];
-          });
-
-          if (badValues.length) {
-            throw new Meteor.Error("invalid-sample-label-list");
+          if (_.difference(options.sample_labels, study.Sample_IDs).length) {
+            throw new Meteor.Error("invalid-sample-labels");
           }
 
-          // actually do the filtering
-          sample_labels =
-              _.intersection(sample_labels, filter.options.sample_labels);
-        } else {
+          sample_labels = _.intersection(sample_labels, options.sample_labels);
+        } else if (filter.type === "exclude_sample_label_list") {
+          if (_.difference(options.sample_labels, study.Sample_IDs).length) {
+            throw new Meteor.Error("invalid-sample-labels");
+          }
+
+          sample_labels = _.difference(sample_labels, options.sample_labels);
+        } else if (filter.type === "data_loaded") {
+          if (options.gene_expression) {
+            sample_labels = _.intersection(sample_labels,
+                study.gene_expression);
+          }
+        }else {
           throw new Meteor.Error("invalid-filter-type");
         }
       });
