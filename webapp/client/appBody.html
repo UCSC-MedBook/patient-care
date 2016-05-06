@@ -1,0 +1,53 @@
+<template name="appBody">
+  <div class="ui container">
+    <div style="margin-bottom: 10px;">
+      <div class="ui breadcrumb large">
+        {{#breadcrumbItem isActive=(isActiveRoute "home")
+            href=(pathFor 'home')}}
+          Home
+        {{/breadcrumbItem}}
+
+        {{#if params.study_label}}
+          {{#breadcrumbItem isActive=(isActiveRoute "study")
+              href=(pathFor "study" study_label=params.study_label)}}
+            {{getShortName}}
+          {{/breadcrumbItem}}
+        {{/if}}
+
+        {{#if params.patient_label}}
+          {{#breadcrumbItem isActive=(isActiveRoute "patient")
+              href=(pathFor "patient" study_label=params.study_label patient_label=params.patient_label)}}
+            {{params.patient_label}}
+          {{/breadcrumbItem}}
+        {{/if}}
+
+        {{#if params.job_id}}
+          {{#breadcrumbItem isActive=(isActiveRoute "upDownGenes")
+              href="TODO"}}
+            Gene Outlier Analysis
+          {{/breadcrumbItem}}
+        {{/if}}
+      </div>
+
+      <div style="float: right;">
+        {{> loginButtons}}
+      </div>
+    </div>
+
+
+    {{>Template.dynamic template=content data=params}}
+  </div>
+</template>
+
+<template name="breadcrumbItem">
+  {{#if isActive}}
+    <div class="section active">
+      {{> UI.contentBlock}}
+    </div>
+  {{else}}
+    <a href={{href}}>
+      {{> UI.contentBlock}}
+    </a>
+    <span class="divider">/</span>
+  {{/if}}
+</template>

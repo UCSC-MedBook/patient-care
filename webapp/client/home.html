@@ -1,0 +1,89 @@
+<template name="home">
+  {{> homeWelcome}}
+
+  <h1>Pick a study</h1>
+
+  {{#if Template.subscriptionsReady}}
+    {{#if length getStudies}}
+      <div class="ui cards">
+        {{#each getStudies}}
+          <a href={{pathFor "study" study_label=id}} class="ui card">
+            <div class="content">
+              <div class="header">{{short_name}}</div>
+              <!-- <div class="meta">
+                <span class="date">Joined in 2013</span>
+              </div> -->
+              <div class="description">
+                {{description}}
+              </div>
+            </div>
+            <div class="extra content">
+              <div>
+                <i class="users icon"></i>
+                {{#if length patients}}
+                  {{length patients}} Patients
+                {{else}}
+                  No patients
+                {{/if}}
+              </div>
+            </div>
+          </a>
+        {{/each}}
+      </div>
+    {{else}}
+      <div class="ui icon message">
+        <i class="frown icon"></i>
+        <div class="content">
+          <div class="header">
+            No studies
+          </div>
+          <p>You don't have access to any studies.</p>
+        </div>
+      </div>
+    {{/if}}
+  {{else}}
+    {{> dataLoading}}
+  {{/if}}
+</template>
+
+
+
+<template name="dataLoading">
+  <div class="ui icon message">
+    <i class="notched circle loading icon"></i>
+    <div class="content">
+      <div class="header">
+        Just one second
+      </div>
+      <p>We're fetching that data for you.</p>
+    </div>
+  </div>
+</template>
+
+
+
+<template name="homeWelcome">
+  {{#if shouldWelcome}}
+    <div class="row">
+      <div class="column">
+        <div class="ui icon massive info message">
+          <!-- <i class="fa fa-heartbeat icon"></i>
+          <i class="fa fa-user-md icon"></i>
+          <i class="fa fa-medkit icon"></i> -->
+          <i class="treatment icon"></i>
+          <i class="close icon never-show-again"></i>
+
+          <div class="content">
+            <div class="ui header">
+              Welcome to PatientCare
+            </div>
+            <p>
+              PatientCare helps doctors and researchers make
+              personalized treatment decisions for cancer patients.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  {{/if}}
+</template>

@@ -1,0 +1,9 @@
+{
+  "public": {
+    "medbook_apps": {
+      "Wrangler": {
+        "url": "http://localhost:3002/"
+      }
+    }
+  }
+}

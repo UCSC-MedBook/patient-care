@@ -1,0 +1,440 @@
+<template name="patient">
+  {{#if Template.subscriptionsReady}}
+    {{#with getPatient}}
+      <h1 class="title ui">
+        <i class="fa fa-user"></i>
+        {{patient_label}}
+      </h1>
+
+      {{> questions}}
+    {{/with}}
+
+    {{#unless getPatient}}
+      <div class="ui icon message massive">
+        <i class="warning sign icon"></i>
+        <div class="content">
+          <div class="header">
+            Uh oh...
+          </div>
+          <p>We couldn't find the patient with that ID</p>
+        </div>
+      </div>
+    {{/unless}}
+  {{else}}
+    {{> dataLoading}}
+  {{/if}}
+</template>
+
+
+
+<template name="questions">
+    {{#if length sample_labels}}
+      <h2 class="title ui">
+        Which data have been loaded?
+      </h2>
+      <div class="content">
+        {{> patientLoadedData}}
+      </div>
+
+
+      <h2 class="title ui">
+        Which cancers is this cancer most like?
+      </h2>
+      <div class="content">
+        {{> patientTumorMap}}
+      </div>
+
+
+      <h2 class="title ui">
+        Which genes are gene-expression outliers?
+      </h2>
+      <div class="content">
+        {{> patientUpDownGenes}}
+      </div>
+    {{else}}
+      {{! error message if there are no samples}}
+      <div class="ui warning message">
+        This patient has no samples associated with it.
+        Questions that provide sample-level information have been hidden.
+      </div>
+    {{/if}}
+</template>
+
+
+
+<template name="patientLoadedData">
+  <p>
+    This panel is an overview of which data are loaded into MedBook.
+  </p>
+
+  <h3>Gene expression</h3>
+  <table class="ui celled structured table">
+    <thead>
+      <tr>
+        <th>Sample</th>
+        <th>Quantile counts log2(x+1)</th>
+        <!-- <th>FPKM</th>
+        <th>TPM</th> -->
+      </tr>
+    </thead>
+    <tbody>
+      {{#each sample_labels}}
+        <tr>
+          <td><i class="fa fa-flask"></i>{{this}}</td>
+          <td class="center aligned">
+            <i class="large icon {{geneExpExists "rsem_quan_log2"}}"></i>
+          </td>
+          <!-- <td class="center aligned">
+            <i class="large icon {{geneExpExists "tpm"}}"></i>
+          </td>
+          <td class="center aligned">
+            <i class="large icon {{geneExpExists "fpkm"}}"></i>
+          </td> -->
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</template>
+
+<template name="patientTumorMap">
+  <p>
+    <a href="https://tumormap.ucsc.edu/">TumorMap</a>
+    clusters samples based on expression values or other genomic
+    data such as mutations.
+  </p>
+
+  <table class="ui structured celled table">
+    <thead>
+      <tr>
+        <th rowspan="2">Sample</th>
+        <th colspan="3">Cluster by...</th>
+      </tr>
+      <tr>
+        {{#each mapTypes}}
+          <th>{{title}}</th>
+        {{/each}}
+      </tr>
+    </thead>
+    <tbody>
+      {{#each sample_labels}}
+        <tr>
+          <td><i class="fa fa-flask"></i>{{this}}</td>
+          {{! #let here so that we can get to it inside the #each}}
+          {{#let sample_label=this}}
+            {{#each mapTypes}}
+              <td>
+                {{#if compare mapLabel "gene_expression"}} {{! XXX}}
+                  {{> tumorMapButton mapLabel=this.mapLabel
+                      sample_label=sample_label}}
+                {{else}}
+                  No data
+                {{/if}}
+              </td>
+            {{/each}}
+          {{/let}}
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</template>
+
+<template name="tumorMapButton">
+  {{#if bookmarkExists}}
+    <a href={{getBookmark}} target="_blank" class="ui primary button tiny">
+      View
+    </a>
+  {{else}}
+    <div class="ui secondary button tiny
+        {{#if creatingBookmark}}loading{{else}}generate-bookmark{{/if}}">
+      Generate
+    </div>
+  {{/if}}
+</template>
+
+
+
+<template name="patientUpDownGenes">
+  <p>
+    Outlier genes are defined as being more than N IQRs away from the median.
+
+    The maximum number of genes returned is 5% of the total number of genes.
+    If there are more than 5% of the total number of genes that are outliers,
+    only the top 5% of the outliers will be returned.
+  </p>
+
+  <h3>Create a new analysis</h3>
+  <form id="create-up-down-genes" class="ui form">
+    <!-- <div style="font-size: 16px;"> -->
+      Calculate outlier genes in
+      <button class="ui tiny dropdown button" type="button">
+        <span class="text">Sample</span>
+        <div class="menu">
+          {{#each sample_labels}}
+            <div class="item choose-sample-label">{{this}}</div>
+          {{/each}}
+        </div>
+      </button>
+      compared to
+      <button class="ui tiny dropdown button" type="button">
+        <span class="text">
+          Background
+        </span>
+
+        <div class="menu">
+          <div class="item choose-custom-sample-group">
+            <i class="plus icon"></i>
+            Create new
+          </div>
+
+          {{#each getSampleGroups}}
+            <div class="item choose-sample-group">
+              {{name}}
+            </div>
+          {{/each}}
+        </div>
+      </button>
+
+      with an IQR multiplier of
+      <div class="ui tiny input" style="width: 60px;">
+        <input type="text" placeholder="IQR" value="1.5" class="set-iqr">
+      </div>.
+
+        <button class="ui tiny primary labeled icon button
+              {{#if getInstanceReactive "waitingForResponse"}}loading{{/if}}"
+            id="create-up-down-genes" type="submit">
+          <i class="arrow right icon"></i> Go!
+        </button>
+    <!-- </div> -->
+  </form>
+
+  {{#if getInstanceReactive "createCustomSampleGroup"}}
+    {{> editSampleGroup sampleGroup=getCustomSampleGroup}}
+  {{/if}}
+
+  {{#with getInstanceReactive "error"}}
+    <div class="ui error message">
+      <i class="close icon close-error-message"></i>
+      <div class="header">{{header}}</div>
+      {{{message}}}
+    </div>
+  {{/with}}
+
+  <h3>Previously run analyses</h3>
+  {{> patientUpDownGenesTable}}
+</template>
+
+<template name="editSampleGroup">
+  <div class="ui top attached menu">
+    {{#if length addableStudies}}
+      {{> addStudyMenu addableStudies=addableStudies
+          sampleGroup=sampleGroup}}
+    {{else}}
+      <div class="ui item">
+        No more studies
+      </div>
+    {{/if}}
+
+    <div class="right menu">
+      <div class="item">
+        <div class="ui transparent icon input">
+          <input class="sample-group-name" type="text"
+              placeholder="Name of sample group...">
+          <!-- <i class="idea icon"></i> -->
+          <div class="ui basic label sample-group-version"
+              data-content="Sample group version">
+            v{{getSampleGroup.version}}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {{#if Template.subscriptionsReady}}
+    <div class="ui bottom attached segment">
+      {{#with getSampleGroup}}
+        <div class="ui list">
+          {{#if length studies}}
+            {{! show all of the studies}}
+            {{#each studies}}
+              <div class="item">
+                <!-- <i class="icon"></i> {{! blank icons create indentation}} -->
+                <div class="content">
+                  <div class="header">
+                    {{getStudyName study_label}}
+
+                    <div class="ui mini buttons">
+                      {{> addFilterButton study=this sampleGroup=sampleGroup
+                          studyIndex=@index}}
+                      <button class="ui icon button remove-study">
+                        <i class="minus icon"></i> Remove
+                      </button>
+                    </div>
+                  </div>
+                  <div class="description"></div>
+                  <div class="list" style="padding-top: 0px;">
+                    {{#let studyIndex=@index}}
+                      {{#each filters}}
+                        {{> showFilter studyIndex=studyIndex filterIndex=@index
+                            sampleGroup=sampleGroup}}
+                      {{/each}}
+                    {{/let}}
+                  </div>
+                </div>
+              </div>
+            {{/each}}
+          {{else}}
+            No studies
+          {{/if}}
+        </div>
+      {{/with}}
+    </div>
+  {{else}}
+    {{> dataLoading}}
+  {{/if}}
+</template>
+
+<template name="addStudyMenu">
+  <div class="ui item dropdown"> {{! "dropdown" for hand as mouse}}
+    Add a study <i class="dropdown icon"></i>
+  </div>
+  <div class="ui flowing popup">
+    <div class="ui list">
+      {{#each addableStudies}}
+        <a class="item add-study-to-sample-group">
+          {{name}}
+        </a>
+      {{/each}}
+    </div>
+  </div>
+</template>
+
+<template name="addFilterButton">
+  <div class="ui icon item dropdown button"> {{! "dropdown" for hand as mouse}}
+    <i class="filter icon"></i> Add filter
+  </div>
+  <div class="ui flowing popup">
+    <div class="ui list" style="padding: 0px;">
+      <a class="item add-sample-label-list-filter">
+        Specific samples
+      </a>
+    </div>
+  </div>
+</template>
+
+<template name="showFilter">
+  <div class="item">
+    <i class="filter icon"></i>
+    <div class="content" style="width: 100%;">
+      {{#with getFilter}}
+        {{#if compare type "sample_label_list"}}
+          {{> sampleLabelListFilter editing=editing getEditing=getEditing
+              options=getFilter.options setOptions=setOptions
+              study_label=study_label}}
+        {{/if}}
+
+        <div class="ui mini buttons">
+          {{#unless getEditing}}
+            <button class="ui icon button edit-filter-toggle">
+              <i class="edit icon"></i> Edit filter
+            </button>
+
+            <button class="ui icon button remove-filter">
+              <i class="minus icon"></i> Remove filter
+            </button>
+          {{/unless}}
+        </div>
+      {{/with}}
+    </div>
+  </div>
+</template>
+
+<template name="sampleLabelListFilter">
+  Specific samples:
+  {{#if getEditing}}
+    <div class="ui form">
+      <div class="field">
+        <textarea value={{sampleLabelsToText}}></textarea>
+      </div>
+    </div>
+
+    {{#if length getInvalidSampleLabels}}
+      <div class="ui error message">
+        <i class="close icon close-sample-error-message"></i>
+        <div class="header">
+          The following sample names are invalid
+        </div>
+        <ul class="list">
+          {{#each getInvalidSampleLabels}}
+            <li>{{this}}</li>
+          {{/each}}
+        </ul>
+      </div>
+    {{/if}}
+
+    <button class="ui icon primary mini button done-editing">
+      <i class="check icon"></i> Done
+    </button>
+  {{else}}
+    {{#if length options.sample_labels}}
+      {{#each options.sample_labels}}
+        <div class="ui label">
+          {{this}}
+        </div>
+      {{/each}}
+    {{else}}
+      None
+    {{/if}}
+  {{/if}}
+</template>
+
+<template name="patientUpDownGenesTable">
+  {{#if Template.subscriptionsReady}}
+    {{#if length getJobs}}
+      <table class="ui single line table">
+        <thead>
+          <tr>
+            <th>Sample</th>
+            <th>Comparison sample group</th>
+            <th>IQR multiplier</th>
+            <th>Upregulated genes</th>
+            <th>Downregulated genes</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each getJobs}}
+            <tr>
+              <td><i class="fa fa-flask"></i>{{this.args.sample_label}}</td>
+              <td>{{this.args.sample_group_name}}</td>
+              <td>{{this.args.iqr_multiplier}}</td>
+              <td>{{this.output.up_genes.length}}</td>
+              <td>{{this.output.down_genes.length}}</td>
+              <td>
+                <a href={{pathFor "upDownGenes" study_label=(param "study_label")
+                        patient_label=(param "patient_label") job_id=this._id}}
+                    class="ui right labeled icon button">
+                  <i class="right arrow icon"></i>
+                  View
+                </a>
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    {{else}}
+      <div class="ui message">
+        <div class="content">
+          <div class="header">
+            No analyses... yet!
+          </div>
+          <p>
+            No analyses have been run for this patient.
+            Use the form above to run a new analysis.
+          </p>
+        </div>
+      </div>
+    {{/if}}
+  {{else}}
+    {{> dataLoading}}
+  {{/if}}
+</template>

@@ -1,44 +1,95 @@
-Meteor.publish("PatientReport", function (patientLabel) {
+Meteor.publish("studies", function () {
+  var user = MedBook.ensureUser(this.userId);
 
-  var patientCursor = PatientReports.find(
-        {"patient_label": patientLabel},
-        {limit: 1}
-      );
+  return Studies.find({
+    collaborations: {$in: user.getCollaborations() },
+  });
+});
 
-  var cohortSignaturesCursor = CohortSignatures.find({
-        "_id": { $in: patientCursor.fetch()[0]['cohort_signature_ids'] }
+Meteor.publish("study", function (study_label) {
+  check(study_label, String);
+  var user = MedBook.ensureUser(this.userId);
+
+  return Studies.find({
+    id: study_label,
+    collaborations: {$in: user.getCollaborations() },
+  });
+});
+
+Meteor.publish("patientSamples", function (study_label, patient_label) {
+  check([study_label, patient_label], [String]);
+
+  var user = MedBook.ensureUser(this.userId);
+  var study = Studies.findOne({id: study_label});
+  user.ensureAccess(study);
+
+  var cursor = Samples.find({
+    study_label,
+    patient_label,
+  });
+
+  // if the samples don't exist for the patient, create them
+  var asArray = cursor.fetch();
+  var sample_labels = _.pluck(asArray, "sample_label");
+  var patient = _.findWhere(study.patients, { patient_label });
+  if (!patient) {
+    this.ready();
+    return;
+  }
+
+  _.each(patient.sample_labels, (sample_label) => {
+    if (sample_labels.indexOf(sample_label) === -1) {
+      Samples.insert({
+        study_label,
+        patient_label,
+        sample_label
       });
+    }
+  });
 
-  return [
-    patientCursor,
-    cohortSignaturesCursor,
-  ];
+  return cursor;
 });
 
-// allows quick linking between patient reports
-Meteor.publish("ReportMetadata", function () {
-  console.log("publishing report metadata");
-  return [
-    PatientReports.find({}, {
-      fields: {
-        "patient_id": 1,
-        "patient_label": 1
-      }
-    }),
-  ];
+Meteor.publish("upDownGenes", function (study_label, patient_label) {
+  check([study_label, patient_label], [String]);
+
+  let user = MedBook.ensureUser(this.userId);
+  let study = Studies.findOne({id: study_label});
+  user.ensureAccess(study);
+
+  return Jobs.find({
+    name: "UpDownGenes",
+    status: { $ne: "creating" },
+    "args.study_label": study_label,
+    "args.patient_label": patient_label,
+  });
 });
 
-Meteor.publish("GeneReport", function (geneLabel) {
-  // TODO: add security and such
+Meteor.publish("upDownGenesJob", function (jobId) {
+  check(jobId, String);
 
-  var geneReportCursor = GeneReports.find({"gene_label": geneLabel});
-  var currentReport = geneReportCursor.fetch()[0];
+  let user = MedBook.ensureUser(this.userId);
+  let job = Jobs.findOne({
+    _id: jobId,
+    name: "UpDownGenes",
+  });
+  let study = Studies.findOne({id: job.args.study_label});
+  user.ensureAccess(study);
 
-  var geneNames = _.pluck(currentReport.network.elements, 'name');
-  var expression2Cursor = expression2.find({"gene": { $in: geneNames }});
+  return Jobs.find({ _id: jobId });
+});
 
-  return [
-    geneReportCursor,
-    expression2Cursor,
-  ];
+Meteor.publish("blob", function (blobId) {
+  check(blobId, String);
+
+  // NOTE: no security... if they have the _id they can have it
+  return Blobs.find(blobId);
+});
+
+Meteor.publish("sampleGroups", function () {
+  let user = MedBook.ensureUser(this.userId);
+
+  return SampleGroups.find({
+    collaborations: { $in: user.getCollaborations() },
+  });
 });
