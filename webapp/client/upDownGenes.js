@@ -40,58 +40,6 @@ Template.upDownGenesJob.helpers({
 
 
 
-// Template.setOutlierAnalysisOptions
-
-Template.setOutlierAnalysisOptions.onCreated(function () {
-  const instance = this;
-
-  instance.selectedSample = new ReactiveVar();
-});
-
-Template.setOutlierAnalysisOptions.onRendered(function () {
-  const instance = this;
-
-  instance.$('select.dropdown').dropdown();
-});
-
-Template.setOutlierAnalysisOptions.helpers({
-  getStudy: function () {
-    return Studies.findOne();
-  },
-  disabledIfNotReady: function () {
-    if (!Template.instance().selectedSample.get()) {
-      return "disabled";
-    }
-  },
-});
-
-Template.setOutlierAnalysisOptions.events({
-  "change .select-sample": function (event, instance) {
-    instance.selectedSample.set(event.target.value);
-  },
-  "click .submit-job": function (event, instance) {
-    event.preventDefault();
-
-    let options = _.pick(instance.data.patient, "study_label", "patient_label");
-    _.extend(options, {
-      sample_label: instance.selectedSample.get()
-    });
-
-    Meteor.call("startUpDownGenes", instance.data.job._id, options,
-        (err, result) => {
-      if (result) {
-        FlowRouter.go("upDownGenes", {
-          study_label: options.study_label,
-          patient_label: options.patient_label,
-          job_id: result,
-        });
-      }
-    });
-  },
-});
-
-
-
 // Template.outlierAnalysis
 
 Template.outlierAnalysis.onCreated(function () {

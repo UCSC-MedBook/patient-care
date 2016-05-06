@@ -93,3 +93,20 @@ Meteor.publish("sampleGroups", function () {
     collaborations: { $in: user.getCollaborations() },
   });
 });
+
+Meteor.publish("geneSetCollections", function () {
+  let user = MedBook.ensureUser(this.userId);
+
+  return GeneSetCollections.find({
+    collaborations: { $in: user.getCollaborations() },
+  });
+});
+
+Meteor.publish("limmaGSEAJobs", function () {
+  let user = MedBook.ensureUser(this.userId);
+
+  return Jobs.find({
+    name: "RunLimmaGSEA",
+    user_id: this.userId,
+  });
+});

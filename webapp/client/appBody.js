@@ -38,9 +38,16 @@ Template.appBody.helpers({
 
 
 
-// // Tempalte.upDownGenesBreadcrumbDesc
-//
-// Template.upDownGenesBreadcrumbDesc.onCreated(function () {
-//   const instance = this;
-//   instance.subscribe("upDownGenesJob", instance.data.params().job_id);
-// });
+// Template.showErrorMessage
+
+Template.showErrorMessage.helpers({
+  getError: function () {
+    return Template.instance().data.get();
+  },
+});
+
+Template.showErrorMessage.events({
+  "click .close-error-message": function (event, instance) {
+    instance.data.set(null);
+  },
+});

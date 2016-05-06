@@ -144,8 +144,9 @@
       View
     </a>
   {{else}}
-    <div class="ui secondary button tiny
-        {{#if creatingBookmark}}loading{{else}}generate-bookmark{{/if}}">
+    <div class="ui secondary button tiny bookmark-popup
+        {{#if creatingBookmark}}loading{{else}}generate-bookmark{{/if}}"
+        data-content="This usually takes around 10 seconds">
       Generate
     </div>
   {{/if}}
@@ -164,227 +165,47 @@
 
   <h3>Create a new analysis</h3>
   <form id="create-up-down-genes" class="ui form">
-    <!-- <div style="font-size: 16px;"> -->
-      Calculate outlier genes in
-      <button class="ui tiny dropdown button" type="button">
-        <span class="text">Sample</span>
-        <div class="menu">
-          {{#each sample_labels}}
-            <div class="item choose-sample-label">{{this}}</div>
-          {{/each}}
-        </div>
-      </button>
-      compared to
-      <button class="ui tiny dropdown button" type="button">
-        <span class="text">
-          Background
-        </span>
+    Calculate outlier genes in
 
-        <div class="menu">
-          <div class="item choose-custom-sample-group">
-            <i class="plus icon"></i>
-            Create new
-          </div>
+    <select class="ui tiny search dropdown sample-label">
+      <option value="">Choose sample...</option>
+      {{#each sample_labels}}
+        <option value={{this}}>{{this}}</option>
+      {{/each}}
+    </select>
 
-          {{#each getSampleGroups}}
-            <div class="item choose-sample-group">
-              {{name}}
-            </div>
-          {{/each}}
-        </div>
-      </button>
+    compared to
 
-      with an IQR multiplier of
-      <div class="ui tiny input" style="width: 60px;">
-        <input type="text" placeholder="IQR" value="1.5" class="set-iqr">
-      </div>.
+    <select class="ui tiny search dropdown sample-group">
+      <option value="">Choose background...</option>
+      <option value="create-new-sample-group">
+        Create new
+      </option>
+      {{#each getSampleGroups}}
+        <option value={{_id}}>{{name}}</option>
+      {{/each}}
+    </select>
 
-        <button class="ui tiny primary labeled icon button
-              {{#if getInstanceReactive "waitingForResponse"}}loading{{/if}}"
-            id="create-up-down-genes" type="submit">
-          <i class="arrow right icon"></i> Go!
-        </button>
-    <!-- </div> -->
+    with an IQR multiplier of
+    <div class="ui tiny input" style="width: 60px;">
+      <input type="text" placeholder="IQR" value="1.5" class="set-iqr">
+    </div>.
+
+    <button class="ui tiny primary labeled icon button
+          {{#if getInstanceReactive "waitingForResponse"}}loading{{/if}}"
+        id="create-up-down-genes" type="submit">
+      <i class="arrow right icon"></i> Go!
+    </button>
   </form>
 
   {{#if getInstanceReactive "createCustomSampleGroup"}}
     {{> editSampleGroup sampleGroup=getCustomSampleGroup}}
   {{/if}}
 
-  {{#with getInstanceReactive "error"}}
-    <div class="ui error message">
-      <i class="close icon close-error-message"></i>
-      <div class="header">{{header}}</div>
-      {{{message}}}
-    </div>
-  {{/with}}
+  {{> showErrorMessage error}}
 
   <h3>Previously run analyses</h3>
   {{> patientUpDownGenesTable}}
-</template>
-
-<template name="editSampleGroup">
-  <div class="ui top attached menu">
-    {{#if length addableStudies}}
-      {{> addStudyMenu addableStudies=addableStudies
-          sampleGroup=sampleGroup}}
-    {{else}}
-      <div class="ui item">
-        No more studies
-      </div>
-    {{/if}}
-
-    <div class="right menu">
-      <div class="item">
-        <div class="ui transparent icon input">
-          <input class="sample-group-name" type="text"
-              placeholder="Name of sample group...">
-          <!-- <i class="idea icon"></i> -->
-          <div class="ui basic label sample-group-version"
-              data-content="Sample group version">
-            v{{getSampleGroup.version}}
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  {{#if Template.subscriptionsReady}}
-    <div class="ui bottom attached segment">
-      {{#with getSampleGroup}}
-        <div class="ui list">
-          {{#if length studies}}
-            {{! show all of the studies}}
-            {{#each studies}}
-              <div class="item">
-                <!-- <i class="icon"></i> {{! blank icons create indentation}} -->
-                <div class="content">
-                  <div class="header">
-                    {{getStudyName study_label}}
-
-                    <div class="ui mini buttons">
-                      {{> addFilterButton study=this sampleGroup=sampleGroup
-                          studyIndex=@index}}
-                      <button class="ui icon button remove-study">
-                        <i class="minus icon"></i> Remove
-                      </button>
-                    </div>
-                  </div>
-                  <div class="description"></div>
-                  <div class="list" style="padding-top: 0px;">
-                    {{#let studyIndex=@index}}
-                      {{#each filters}}
-                        {{> showFilter studyIndex=studyIndex filterIndex=@index
-                            sampleGroup=sampleGroup}}
-                      {{/each}}
-                    {{/let}}
-                  </div>
-                </div>
-              </div>
-            {{/each}}
-          {{else}}
-            No studies
-          {{/if}}
-        </div>
-      {{/with}}
-    </div>
-  {{else}}
-    {{> dataLoading}}
-  {{/if}}
-</template>
-
-<template name="addStudyMenu">
-  <div class="ui item dropdown"> {{! "dropdown" for hand as mouse}}
-    Add a study <i class="dropdown icon"></i>
-  </div>
-  <div class="ui flowing popup">
-    <div class="ui list">
-      {{#each addableStudies}}
-        <a class="item add-study-to-sample-group">
-          {{name}}
-        </a>
-      {{/each}}
-    </div>
-  </div>
-</template>
-
-<template name="addFilterButton">
-  <div class="ui icon item dropdown button"> {{! "dropdown" for hand as mouse}}
-    <i class="filter icon"></i> Add filter
-  </div>
-  <div class="ui flowing popup">
-    <div class="ui list" style="padding: 0px;">
-      <a class="item add-sample-label-list-filter">
-        Specific samples
-      </a>
-    </div>
-  </div>
-</template>
-
-<template name="showFilter">
-  <div class="item">
-    <i class="filter icon"></i>
-    <div class="content" style="width: 100%;">
-      {{#with getFilter}}
-        {{#if compare type "sample_label_list"}}
-          {{> sampleLabelListFilter editing=editing getEditing=getEditing
-              options=getFilter.options setOptions=setOptions
-              study_label=study_label}}
-        {{/if}}
-
-        <div class="ui mini buttons">
-          {{#unless getEditing}}
-            <button class="ui icon button edit-filter-toggle">
-              <i class="edit icon"></i> Edit filter
-            </button>
-
-            <button class="ui icon button remove-filter">
-              <i class="minus icon"></i> Remove filter
-            </button>
-          {{/unless}}
-        </div>
-      {{/with}}
-    </div>
-  </div>
-</template>
-
-<template name="sampleLabelListFilter">
-  Specific samples:
-  {{#if getEditing}}
-    <div class="ui form">
-      <div class="field">
-        <textarea value={{sampleLabelsToText}}></textarea>
-      </div>
-    </div>
-
-    {{#if length getInvalidSampleLabels}}
-      <div class="ui error message">
-        <i class="close icon close-sample-error-message"></i>
-        <div class="header">
-          The following sample names are invalid
-        </div>
-        <ul class="list">
-          {{#each getInvalidSampleLabels}}
-            <li>{{this}}</li>
-          {{/each}}
-        </ul>
-      </div>
-    {{/if}}
-
-    <button class="ui icon primary mini button done-editing">
-      <i class="check icon"></i> Done
-    </button>
-  {{else}}
-    {{#if length options.sample_labels}}
-      {{#each options.sample_labels}}
-        <div class="ui label">
-          {{this}}
-        </div>
-      {{/each}}
-    {{else}}
-      None
-    {{/if}}
-  {{/if}}
 </template>
 
 <template name="patientUpDownGenesTable">

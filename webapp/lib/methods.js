@@ -66,10 +66,12 @@ Meteor.methods({
     // feel like rewriting most of the schema for SampleGroups for the
     // check function (above)
 
-    let user = MedBook.findUser(Meteor.userId());
+    let user = MedBook.ensureUser(Meteor.userId());
     user.ensureAccess(sampleGroup);
 
     // make sure the version is correct (aka don't trust the user)
+    // TODO: when should we increment the version?
+    // What if the samples are the same?
     sampleGroup.version =
         Meteor.call("getSampleGroupVersion", sampleGroup.name);
 
@@ -90,26 +92,26 @@ Meteor.methods({
       let sample_labels = study.Sample_IDs;
 
       _.each(sampleGroupStudy.filters, (filter) => {
+        let { options } = filter;
+
         if (filter.type === "sample_label_list") {
-          // for good measure, make sure all the sample labels are in the array
-          let studySampleLabelMap =
-              _.reduce(study.Sample_IDs, (memo, label) => {
-            memo[label] = true;
-            return memo;
-          }, {});
-
-          let badValues = _.filter(filter.options.sample_labels, (label) => {
-            return !studySampleLabelMap[label];
-          });
-
-          if (badValues.length) {
-            throw new Meteor.Error("invalid-sample-label-list");
+          if (_.difference(options.sample_labels, study.Sample_IDs).length) {
+            throw new Meteor.Error("invalid-sample-labels");
           }
 
-          // actually do the filtering
-          sample_labels =
-              _.intersection(sample_labels, filter.options.sample_labels);
-        } else {
+          sample_labels = _.intersection(sample_labels, options.sample_labels);
+        } else if (filter.type === "exclude_sample_label_list") {
+          if (_.difference(options.sample_labels, study.Sample_IDs).length) {
+            throw new Meteor.Error("invalid-sample-labels");
+          }
+
+          sample_labels = _.difference(sample_labels, options.sample_labels);
+        } else if (filter.type === "data_loaded") {
+          if (options.gene_expression) {
+            sample_labels = _.intersection(sample_labels,
+                study.gene_expression);
+          }
+        }else {
           throw new Meteor.Error("invalid-filter-type");
         }
       });
@@ -120,5 +122,63 @@ Meteor.methods({
     });
 
     return SampleGroups.insert(sampleGroup)
+  },
+  removeSampleGroup: function (sampleGroupId) {
+    check(sampleGroupId, String);
+
+    let user = MedBook.ensureUser(Meteor.userId());
+    user.ensureAccess(SampleGroups.findOne(sampleGroupId));
+
+    SampleGroups.remove(sampleGroupId);
+  },
+  createLimmaGSEA: function (args) {
+    check(args, new SimpleSchema({
+      sample_group_a_id: { type: String },
+      sample_group_b_id: { type: String },
+      limma_top_genes_count: { type: Number, min: 1 },
+      gene_set_collection_id: { type: String },
+    }));
+
+    let user = MedBook.ensureUser(Meteor.userId());
+
+    let geneSetColl = GeneSetCollections.findOne(args.gene_set_collection_id);
+    user.ensureAccess(geneSetColl);
+
+    // ensure access to sample group, studies inside
+    _.each([
+      args.sample_group_a_id,
+      args.sample_group_b_id
+    ], (sampleGroupId) => {
+      let sampleGroup = SampleGroups.findOne(sampleGroupId);
+      user.ensureAccess(sampleGroup);
+
+      // studies not necessarily loaded on client
+      if (Meteor.isServer) {
+        _.each(sampleGroup.studies, (study) => {
+          user.ensureAccess(Studies.findOne({id: study.study_label}));
+        });
+      }
+    });
+
+    // add the sample group names in there to make joins on the client easy
+    // TODO: don't do to SampleGroups.findOne()s
+    _.extend(args, {
+      sample_group_a_name: SampleGroups.findOne(args.sample_group_a_id).name,
+      sample_group_b_name: SampleGroups.findOne(args.sample_group_b_id).name,
+      gene_set_collection_name: geneSetColl.name,
+    });
+
+    // if it's been run before return that
+    let duplicateJob = Jobs.findOne({ args });
+    if (duplicateJob) {
+      return duplicateJob._id;
+    }
+
+    return Jobs.insert({
+      name: "RunLimmaGSEA",
+      status: "waiting",
+      user_id: user._id,
+      args,
+    });
   },
 });
