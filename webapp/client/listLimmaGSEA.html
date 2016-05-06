@@ -109,7 +109,23 @@
         </thead>
         <tbody>
           {{#each getJobs}}
-            {{> showLimmaGSEAJob}}
+            <tr>
+              <td>{{args.sample_group_a_name}}</td>
+              <td>{{args.sample_group_b_name}}</td>
+              <td>{{args.limma_top_genes_count}}</td>
+              <td>{{args.gene_set_collection_name}}</td>
+              <td>
+                {{#if compare status "done"}}
+                  <a href={{pathFor getJobResultUrl}} target="_blank"
+                      class="ui right labeled icon button">
+                    <i class="book icon"></i>
+                    View result
+                  </a>
+                {{else}}
+                  {{status}}
+                {{/if}}
+              </td>
+            </tr>
           {{/each}}
         </tbody>
       </table>
@@ -126,25 +142,4 @@
       </div>
     {{/if}}
   {{/if}}
-</template>
-
-<template name="showLimmaGSEAJob">
-  <tr>
-    <td>{{args.sample_group_a_name}}</td>
-    <td>{{args.sample_group_b_name}}</td>
-    <td>{{args.limma_top_genes_count}}</td>
-    <td>{{args.gene_set_collection_name}}</td>
-    <td>
-      {{#if compare status "done"}}
-        <a href={{zippedReportBlobUrl}} target="_blank"
-            class="ui right labeled icon button
-                {{#unless zippedReportBlobUrl}}loading{{/unless}}">
-          <i class="download icon"></i>
-          Download result
-        </a>
-      {{else}}
-        {{status}}
-      {{/if}}
-    </td>
-  </tr>
 </template>

@@ -41,20 +41,14 @@
     </div>
 
     {{#if loggingIn}}
-      <div class="ui massive icon message">
-        <i class="notched circle loading icon"></i>
-        <div class="content">
-          <div class="header">
-            Logging in...
-          </div>
-          <p>
-            You'll be on your way in just a moment!
-          </p>
-        </div>
-      </div>
+      {{> loggingInMessage}}
     {{else}}
-      {{#if currentMedBookUser}}
-        {{>Template.dynamic template=content data=params}}
+      {{#if currentUser}}
+        {{#if currentMedBookUser}}
+          {{>Template.dynamic template=content data=params}}
+        {{else}}
+          {{> loggingInMessage}}
+        {{/if}}
       {{else}}
         <div class="ui massive icon message">
           <i class="warning sign icon"></i>
@@ -85,7 +79,19 @@
   {{/if}}
 </template>
 
-
+<template name="loggingInMessage">
+  <div class="ui massive icon message">
+    <i class="notched circle loading icon"></i>
+    <div class="content">
+      <div class="header">
+        Logging in...
+      </div>
+      <p>
+        You'll be on your way in just a moment!
+      </p>
+    </div>
+  </div>
+</template>
 
 <template name="dataLoading">
   <div class="ui icon message">
@@ -107,4 +113,23 @@
       {{{message}}}
     </div>
   {{/with}}
+</template>
+
+<template name="routeNotFound">
+  <div class="ui message massive">
+    <div class="header">Invalid URL</div>
+    <p>
+      To be completely honest, we don't quite know how you found your way here...
+    </p>
+    <p>
+      Click here to return to the home page:
+      <a href={{pathFor "home"}} class="ui primary button">
+        <i class="home icon"></i>
+        Go home!
+      </a>
+    </p>
+    <p>
+      If you think you are seeing this message in error, please {{{contactTeoText}}}
+    </p>
+  </div>
 </template>

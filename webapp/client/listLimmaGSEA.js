@@ -215,42 +215,7 @@ Template.previouslyRunLimmaGSEA.helpers({
       sort: { date_created: -1 }
     });
   },
-});
-
-
-
-// Template.showLimmaGSEAJob
-
-Template.showLimmaGSEAJob.onCreated(function () {
-  let instance = this;
-
-  instance.autorun(function () {
-    let data = Template.currentData();
-
-    if (data && data.output) {
-      let blobId = data.output.gsea_report_zipped_blob_id;
-
-      if (blobId) {
-        instance.subscribe("blob", blobId);
-      }
-    }
-  });
-});
-
-Template.showLimmaGSEAJob.helpers({
-  zippedReportBlobUrl: function () {
-    let data = Template.currentData();
-
-    if (data && data.output) {
-      let blobId = data.output.gsea_report_zipped_blob_id;
-
-      if (blobId) {
-        let blob = Blobs.findOne(blobId);
-
-        if (blob) {
-          return blob.url();
-        }
-      }
-    }
+  getJobResultUrl: function() {
+    return "/tools/gsea-result/" + this._id + "/index.html";
   },
 });

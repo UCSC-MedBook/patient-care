@@ -1,3 +1,12 @@
+FlowRouter.notFound = {
+  action: function(params) {
+    BlazeLayout.render("appBody", {
+      content: "routeNotFound",
+      params,
+    });
+  }
+};
+
 FlowRouter.route("/", {
   name: "home",
   action: function(params) {
