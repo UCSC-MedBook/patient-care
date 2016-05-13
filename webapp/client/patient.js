@@ -166,7 +166,7 @@ Template.patientUpDownGenes.onRendered(function () {
         instance.createCustomSampleGroup.set(true);
         instance.sampleGroupId.set(null);
       } else {
-        instance.sampleGroupId.set(this._id);
+        instance.sampleGroupId.set(value);
         instance.createCustomSampleGroup.set(false);
       }
     }
