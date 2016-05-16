@@ -1,17 +1,17 @@
-Meteor.publish("studies", function () {
+Meteor.publish("dataSets", function () {
   var user = MedBook.ensureUser(this.userId);
 
-  return Studies.find({
+  return DataSets.find({
     collaborations: {$in: user.getCollaborations() },
   });
 });
 
-Meteor.publish("study", function (study_label) {
-  check(study_label, String);
+Meteor.publish("dataSet", function (dataSetId) {
+  check(dataSetId, String);
   var user = MedBook.ensureUser(this.userId);
 
-  return Studies.find({
-    id: study_label,
+  return DataSets.find({
+    _id: dataSetId,
     collaborations: {$in: user.getCollaborations() },
   });
 });
@@ -108,5 +108,13 @@ Meteor.publish("limmaGSEAJobs", function () {
   return Jobs.find({
     name: "RunLimmaGSEA",
     user_id: this.userId,
+  });
+});
+
+Meteor.publish("forms", function () {
+  let user = MedBook.ensureUser(this.userId);
+
+  return Forms.find({
+    collaborations: { $in: user.getCollaborations() },
   });
 });

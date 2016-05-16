@@ -4,3 +4,11 @@ contactTeoText =
   Contact Teo
 </a>`;
 Template.registerHelper("contactTeoText", contactTeoText);
+
+Meteor.startup(() => {
+  AutoForm.setDefaultTemplate("semanticUI");
+});
+
+Template.registerHelper("firstGreater", function (first, second) {
+  return first > second;
+});

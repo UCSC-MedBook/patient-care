@@ -1,17 +1,17 @@
-// Template.studiesForPatients
+// Template.listDataSets
 
-Template.studiesForPatients.onCreated(function () {
+Template.listDataSets.onCreated(function () {
   let instance = this;
 
   instance.autorun(function () {
-    Meteor.userId();
-    instance.subscribe("studies");
+    Meteor.userId(); // make reactive
+    instance.subscribe("dataSets");
   });
 });
 
-Template.studiesForPatients.helpers({
-  getStudies: function () {
-    return Studies.find({});
+Template.listDataSets.helpers({
+  getDataSets: function () {
+    return DataSets.find({});
   },
 });
 

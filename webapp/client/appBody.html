@@ -7,10 +7,12 @@
           Home
         {{/breadcrumbItem}}
 
-        {{#if params.study_label}}
-          {{#breadcrumbItem isActive=(isActiveRoute "study")
-              href=(pathFor "study" study_label=params.study_label)}}
-            {{getShortName}}
+        {{#if params.data_set_id}}
+          {{#breadcrumbItem isActive=(isActiveRoute "dataSet")
+              href=(pathFor "dataSet" data_set_id=params.data_set_id)}}
+            {{#if Template.subscriptionsReady}}
+              {{getDataSetName}}
+            {{/if}}
           {{/breadcrumbItem}}
         {{/if}}
 
@@ -31,6 +33,12 @@
         {{#if isActiveRoute "listLimmaGSEA"}}
           {{#breadcrumbItem isActive=true}}
             Limma <i class="right arrow icon"></i> GSEA
+          {{/breadcrumbItem}}
+        {{/if}}
+
+        {{#if isActiveRoute "createRecord"}}
+          {{#breadcrumbItem isActive=true}}
+            Create record
           {{/breadcrumbItem}}
         {{/if}}
       </div>

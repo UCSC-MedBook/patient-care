@@ -1,7 +1,17 @@
 <template name="home">
   {{> homeWelcome}}
 
-  {{> studiesForPatients}}
+  <h1>Teo's experiment</h1>
+  <a href={{pathFor "createForm"}}
+      class="ui button">
+    Create form
+  </a>
+  <a href={{pathFor "createRecord"}}
+      class="ui button">
+    Create record
+  </a>
+
+  {{> listDataSets}}
 
   {{> listTools}}
 </template>
@@ -36,31 +46,38 @@
 
 
 
-<template name="studiesForPatients">
-  <h1>Pick a study to access patient views</h1>
+<template name="listDataSets">
+  <h1>Data sets</h1>
 
   {{#if Template.subscriptionsReady}}
-    {{#if length getStudies}}
+    {{#if length getDataSets}}
       <div class="ui cards">
-        {{#each getStudies}}
-          <a href={{pathFor "study" study_label=id}} class="ui card">
+        {{#each getDataSets}}
+          <a href={{pathFor "dataSet" data_set_id=_id}} class="ui card">
             <div class="content">
-              <div class="header">{{short_name}}</div>
-              <!-- <div class="meta">
-                <span class="date">Joined in 2013</span>
-              </div> -->
+              <div class="header">{{name}}</div>
               <div class="description">
                 {{description}}
               </div>
             </div>
             <div class="extra content">
-              <div>
-                <i class="users icon"></i>
-                {{#if length patients}}
-                  {{length patients}} Patients
-                {{else}}
-                  No patients
-                {{/if}}
+              <div class="ui grid">
+                <div class="eight wide column">
+                  <i class="users icon"></i>
+                  {{#if length patients}}
+                    {{length patients}} Patients
+                  {{else}}
+                    No patients
+                  {{/if}}
+                </div>
+                <div class="eight wide column">
+                  <i class="flask icon"></i>
+                  {{#if length sample_labels}}
+                    {{length sample_labels}} Samples
+                  {{else}}
+                    No samples
+                  {{/if}}
+                </div>
               </div>
             </div>
           </a>
@@ -71,9 +88,9 @@
         <i class="frown icon"></i>
         <div class="content">
           <div class="header">
-            No studies
+            No data sets
           </div>
-          <p>You don't have access to any studies.</p>
+          <p>You don't have access to any data sets.</p>
         </div>
       </div>
     {{/if}}

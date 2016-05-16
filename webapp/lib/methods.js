@@ -67,7 +67,7 @@ Meteor.methods({
     // check function (above)
 
     let user = MedBook.ensureUser(Meteor.userId());
-    user.ensureAccess(sampleGroup);
+    user.ensureAccess(sampleGroup.collaborations);
 
     // make sure the version is correct (aka don't trust the user)
     // TODO: when should we increment the version?
@@ -180,5 +180,41 @@ Meteor.methods({
       user_id: user._id,
       args,
     });
+  },
+
+  // return a list of the collaborations this user can share with
+  getSharableCollaborations: function () {
+    let user = MedBook.ensureUser(this.userId);
+
+    // TODO: who can we share with?
+    let usersCursor = Meteor.users.find({}, {
+      fields: { "collaborations.personal": 1 }
+    });
+    let usersPersonalCollabs =
+        _.pluck(_.pluck(usersCursor.fetch(), "collaborations"), "personal");
+
+    return _.union(usersPersonalCollabs, user.getCollaborations());
+  },
+  insertRecord: function (values) {
+    check(values, Object);
+
+    let nonValueFields = [
+      "collaborations",
+      "data_set_id",
+      "form_id",
+      "patient_label",
+      "sample_label",
+    ];
+
+    // remove added fields so that values is just the values
+    let record = _.pick(values, nonValueFields);
+    record.values = _.omit(values, nonValueFields);
+
+    let user = MedBook.ensureUser(Meteor.userId());
+    user.ensureAccess(Forms.findOne(record.form_id));
+    user.ensureAccess(DataSets.findOne(record.data_set_id));
+    user.ensureAccess(record.collaborations);
+
+    Records.insert(record);
   },
 });

@@ -51,6 +51,7 @@ ecmascript-runtime@0.2.6
 ejson@1.0.7
 email@1.0.8
 erasaur:meteor-lodash@4.0.0
+fabienb4:autoform-semantic-ui@0.9.3
 fastclick@1.0.7
 flemay:less-autoprefixer@1.2.0
 fortawesome:fontawesome@4.5.0

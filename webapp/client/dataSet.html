@@ -1,7 +1,9 @@
-<template name="study">
+<template name="dataSet">
   {{#if Template.subscriptionsReady}}
-    {{#with getStudy}}
+    {{#with getDataSet}}
       <h1 class="ui header">{{name}}</h1>
+
+      <h3>Patients</h3>
       {{#if length patients}}
         <table class="ui celled striped table">
           <thead>
@@ -44,24 +46,24 @@
               No patients
             </div>
             <p>
-              There are no patients in this study yet.
+              There are no patients in this data set yet.
             </p>
             <p>
-              Use Wrangler to add patients to this study.
+              Use Wrangler to add patients to this data set.
             </p>
           </div>
         </div>
       {{/if}}
     {{/with}}
 
-    {{#unless getStudy}}
+    {{#unless getDataSet}}
       <div class="ui icon message massive">
         <i class="warning sign icon"></i>
         <div class="content">
           <div class="header">
             Uh oh...
           </div>
-          <p>We couldn't find the study with that ID.</p>
+          <p>We couldn't find the data set with that id.</p>
         </div>
       </div>
     {{/unless}}

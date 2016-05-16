@@ -40,5 +40,7 @@ check
 ecmascript
 http
 medbook:referential-integrity
-aldeed:autoform
 meteorhacks:picker
+
+aldeed:autoform
+fabienb4:autoform-semantic-ui

@@ -17,13 +17,31 @@ FlowRouter.route("/", {
   }
 });
 
-// patient-view
-
-FlowRouter.route("/patients/:study_label", {
-  name: "study",
+FlowRouter.route("/data-set/:data_set_id", {
+  name: "dataSet",
   action: function(params) {
     BlazeLayout.render("appBody", {
-      content: "study",
+      content: "dataSet",
+      params
+    });
+  }
+});
+
+FlowRouter.route("/create-record", {
+  name: "createRecord",
+  action: function(params) {
+    BlazeLayout.render("appBody", {
+      content: "createRecord",
+      params
+    });
+  }
+});
+
+FlowRouter.route("/create-form", {
+  name: "createForm",
+  action: function(params) {
+    BlazeLayout.render("appBody", {
+      content: "createForm",
       params
     });
   }
