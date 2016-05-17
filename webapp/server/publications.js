@@ -9,6 +9,7 @@ Meteor.publish("dataSets", function () {
       description: 1,
       sample_labels: 1,
       patients: 1,
+      collaborations: 1,
     }
   });
 });

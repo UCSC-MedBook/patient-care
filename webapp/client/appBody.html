@@ -1,3 +1,8 @@
+<head>
+  <script src="https://docs.handsontable.com/pro/1.3.4/bower_components/handsontable-pro/dist/handsontable.full.min.js"></script>
+  <link rel="stylesheet" href="https://docs.handsontable.com/pro/1.3.4/bower_components/handsontable-pro/dist/handsontable.full.min.css">
+</head>
+
 <template name="appBody">
   <div class="ui container">
     <div style="margin-bottom: 10px;">
@@ -37,21 +42,26 @@
         {{/if}}
 
         {{#if isActiveRoute "createRecord"}}
-          {{#breadcrumbItem isActive=true}}
-            Create record
-          {{/breadcrumbItem}}
+          {{#breadcrumbItem isActive=true}}Create record{{/breadcrumbItem}}
         {{/if}}
 
         {{#if isActiveRoute "createForm"}}
-          {{#breadcrumbItem isActive=true}}
-            Create form
-          {{/breadcrumbItem}}
+          {{#breadcrumbItem isActive=true}}Create form{{/breadcrumbItem}}
         {{/if}}
 
         {{#if isActiveRoute "editRecords"}}
-          {{#breadcrumbItem isActive=true}}
-            Edit records
+          {{#breadcrumbItem isActive=true}}Edit records{{/breadcrumbItem}}
+        {{/if}}
+
+        {{#if isActiveRoute "manageDataSets"}}
+          {{#breadcrumbItem isActive=true}}Manage data sets{{/breadcrumbItem}}
+        {{/if}}
+
+        {{#if isActiveRoute "createDataSet"}}
+          {{#breadcrumbItem isActive=false href=(pathFor "manageDataSets")}}
+            Manage data sets
           {{/breadcrumbItem}}
+          {{#breadcrumbItem isActive=true}}Create new{{/breadcrumbItem}}
         {{/if}}
       </div>
 
