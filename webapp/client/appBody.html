@@ -53,15 +53,9 @@
           {{#breadcrumbItem isActive=true}}Edit records{{/breadcrumbItem}}
         {{/if}}
 
-        {{#if isActiveRoute "manageDataSets"}}
+        {{#if or (isActiveRoute "manageDataSets")
+            (isActiveRoute "createDataSet")}}
           {{#breadcrumbItem isActive=true}}Manage data sets{{/breadcrumbItem}}
-        {{/if}}
-
-        {{#if isActiveRoute "createDataSet"}}
-          {{#breadcrumbItem isActive=false href=(pathFor "manageDataSets")}}
-            Manage data sets
-          {{/breadcrumbItem}}
-          {{#breadcrumbItem isActive=true}}Create new{{/breadcrumbItem}}
         {{/if}}
       </div>
 

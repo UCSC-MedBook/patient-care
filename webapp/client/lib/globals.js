@@ -12,3 +12,11 @@ Meteor.startup(() => {
 Template.registerHelper("firstGreater", function (first, second) {
   return first > second;
 });
+
+Template.registerHelper("concat", function (first, second) {
+  return first + second;
+});
+
+Template.registerHelper("or", function (first, second) {
+  return first || second;
+});

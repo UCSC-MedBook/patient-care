@@ -49,7 +49,7 @@ FlowRouter.route("/manage-data-sets", {
 FlowRouter.route("/manage-data-sets/create", {
   name: "createDataSet",
   action(params) {
-    BlazeLayout.render("appBody", { content: "createDataSet", params });
+    BlazeLayout.render("appBody", { content: "manageDataSets", params });
   }
 });
 

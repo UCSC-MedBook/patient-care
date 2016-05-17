@@ -1,6 +1,15 @@
 Template.manageDataSets.onCreated(function () {
-  let template = this;
+  let instance = this;
 
-  template.subscribe("dataSets");
+  instance.creating = new ReactiveVar(true);
+  instance.selectedCollaboration = new ReactiveVar(null);
+
+  instance.subscribe("dataSets");
   // woohoo!
+});
+
+Template.manageDataSets.helpers({
+  getDataSets() {
+    return DataSets.find({});
+  },
 });
