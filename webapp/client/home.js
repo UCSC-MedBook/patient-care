@@ -25,8 +25,8 @@ Template.homeWelcome.helpers({
 
     if (!user ||
         !user.profile ||
-        !user.profile.PatientCare ||
-        !user.profile.PatientCare.dismissedHomeWelcome) {
+        !user.profile.patient_care ||
+        !user.profile.patient_care.dismissedHomeWelcome) {
       return true;
     }
   },
@@ -36,7 +36,7 @@ Template.homeWelcome.events({
   "click .never-show-again": function (event, instance) {
     Meteor.users.update(Meteor.userId(), {
       $set: {
-        "profile.PatientCare.dismissedHomeWelcome": true
+        "profile.patient_care.dismissedHomeWelcome": true
       }
     });
   }

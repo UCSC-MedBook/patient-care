@@ -1,0 +1,53 @@
+<template name="editRecords">
+  <div class="ui container grid">
+    <div class="row">
+      <p>
+        Edit records for
+        <div class="ui selection dropdown forms
+            {{#unless formsLoaded}}loading{{/unless}}">
+          <input type="hidden" name="gender">
+          <i class="dropdown icon"></i>
+          <div class="default text">Select a form</div>
+          <div class="menu">
+            {{#each getForms}}
+              <div class="item" data-value={{_id}}>{{name}}</div>
+            {{/each}}
+          </div>
+        </div>
+        in
+        <div class="ui selection dropdown data-set
+            {{#unless dataSetsLoaded}}loading{{/unless}}">
+          <input type="hidden" name="gender">
+          <i class="dropdown icon"></i>
+          <div class="default text">Select a data set</div>
+          <div class="menu">
+            {{#each getDataSets}}
+              <div class="item" data-value={{_id}}>{{name}}</div>
+            {{/each}}
+          </div>
+        </div>
+      </p>
+    </div>
+
+    <div class="row">
+      {{#if recordsSub}}
+        {{#if recordsSub.ready}}
+          {{> handsOnTable}}
+        {{else}}
+          {{> dataLoading}}
+        {{/if}}
+      {{else}}
+        <div class="ui large message">
+          <div class="header">
+            Select a form and a data set to continue.
+          </div>
+          The data will load once you have made your selections.
+        </div>
+      {{/if}}
+    </div>
+  </div>
+</template>
+
+<template name="handsOnTable">
+  <div id="recordsHandsOnTable"></div>
+</template>

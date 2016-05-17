@@ -195,7 +195,7 @@ Meteor.methods({
 
     return _.union(usersPersonalCollabs, user.getCollaborations());
   },
-  insertRecord: function (values) {
+  insertRecord: function(values) {
     check(values, Object);
 
     let nonValueFields = [
@@ -216,5 +216,10 @@ Meteor.methods({
     user.ensureAccess(record.collaborations);
 
     Records.insert(record);
+  },
+  insertForm: function(newForm) {
+    let user = MedBook.ensureUser(Meteor.userId());
+    user.ensureAccess(newForm);
+    Forms.insert(newForm);
   },
 });

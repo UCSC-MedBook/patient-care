@@ -47,6 +47,16 @@ FlowRouter.route("/create-form", {
   }
 });
 
+FlowRouter.route("/edit-records", {
+  name: "editRecords",
+  action: function(params) {
+    BlazeLayout.render("appBody", {
+      content: "editRecords",
+      params
+    });
+  }
+});
+
 FlowRouter.route("/patients/:study_label/:patient_label", {
   name: "patient",
   action: function(params) {

@@ -22,30 +22,21 @@
 
               {{! form-defined fields}}
               {{#each getForm.fields}}
-                {{#if compare type "String"}}
-                  {{#if allowedValues}}
-                    {{> afQuickField name=label options="allowed" search=true}}
+                {{#if compare type "Select"}}
+                  {{> afQuickField name=label options="allowed"
+                      search=true type="select"}}
+                {{else}}
+                  {{#if compare type "Integer"}}
+                    {{> afQuickField name=label step="1"}}
                   {{else}}
                     {{> afQuickField name=label}}
                   {{/if}}
-                {{/if}}
-
-                {{#if compare type "Number"}}
-                  {{> afQuickField name=label}}
-                {{/if}}
-
-                {{#if compare type "Date"}}
-                  {{> afQuickField name=label}}
-                {{/if}}
-
-                {{#if compare type "Boolean"}}
-                  {{> afQuickField name=label}}
                 {{/if}}
               {{/each}}
             </div>
 
             <button type="submit" class="ui primary button">
-              Create
+              Create record
             </button>
           {{/with}}
 
@@ -101,7 +92,8 @@
       </div>
     {{else}}
       {{> afQuickField name="patient_label" options="allowed"
-          defaultValue=(queryParam "patient_label")}}
+          defaultValue=(queryParam "patient_label")
+          search=true}}
     {{/if}}
   {{else}}
     {{#if firstGreater (length dataSet.patients) 250}}
@@ -115,8 +107,8 @@
       <div class="ui two fields">
         {{> automaticPatientLabelField lookedUpPatient}}
 
-
-        {{> afQuickField name="sample_label" options="allowed"}}
+        {{> afQuickField name="sample_label" options="allowed"
+            search=true}}
             <!-- defaultValue=(queryParam "sample_label")}} -->
       </div>
     {{/if}}
@@ -131,10 +123,4 @@
     {{> afQuickField name="patient_label" readonly=true
         placeholder="Set automatically" value=this}}
   {{/if}}
-</template>
-
-<template name="createForm">
-  <h1>Create a new form</h1>
-
-
 </template>

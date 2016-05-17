@@ -3,6 +3,13 @@ Meteor.publish("dataSets", function () {
 
   return DataSets.find({
     collaborations: {$in: user.getCollaborations() },
+  }, {
+    fields: {
+      name: 1,
+      description: 1,
+      sample_labels: 1,
+      patients: 1,
+    }
   });
 });
 
@@ -116,5 +123,15 @@ Meteor.publish("forms", function () {
 
   return Forms.find({
     collaborations: { $in: user.getCollaborations() },
+  });
+});
+
+Meteor.publish("records", function(form_id, data_set_id) {
+  let user = MedBook.ensureUser(this.userId);
+
+  return Records.find({
+    collaborations: { $in: user.getCollaborations() },
+    form_id,
+    data_set_id,
   });
 });

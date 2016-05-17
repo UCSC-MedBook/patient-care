@@ -2,13 +2,14 @@
   {{> homeWelcome}}
 
   <h1>Teo's experiment</h1>
-  <a href={{pathFor "createForm"}}
-      class="ui button">
+  <a href={{pathFor "createForm"}} class="ui button">
     Create form
   </a>
-  <a href={{pathFor "createRecord"}}
-      class="ui button">
+  <a href={{pathFor "createRecord"}} class="ui button">
     Create record
+  </a>
+  <a href={{pathFor "editRecords"}} class="ui button">
+    Edit records
   </a>
 
   {{> listDataSets}}

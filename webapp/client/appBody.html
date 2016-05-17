@@ -41,6 +41,18 @@
             Create record
           {{/breadcrumbItem}}
         {{/if}}
+
+        {{#if isActiveRoute "createForm"}}
+          {{#breadcrumbItem isActive=true}}
+            Create form
+          {{/breadcrumbItem}}
+        {{/if}}
+
+        {{#if isActiveRoute "editRecords"}}
+          {{#breadcrumbItem isActive=true}}
+            Edit records
+          {{/breadcrumbItem}}
+        {{/if}}
       </div>
 
       <div style="float: right;">

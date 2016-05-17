@@ -3,6 +3,9 @@ AutoForm.addHooks("insertRecord", {
     // clear (almost) all dropdowns
     $("#insertRecord .reset-dropdown .ui.dropdown").dropdown("clear")
   },
+  onError: function (first, second) {
+    console.log("first, second:", first, second);
+  },
 });
 
 // Template.createRecord
@@ -48,7 +51,7 @@ var commonRecordFields = Records.simpleSchema().pick([
 ]).schema();
 
 Template.createRecord.helpers({
-  recordSchema: function () {
+  recordSchema() {
     let instance = Template.instance();
 
     let formId = instance.form_id.get();
@@ -64,42 +67,45 @@ Template.createRecord.helpers({
           _.pluck(dataSet.patients, "patient_label");
       commonRecordFields.sample_label.allowedValues = dataSet.sample_labels;
 
+      // require patient or sample label
       if (form.specificity === "patient") {
         commonRecordFields.patient_label.optional = false;
       } else {
         commonRecordFields.sample_label.optional = false;
       }
 
+      let schemaFromForm = MedBook.schemaObjectFromForm(form);
+
       // add the schemas together
       return new SimpleSchema([
-        MedBook.schemaObjectFromForm(form),
+        schemaFromForm,
         commonRecordFields,
       ]);
     }
 
     return new SimpleSchema(commonRecordFields);
   },
-  getForm: function () {
+  getForm() {
     return Forms.findOne(Template.instance().form_id.get());
   },
-  getDataSet: function () {
+  getDataSet() {
     return DataSets.findOne(Template.instance().data_set_id.get());
   },
-  onlyPersonal: function () {
+  onlyPersonal() {
     return [MedBook.findUser(Meteor.userId()).personalCollaboration()];
   },
 
-  collaborationOptions: function () {
+  collaborationOptions() {
     return _.map(Template.instance().sharableCollabs.get(), (name) => {
       return { value: name, label: name };
     });
   },
-  formOptions: function () {
+  formOptions() {
     return Forms.find().map((form) => {
       return { value: form._id, label: form.name };
     });
   },
-  dataSetOptions: function () {
+  dataSetOptions() {
     return DataSets.find().map((dataSet) => {
       return { value: dataSet._id, label: dataSet.name };
     });
@@ -161,7 +167,3 @@ Template.automaticPatientLabelField.onRendered(function () {
     });
   });
 });
-
-
-
-// Template.createForm
