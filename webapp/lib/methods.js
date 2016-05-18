@@ -292,7 +292,8 @@ Meteor.methods({
       Collaborations.update(collaborationId, {
         $addToSet: {
           requestsToJoin: {
-            name: user.profile.firstName + " " + user.profile.lastName,
+            firstName: user.profile.firstName,
+            lastName: user.profile.lastName,
             email: user.collaborations.email_address,
             personalCollaboration: user.personalCollaboration(),
           },

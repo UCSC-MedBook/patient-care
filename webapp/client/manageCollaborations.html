@@ -179,13 +179,17 @@
 
     {{#if length requestsToJoin}}
       {{#if isAdmin}}
-        <p>The following members have requested access:</p>
+        <h4>The following people have requested access:</h4>
         <div class="ui cards">
           {{#each requestsToJoin}}
             <div class="card">
               <div class="content">
                 <div class="header">
-                  {{name}}
+                  {{firstName}} {{lastName}}
+                </div>
+                <div class="description">
+                  Email {{firstName}} at
+                  <a href="mailto:{{email}}">{{email}}</a>.
                 </div>
               </div>
               <div class="extra content">
