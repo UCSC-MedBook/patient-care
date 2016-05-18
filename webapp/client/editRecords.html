@@ -32,7 +32,7 @@
     <div class="row">
       {{#if recordsSub}}
         {{#if recordsSub.ready}}
-          {{> handsOnTable}}
+          {{> handsOnTable data_set_id=getDataSetId form_id=getFormId}}
         {{else}}
           {{> dataLoading}}
         {{/if}}

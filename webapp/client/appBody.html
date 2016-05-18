@@ -53,9 +53,10 @@
           {{#breadcrumbItem isActive=true}}Edit records{{/breadcrumbItem}}
         {{/if}}
 
-        {{#if or (isActiveRoute "manageDataSets")
-            (isActiveRoute "createDataSet")}}
-          {{#breadcrumbItem isActive=true}}Manage data sets{{/breadcrumbItem}}
+        {{#if or (isActiveRoute "manageCollaborations")
+            (isActiveRoute "createCollaboration")
+            (isActiveRoute "browseCollaborations")}}
+          {{#breadcrumbItem isActive=true}}Collaborations{{/breadcrumbItem}}
         {{/if}}
       </div>
 

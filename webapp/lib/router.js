@@ -1,77 +1,67 @@
+function defaultAction(templateName, params) {
+  // renders appBody with templateName inside
+  BlazeLayout.render("appBody", { content: templateName, params });
+}
+
 FlowRouter.notFound = {
-  action(params) {
-    BlazeLayout.render("appBody", {content: "routeNotFound", params, });
-  }
+  action: _.partial(defaultAction, "routeNotFound"),
 };
+
+
 
 FlowRouter.route("/", {
   name: "home",
-  action(params) {
-    BlazeLayout.render("appBody", {content: "home", params });
-  }
+  action: _.partial(defaultAction, "home"),
 });
 
 FlowRouter.route("/data-set/:data_set_id", {
   name: "dataSet",
-  action(params) {
-    BlazeLayout.render("appBody", {content: "dataSet", params });
-  }
+  action: _.partial(defaultAction, "dataSet"),
 });
 
 FlowRouter.route("/create-record", {
   name: "createRecord",
-  action(params) {
-    BlazeLayout.render("appBody", {content: "createRecord", params });
-  }
+  action: _.partial(defaultAction, "createRecord"),
 });
 
 FlowRouter.route("/create-form", {
   name: "createForm",
-  action(params) {
-    BlazeLayout.render("appBody", {content: "createForm", params });
-  }
+  action: _.partial(defaultAction, "createForm"),
 });
 
 FlowRouter.route("/edit-records", {
   name: "editRecords",
-  action(params) {
-    BlazeLayout.render("appBody", {content: "editRecords", params });
-  }
+  action: _.partial(defaultAction, "editRecords"),
 });
 
-FlowRouter.route("/manage-data-sets", {
-  name: "manageDataSets",
-  action(params) {
-    BlazeLayout.render("appBody", { content: "manageDataSets", params });
-  }
+FlowRouter.route("/collaborations", {
+  name: "manageCollaborations",
+  action: _.partial(defaultAction,  "manageCollaborations"),
 });
 
-FlowRouter.route("/manage-data-sets/create", {
-  name: "createDataSet",
-  action(params) {
-    BlazeLayout.render("appBody", { content: "manageDataSets", params });
-  }
+FlowRouter.route("/collaborations/create", {
+  name: "createCollaboration",
+  action: _.partial(defaultAction,  "manageCollaborations"),
+});
+
+FlowRouter.route("/collaborations/browse", {
+  name: "browseCollaborations",
+  action: _.partial(defaultAction,  "manageCollaborations"),
 });
 
 FlowRouter.route("/patients/:study_label/:patient_label", {
   name: "patient",
-  action(params) {
-    BlazeLayout.render("appBody", {content: "patient", params });
-  }
+  action: _.partial(defaultAction, "patient"),
 });
 
 FlowRouter.route("/patients/:study_label/:patient_label/upDownGenes/:job_id", {
   name: "upDownGenes",
-  action(params) {
-    BlazeLayout.render("appBody", {content: "upDownGenesJob", params });
-  }
+  action: _.partial(defaultAction, "upDownGenesJob"),
 });
 
 // tools
 
 FlowRouter.route("/tools/limmaGSEA", {
   name: "listLimmaGSEA",
-  action(params) {
-    BlazeLayout.render("appBody", {content: "listLimmaGSEA", params });
-  }
+  action: _.partial(defaultAction, "listLimmaGSEA"),
 });

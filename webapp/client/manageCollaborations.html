@@ -1,0 +1,330 @@
+<template name="manageCollaborations">
+  <h1>Collaborations</h1>
+
+  <div class="ui grid">
+    <div class="four wide column">
+      <div class="ui vertical fluid tabular menu">
+        <a href={{pathFor "createCollaboration"}}
+            class="item {{#if (isActiveRoute "createCollaboration")}}
+                active{{/if}}">
+          Create new
+          <i class="plus icon"></i>
+        </a>
+        <a href={{pathFor "browseCollaborations"}}
+            class="item {{#if (isActiveRoute "browseCollaborations")}}
+                active{{/if}}">
+          Browse
+          <i class="grid layout icon"></i>
+        </a>
+
+        {{#each getCollaborations}}
+          <a href={{pathFor "manageCollaborations"
+                  query=(concat "collaboration_id=" _id)}}
+              class="{{#if compare (queryParam "collaboration_id") _id}}
+                  active{{/if}} item">
+            {{name}}
+          </a>
+        {{/each}}
+        <!-- {{#unless length getCollaborations}}
+          <div class="item">
+            No collaborations
+            <i class="frown icon"></i>
+          </div>
+        {{/unless}} -->
+      </div>
+    </div>
+    <div class="twelve wide stretched column">
+      <div class="ui segment">
+        {{#if isActiveRoute "manageCollaborations"}}
+          {{#if getCollaboration}}
+            {{> showCollaboration getCollaboration}}
+          {{else}}
+            {{#if Template.subscriptionsReady}}
+              {{#if queryParam "data_set"}}
+                <div class="ui error message">
+                  <div class="header">
+                    Invalid data set.
+                  </div>
+                  This data set either doesn't exist or you don't have
+                  access to it.
+                </div>
+              {{else}}
+                {{#if length getCollaborations}}
+                  <h3>
+                    Nothing selected
+                  </h3>
+                  <p>
+                    Select a collaboration on the left panel to
+                    view more information about it.
+                  </p>
+                {{else}}
+                  <h3>
+                    You are not part of any collaborations... yet!
+                  </h3>
+                  <p>
+                    You can either
+                    <a href={{pathFor "createCollaboration"}}>
+                      create a new collaboration
+                    </a>
+                    or
+                    <a href={{pathFor "browseCollaborations"}}>
+                      browse existing collaborations.
+                    </a>
+                  </p>
+                  <p>
+                    If the collaboration you'd like to join is not listed,
+                    you may have to contact the collaboration administrators
+                    to add you.
+                  </p>
+                {{/if}}
+              {{/if}}
+            {{else}}
+              {{> dataLoading}}
+            {{/if}}
+          {{/if}}
+        {{else}}
+          {{#if isActiveRoute "createCollaboration"}}
+            {{> createCollaboration}}
+          {{else}}
+            {{> browseCollaborations}}
+          {{/if}}
+        {{/if}}
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="createCollaboration">
+  <h3>Create new collaboration</h3>
+
+  {{#autoForm id="insertCollaboration" schema=collaborationSchema
+      type="method" meteormethod="insertCollaboration"}}
+    {{> afQuickField name="name" type="text"
+        placeholder="What do you want to call your collaboration?"}}
+    <p>
+      Note: you cannot change the name of collaborations after
+      they are created.
+    </p>
+
+    {{> alwaysShowCollaborationFields}}
+
+
+    {{! only one admin: this user}}
+    {{> afQuickField name="administrators" type="hidden" value=onlyPersonal}}
+    {{> afQuickField name="collaborators" type="hidden" value=onlyPersonal}}
+
+    <p>
+      You will be able to add collaborators and administrators once your
+      collaboration has been created.
+    </p>
+
+    <button type="submit" class="ui primary button">Create!</button>
+  {{/autoForm}}
+</template>
+
+
+
+<template name="showCollaboration">
+  <h3>
+    {{name}}
+
+    <div class="ui right floated icon buttons">
+      {{#if isAdmin}}
+        {{#if editing}}
+          <button class="ui positive button done-editing-collaboration
+              {{#if waitingForServer}}loading{{/if}}">
+            <i class="checkmark icon"></i> Done
+          </button>
+        {{else}}
+          <button class="ui primary button edit-collaboration">
+            <i class="edit icon"></i> Edit
+          </button>
+        {{/if}}
+        {{> deleteCollabButton
+            reallyDelete=(getInstanceReactive "removeClicked")}}
+      {{else}}
+        <button class="ui negative button remove-collaboration">
+          <i class="sign out icon"></i>
+          {{#if getInstanceReactive "removeClicked"}}
+            Really leave?
+          {{else}}
+            Leave
+          {{/if}}
+        </button>
+      {{/if}}
+    </div>
+  </h3>
+
+  {{#if editing}}
+    {{#autoForm id="editCollaboration" schema=collaborationSchema doc=this
+        type="update"}}
+      {{> alwaysShowCollaborationFields}}
+
+      {{> adminAndCollaboratorFields}}
+    {{/autoForm}}
+  {{else}}
+    <p>
+      {{description}}
+    </p>
+    <p>
+      Publicly listed: {{> yesOrNo publiclyListed}}
+    </p>
+    {{#if publiclyListed}}
+      <p>
+        Admin aproval required to join: {{> yesOrNo adminApprovalRequired}}
+      </p>
+    {{/if}}
+    <p>Collaborators: {{> listCollaborators collaborators}}</p>
+    <p>Administrators: {{> listCollaborators administrators}}</p>
+
+    {{#if length requestsToJoin}}
+      {{#if isAdmin}}
+        <p>The following members have requested access:</p>
+        <div class="ui cards">
+          {{#each requestsToJoin}}
+            <div class="card">
+              <div class="content">
+                <div class="header">
+                  {{name}}
+                </div>
+              </div>
+              <div class="extra content">
+                <div class="ui two buttons">
+                  <div class="ui basic green button approve-collaborator">
+                    Approve
+                  </div>
+                  <div class="ui basic red button deny-collaborator">
+                    Deny
+                  </div>
+                </div>
+              </div>
+            </div>
+          {{/each}}
+        </div>
+      {{/if}}
+    {{/if}}
+  {{/if}}
+</template>
+
+<template name="browseCollaborations">
+  {{#if Template.subscriptionsReady}}
+    {{#if alreadySetName}}
+      <h3>Browse publicly listed collaborations</h3>
+      <p>
+        Note that some collaborations choose to not be listed publicly.
+        To join a collaboration that is not listed publicly, contact one of
+        the collaboration administrators directly.
+      </p>
+
+      {{#if length getBrowsingCollaborations}}
+        <div class="ui cards">
+          {{#each getBrowsingCollaborations}}
+            <div class="card">
+              <div class="content">
+                <div class="header">{{name}}</div>
+                <div class="description">{{description}}</div>
+              </div>
+              {{#if alreadyAppliedToJoin}}
+                <div class="ui bottom attached disabled button">
+                  Already applied
+                </div>
+              {{else}}
+                <div class="ui bottom attached button join-collaboration">
+                  <i class="add icon"></i>
+                  {{#if adminApprovalRequired}}
+                    Apply to collaboration
+                  {{else}}
+                    Join collaboration
+                  {{/if}}
+                </div>
+              {{/if}}
+            </div>
+          {{/each}}
+        </div>
+      {{else}}
+        <div class="ui message">
+          <div class="header">No collaborations found</div>
+          There are no publicly listed collaborations that you are not already
+          a member of.
+        </div>
+      {{/if}}
+    {{else}}
+      <h3>Just a moment...</h3>
+      <p>
+        Your name will not be displayed publically like your personal
+        collaboration, but will be sent with every request to join a
+        collaboration that requires administrative approval.
+      </p>
+      {{#autoForm id="setName" type="method" meteormethod="setProfileName"
+          schema=firstLastName}}
+        <div class="field">
+          <label>Name</label>
+          <div class="two fields">
+            {{> afQuickField name="firstName" placeholder="First name"
+                label=false}}
+            {{> afQuickField name="lastName" placeholder="Last name"
+                label=false}}
+          </div>
+        </div>
+        <button type="submit" class="ui primary button">Set name</button>
+      {{/autoForm}}
+    {{/if}}
+  {{else}}
+    {{> dataLoading}}
+  {{/if}}
+</template>
+
+<template name="yesOrNo">
+  {{#if this}}
+    Yes
+  {{else}}
+    No
+  {{/if}}
+</template>
+
+<template name="alwaysShowCollaborationFields">
+  {{> afQuickField name="description" type="textarea" rows="3"
+      placeholder=collaborationPlaceholder}}
+
+  {{> afQuickField name="publiclyListed" defaultValue=false}}
+
+  {{#if afFieldValueIs name="publiclyListed" value=true}}
+    {{> afQuickField name="adminApprovalRequired" defaultValue=true}}
+  {{else}}
+    {{> afQuickField name="adminApprovalRequired" value=false
+        disabled=true}}
+  {{/if}}
+</template>
+
+<template name="listCollaborators">
+  {{#each this}}
+    <div class="ui horizontal label collaboration">
+      <i class="{{#if isPersonalCollaboration}}user{{else}}users{{/if}}
+          icon"></i>
+      {{this}}
+    </div>
+  {{/each}}
+</template>
+
+<template name="adminAndCollaboratorFields">
+  {{#if collabsLoaded}}
+    {{> afQuickField name="collaborators" options=collaborationOptions
+        type="select" multiple=true search=true}}
+    {{> afQuickField name="administrators" options=collaborationOptions
+        type="select" multiple=true search=true}}
+  {{else}}
+    {{> dataLoading}}
+  {{/if}}
+</template>
+
+<template name="deleteCollabButton">
+  <button class="ui negative button remove-collaboration show-popup"
+      data-content={{deletePopupText}}>
+    <i class="trash icon"></i>
+    {{#if reallyDelete}}
+      Really delete?
+    {{else}}
+      Delete
+    {{/if}}
+  </button>
+</template>

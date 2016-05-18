@@ -41,6 +41,8 @@ Meteor.methods({
     });
   },
   getSampleGroupVersion: function (name) {
+    check(name, String);
+
     // return the next version given the sample group name
     // NOTE: this function only looks at the sample groups this user has
     // access to, which means sample groups are not necessarily uniquely
@@ -218,8 +220,151 @@ Meteor.methods({
     Records.insert(record);
   },
   insertForm: function(newForm) {
+    check(newForm, Forms.simpleSchema());
+
     let user = MedBook.ensureUser(Meteor.userId());
     user.ensureAccess(newForm);
     Forms.insert(newForm);
   },
+  insertCollaboration(newCollaboration) {
+    check(newCollaboration, Collaborations.simpleSchema());
+
+    var user = MedBook.ensureUser(Meteor.userId());
+    // they must be an admin of the collaboration they create
+    user.ensureAdmin(newCollaboration);
+
+    if (Meteor.call("collabNameTaken", newCollaboration.name)) {
+      throw new Meteor.Error("collaboration-name-taken");
+    }
+
+    return Collaborations.insert(newCollaboration);
+  },
+  collabNameTaken: function (collabName) {
+    return !!Collaborations.findOne({name: collabName});
+  },
+  removeCollaboration(collaborationId) {
+    check(collaborationId, String);
+
+    let user = MedBook.ensureUser(this.userId);
+    let collab = Collaborations.findOne(collaborationId);
+    user.ensureAdmin(collab);
+
+    // remove all collaborators and administrators so that no one can edit it
+    // but no one can create one with that name
+    Collaborations.update(collaborationId, {
+      $set: {
+        collaborators: [],
+        administrators: [],
+      }
+    });
+  },
+  updateCollaboration(collaborationId, updateFields) {
+    check(updateFields, new SimpleSchema({
+      description: { type: String, optional: true },
+      publiclyListed: { type: Boolean, optional: true },
+      adminApprovalRequired: { type: Boolean, optional: true },
+      administrators: { type: [String], optional: true },
+      collaborators: { type: [String], optional: true },
+    }));
+
+    let user = MedBook.ensureUser(this.userId);
+    let collab = Collaborations.findOne(collaborationId);
+    user.ensureAdmin(collab);
+
+    // make sure they're not doing anything illegal
+    if (updateFields.administrators &&
+        updateFields.administrators.length === 0) {
+      throw new Meteor.Error("no-administrators");
+    }
+
+    Collaborations.update(collaborationId, {
+      $set: updateFields
+    });
+  },
+  joinCollaboration(collaborationId) {
+    check(collaborationId, String);
+
+    let user = MedBook.ensureUser(this.userId);
+    let collab = Collaborations.findOne(collaborationId);
+
+    // either add them to the collaboration or to the requests list
+    if (collab.adminApprovalRequired) {
+      Collaborations.update(collaborationId, {
+        $addToSet: {
+          requestsToJoin: {
+            name: user.profile.firstName + " " + user.profile.lastName,
+            email: user.collaborations.email_address,
+            personalCollaboration: user.personalCollaboration(),
+          },
+        }
+      });
+    } else {
+      Collaborations.update(collaborationId, {
+        $addToSet: {
+          collaborators: user.personalCollaboration(),
+        }
+      });
+
+      // if they've joined the collaboration successfully return the _id
+      return collaborationId
+    }
+  },
+  leaveCollaboration(collaborationId) {
+    check(collaborationId, String);
+
+    let user = MedBook.ensureUser(this.userId);
+    let collab = Collaborations.findOne(collaborationId);
+    user.ensureAccess(collab.name);
+
+    Collaborations.update(collaborationId, {
+      $pull: {
+        collaborators: user.personalCollaboration(),
+      }
+    });
+  },
+  setProfileName(firstAndLastName) {
+    check(firstAndLastName, new SimpleSchema({
+      firstName: { type: String },
+      lastName: { type: String },
+    }));
+
+    let user = MedBook.ensureUser(this.userId);
+
+    Meteor.users.update(user._id, {
+      $set: {
+        "profile.firstName": firstAndLastName.firstName,
+        "profile.lastName": firstAndLastName.lastName,
+      }
+    });
+  },
+  approveOrDenyCollaborator(collaborationId, personalCollaboration,
+      approvedIfTrue) {
+    check([collaborationId, personalCollaboration], [String]);
+    check(approvedIfTrue, Boolean);
+
+    let user = MedBook.ensureUser(this.userId);
+    let collab = Collaborations.findOne(collaborationId);
+    user.ensureAdmin(collab);
+
+    // always remove the request
+    let pullObject = {
+      requestsToJoin: {
+        personalCollaboration,
+      }
+    };
+
+    let modifier;
+    if (approvedIfTrue) {
+      modifier = {
+        $addToSet: {
+          collaborators: personalCollaboration
+        },
+        $pull: pullObject,
+      }
+    } else {
+      modifier = { $pull: pullObject };
+    }
+
+    Collaborations.update(collaborationId, modifier);
+  }
 });

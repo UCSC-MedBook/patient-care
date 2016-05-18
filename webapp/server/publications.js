@@ -136,3 +136,24 @@ Meteor.publish("records", function(form_id, data_set_id) {
     data_set_id,
   });
 });
+
+Meteor.publish("adminAndCollaboratorCollaborations", function() {
+  let user = MedBook.ensureUser(this.userId);
+  let userCollabs = user.getCollaborations();
+
+  return Collaborations.find({
+    $or: [
+      { name: { $in: userCollabs } },
+      { administrators: { $in: userCollabs } },
+    ],
+  });
+});
+
+Meteor.publish("browseCollaborations", function() {
+  let user = MedBook.ensureUser(this.userId);
+
+  return Collaborations.find({
+    publiclyListed: true,
+    administrators: { $ne: [] }
+  });
+});
