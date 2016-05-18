@@ -1,11 +1,11 @@
 <template name="editSampleGroup">
   <div class="ui top attached menu">
-    {{#if length addableStudies}}
-      {{> addStudyMenu addableStudies=addableStudies
+    {{#if length addableDataSets}}
+      {{> addDataSetMenu addableDataSets=addableDataSets
           sampleGroup=sampleGroup}}
     {{else}}
       <div class="ui item">
-        No more studies
+        No more data sets
       </div>
     {{/if}}
 
@@ -28,28 +28,29 @@
     <div class="ui bottom attached segment">
       {{#with getSampleGroup}}
         <div class="ui list">
-          {{#if length studies}}
-            {{! show all of the studies}}
-            {{#each studies}}
+          {{#if length data_sets}}
+            {{! show all of the data sets}}
+            {{#each data_sets}}
               <div class="item">
                 <!-- <i class="icon"></i> {{! blank icons create indentation}} -->
                 <div class="content">
                   <div class="header">
-                    {{getStudyName study_label}}
+                    {{dataSetName}}
 
                     <div class="ui mini buttons">
-                      {{> addFilterButton study=this sampleGroup=sampleGroup
-                          studyIndex=@index}}
-                      <button class="ui icon button remove-study">
+                      {{> addFilterButton data_set=this sampleGroup=sampleGroup
+                          dataSetIndex=@index}}
+                      <button class="ui icon button remove-data-set">
                         <i class="minus icon"></i> Remove
                       </button>
                     </div>
                   </div>
                   <div class="description"></div>
                   <div class="list" style="padding-top: 0px;">
-                    {{#let studyIndex=@index}}
+                    {{#let dataSetIndex=@index}}
                       {{#each filters}}
-                        {{> showFilter studyIndex=studyIndex filterIndex=@index
+                        {{> showFilter dataSetIndex=dataSetIndex
+                            filterIndex=@index
                             sampleGroup=sampleGroup}}
                       {{/each}}
                     {{/let}}
@@ -58,7 +59,7 @@
               </div>
             {{/each}}
           {{else}}
-            No studies
+            No data sets have been added yet.
           {{/if}}
         </div>
       {{/with}}
@@ -68,14 +69,14 @@
   {{/if}}
 </template>
 
-<template name="addStudyMenu">
+<template name="addDataSetMenu">
   <div class="ui item dropdown"> {{! "dropdown" for hand as mouse}}
-    Add a study <i class="dropdown icon"></i>
+    Add a data set <i class="dropdown icon"></i>
   </div>
   <div class="ui flowing popup">
     <div class="ui list">
-      {{#each addableStudies}}
-        <a class="item add-study-to-sample-group">
+      {{#each addableDataSets}}
+        <a class="item add-data-set-to-sample-group">
           {{name}}
         </a>
       {{/each}}
@@ -113,18 +114,18 @@
       {{#with getFilter}}
         {{#if compare type "sample_label_list"}}
           {{> sampleLabelListFilter options=getFilter.options
-              setOptions=setOptions study_label=study_label
+              setOptions=setOptions data_set_id=data_set_id
               title="Include specific samples"}}
         {{/if}}
 
         {{#if compare type "exclude_sample_label_list"}}
           {{> sampleLabelListFilter options=getFilter.options
-              setOptions=setOptions study_label=study_label
+              setOptions=setOptions data_set_id=data_set_id
               title="Exclude specific samples"}}
         {{/if}}
 
         {{#if compare type "data_loaded"}}
-          {{> dataLoadedFilter study_label=study_label
+          {{> dataLoadedFilter data_set_id=data_set_id
               options=getFilter.options setOptions=setOptions}}
         {{/if}}
       {{/with}}

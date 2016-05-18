@@ -14,7 +14,7 @@ Template.listLimmaGSEA.onCreated(function () {
         name: "",
         version: 1,
         collaborations: [ Meteor.user().collaborations.personal ],
-        studies: []
+        data_sets: []
       }),
     }
   }
@@ -51,9 +51,9 @@ function getSampleGroupId (group, instance) {
             `Please enter a name for ${group.title}.`))
         return;
       }
-      if (sgObj.studies.length === 0) {
-        reject(Meteor.Error("Studies missing",
-            `Please add one or more studies to ${group.title}.`));
+      if (sgObj.data_sets.length === 0) {
+        reject(Meteor.Error("Data sets missing",
+            `Please add one or more data sets to ${group.title}.`));
         return;
       }
 
@@ -129,8 +129,6 @@ Template.listLimmaGSEA.events({
         });
       })
       .then((result) => {
-        console.log("JOB CREATED:", result);
-
         // clear the form, stop the spinner on the submit button
         instance.$(".dropdown").dropdown("clear");
         instance.creatingJob.set(false);

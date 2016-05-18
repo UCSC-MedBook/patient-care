@@ -16,7 +16,7 @@
             {{#each patients}}
               <tr class="go-to-patient">
                 <td>
-                  <a href={{pathFor "patient" study_label=(param "study_label")
+                  <a href={{pathFor "patient" data_set_id=(param "data_set_id")
                           patient_label=patient_label}}
                       class="header">
                     <i class="fa fa-user icon"></i> {{patient_label}}

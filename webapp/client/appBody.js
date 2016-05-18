@@ -14,7 +14,14 @@ Template.appBody.onCreated(function () {
 
 Template.appBody.helpers({
   getDataSetName: function () {
-    return DataSets.findOne(this.params().data_set_id).name;
+    let dataSet = DataSets.findOne(this.params().data_set_id);
+    if (dataSet) {
+      return dataSet.name;
+    }
+    return "loading";
+  },
+  invalidUrl() {
+    return FlowRouter.getRouteName() === undefined;
   },
 });
 

@@ -15,15 +15,14 @@
         {{#if params.data_set_id}}
           {{#breadcrumbItem isActive=(isActiveRoute "dataSet")
               href=(pathFor "dataSet" data_set_id=params.data_set_id)}}
-            {{#if Template.subscriptionsReady}}
-              {{getDataSetName}}
-            {{/if}}
+            {{getDataSetName}}
           {{/breadcrumbItem}}
         {{/if}}
 
         {{#if params.patient_label}}
           {{#breadcrumbItem isActive=(isActiveRoute "patient")
-              href=(pathFor "patient" study_label=params.study_label patient_label=params.patient_label)}}
+              href=(pathFor "patient" data_set_id=params.data_set_id
+                  patient_label=params.patient_label)}}
             {{params.patient_label}}
           {{/breadcrumbItem}}
         {{/if}}
@@ -57,6 +56,10 @@
             (isActiveRoute "createCollaboration")
             (isActiveRoute "browseCollaborations")}}
           {{#breadcrumbItem isActive=true}}Collaborations{{/breadcrumbItem}}
+        {{/if}}
+
+        {{#if invalidUrl}}
+          {{#breadcrumbItem isActive=true}}Invalid URL{{/breadcrumbItem}}
         {{/if}}
       </div>
 

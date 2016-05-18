@@ -5,24 +5,24 @@ Template.upDownGenesJob.onCreated(function () {
 
   // subscribe and keep up to date
   instance.autorun(function () {
-    let { study_label, job_id } = Template.currentData();
+    let { data_set_id, job_id } = Template.currentData();
 
-    instance.subscribe("study", study_label);
+    instance.subscribe("dataSet", data_set_id);
     instance.subscribe("upDownGenesJob", job_id);
   });
 
-  // combine study and patient within study
-  instance.patient = new ReactiveVar(); // from the study's `patients` list
+  // combine data set and patient within data set
+  instance.patient = new ReactiveVar(); // from the data sets's `patients` list
   instance.autorun(function () {
-    let { study_label, patient_label } = Template.currentData();
-    let study = Studies.findOne({ id: study_label });
+    let { data_set_id, patient_label } = Template.currentData();
+    let dataSet = DataSets.findOne(data_set_id);
 
     let patient;
-    if (study) {
-      patient = _.findWhere(study.patients, { patient_label });
+    if (dataSet) {
+      patient = _.findWhere(dataSet.patients, { patient_label });
 
       if (patient) {
-        _.extend(patient, { study_label });
+        _.extend(patient, { data_set_id });
       }
     }
     instance.patient.set(patient);

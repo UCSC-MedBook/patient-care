@@ -231,7 +231,7 @@
               <td>{{this.output.up_genes.length}}</td>
               <td>{{this.output.down_genes.length}}</td>
               <td>
-                <a href={{pathFor "upDownGenes" study_label=(param "study_label")
+                <a href={{pathFor "upDownGenes" data_set_id=(param "data_set_id")
                         patient_label=(param "patient_label") job_id=this._id}}
                     class="ui right labeled icon button">
                   <i class="right arrow icon"></i>

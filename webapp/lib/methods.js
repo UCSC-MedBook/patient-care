@@ -3,7 +3,7 @@ Meteor.methods({
   // the given args, it instead returns the _id of that duplicate job.
   createUpDownGenes: function (args) {
     check(args, new SimpleSchema({
-      study_label: { type: String },
+      data_set_id: { type: String },
       patient_label: { type: String },
       sample_label: { type: String },
       sample_group_id: { type: String },
@@ -11,17 +11,19 @@ Meteor.methods({
     }));
 
     let user = MedBook.ensureUser(Meteor.userId());
-    user.ensureAccess(Studies.findOne({id: args.study_label}));
+    let dataSet = DataSets.findOne(args.data_set_id);
+    user.ensureAccess(dataSet);
 
     let sampleGroup = SampleGroups.findOne(args.sample_group_id);
     user.ensureAccess(sampleGroup);
     _.extend(args, {
       sample_group_name: sampleGroup.name,
+      data_set_name: dataSet.name,
     });
 
-    // make sure they have access to each of the studies in the sample group
-    _.each(sampleGroup.studies, (sampleGroupStudy) => {
-      user.ensureAccess(Studies.findOne({id: sampleGroupStudy.study_label}));
+    // make sure they have access to each of the data sets in the sample group
+    _.each(sampleGroup.data_sets, (sampleGroupDataSet) => {
+      user.ensureAccess(DataSets.findOne(sampleGroupDataSet.data_set_id));
     });
 
     // check to see if a job like this one has already been run,
@@ -77,33 +79,36 @@ Meteor.methods({
     sampleGroup.version =
         Meteor.call("getSampleGroupVersion", sampleGroup.name);
 
-    // ensure uniqueness for studies
-    let uniqueStudies = _.uniq(_.pluck(sampleGroup.studies, "study_label"));
-    if (uniqueStudies.length !== sampleGroup.studies.length) {
-      throw new Meteor.Error("non-unique-studies");
+    // ensure uniqueness for data sets
+    let uniqueDataSets = _.uniq(_.pluck(sampleGroup.data_sets, "_id"));
+    if (uniqueDataSets.length !== sampleGroup.data_sets.length) {
+      throw new Meteor.Error("non-unique-data-sets");
     }
 
-    // filter through each study
+    // filter through each data sets
     // - make sure they have access
     // - filter the samples
-    sampleGroup.studies = _.map(sampleGroup.studies, (sampleGroupStudy) => {
-      let study = Studies.findOne({id: sampleGroupStudy.study_label});
-      user.ensureAccess(study);
+    sampleGroup.data_sets = _.map(sampleGroup.data_sets,
+        (sampleGroupDataSet) => {
+      let dataSet = DataSets.findOne(sampleGroupDataSet.data_set_id);
+      user.ensureAccess(dataSet);
 
       // start with all the samples and then filter down from there
-      let sample_labels = study.Sample_IDs;
+      let sample_labels = dataSet.sample_labels;
 
-      _.each(sampleGroupStudy.filters, (filter) => {
+      _.each(sampleGroupDataSet.filters, (filter) => {
         let { options } = filter;
 
         if (filter.type === "sample_label_list") {
-          if (_.difference(options.sample_labels, study.Sample_IDs).length) {
+          if (_.difference(options.sample_labels,
+              dataSet.sample_labels).length) {
             throw new Meteor.Error("invalid-sample-labels");
           }
 
           sample_labels = _.intersection(sample_labels, options.sample_labels);
         } else if (filter.type === "exclude_sample_label_list") {
-          if (_.difference(options.sample_labels, study.Sample_IDs).length) {
+          if (_.difference(options.sample_labels,
+              dataSet.sample_labels).length) {
             throw new Meteor.Error("invalid-sample-labels");
           }
 
@@ -111,16 +116,16 @@ Meteor.methods({
         } else if (filter.type === "data_loaded") {
           if (options.gene_expression) {
             sample_labels = _.intersection(sample_labels,
-                study.gene_expression);
+                dataSet.gene_expression);
           }
         }else {
           throw new Meteor.Error("invalid-filter-type");
         }
       });
 
-      sampleGroupStudy.sample_labels = sample_labels;
+      sampleGroupDataSet.sample_labels = sample_labels;
 
-      return sampleGroupStudy; // NOTE: _.map at beginning
+      return sampleGroupDataSet; // NOTE: _.map at beginning
     });
 
     return SampleGroups.insert(sampleGroup)
@@ -146,7 +151,7 @@ Meteor.methods({
     let geneSetColl = GeneSetCollections.findOne(args.gene_set_collection_id);
     user.ensureAccess(geneSetColl);
 
-    // ensure access to sample group, studies inside
+    // ensure access to sample group, data sets inside
     _.each([
       args.sample_group_a_id,
       args.sample_group_b_id
@@ -154,10 +159,10 @@ Meteor.methods({
       let sampleGroup = SampleGroups.findOne(sampleGroupId);
       user.ensureAccess(sampleGroup);
 
-      // studies not necessarily loaded on client
+      // data sets not necessarily loaded on client
       if (Meteor.isServer) {
-        _.each(sampleGroup.studies, (study) => {
-          user.ensureAccess(Studies.findOne({id: study.study_label}));
+        _.each(sampleGroup.data_sets, (dataSet) => {
+          user.ensureAccess(DataSets.findOne(dataSet.data_set_id));
         });
       }
     });

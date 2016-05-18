@@ -1,3 +1,13 @@
+Meteor.publish("dataSetsNames", function() {
+  var user = MedBook.ensureUser(this.userId);
+
+  return DataSets.find({
+    collaborations: {$in: user.getCollaborations() },
+  }, {
+    fields: { name: 1, collaborations: 1 },
+  });
+});
+
 Meteor.publish("dataSets", function () {
   var user = MedBook.ensureUser(this.userId);
 
@@ -24,22 +34,22 @@ Meteor.publish("dataSet", function (dataSetId) {
   });
 });
 
-Meteor.publish("patientSamples", function (study_label, patient_label) {
-  check([study_label, patient_label], [String]);
+Meteor.publish("patientSamples", function (data_set_id, patient_label) {
+  check([data_set_id, patient_label], [String]);
 
   var user = MedBook.ensureUser(this.userId);
-  var study = Studies.findOne({id: study_label});
-  user.ensureAccess(study);
+  var dataSet = DataSets.findOne(data_set_id);
+  user.ensureAccess(dataSet);
 
   var cursor = Samples.find({
-    study_label,
+    data_set_id,
     patient_label,
   });
 
   // if the samples don't exist for the patient, create them
   var asArray = cursor.fetch();
   var sample_labels = _.pluck(asArray, "sample_label");
-  var patient = _.findWhere(study.patients, { patient_label });
+  var patient = _.findWhere(dataSet.patients, { patient_label });
   if (!patient) {
     this.ready();
     return;
@@ -48,7 +58,7 @@ Meteor.publish("patientSamples", function (study_label, patient_label) {
   _.each(patient.sample_labels, (sample_label) => {
     if (sample_labels.indexOf(sample_label) === -1) {
       Samples.insert({
-        study_label,
+        data_set_id,
         patient_label,
         sample_label
       });
@@ -58,17 +68,17 @@ Meteor.publish("patientSamples", function (study_label, patient_label) {
   return cursor;
 });
 
-Meteor.publish("upDownGenes", function (study_label, patient_label) {
-  check([study_label, patient_label], [String]);
+Meteor.publish("upDownGenes", function (data_set_id, patient_label) {
+  check([data_set_id, patient_label], [String]);
 
   let user = MedBook.ensureUser(this.userId);
-  let study = Studies.findOne({id: study_label});
-  user.ensureAccess(study);
+  let dataSet = DataSets.findOne(data_set_id);
+  user.ensureAccess(dataSet);
 
   return Jobs.find({
     name: "UpDownGenes",
     status: { $ne: "creating" },
-    "args.study_label": study_label,
+    "args.data_set_id": data_set_id,
     "args.patient_label": patient_label,
   });
 });
@@ -81,8 +91,8 @@ Meteor.publish("upDownGenesJob", function (jobId) {
     _id: jobId,
     name: "UpDownGenes",
   });
-  let study = Studies.findOne({id: job.args.study_label});
-  user.ensureAccess(study);
+  let dataSet = DataSets.findOne(job.args.data_set_id);
+  user.ensureAccess(dataSet);
 
   return Jobs.find({ _id: jobId });
 });

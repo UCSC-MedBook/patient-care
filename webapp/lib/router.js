@@ -49,19 +49,19 @@ FlowRouter.route("/collaborations/browse", {
   action: _.partial(defaultAction,  "manageCollaborations"),
 });
 
-FlowRouter.route("/patients/:study_label/:patient_label", {
+FlowRouter.route("/data-set/:data_set_id/patient/:patient_label", {
   name: "patient",
   action: _.partial(defaultAction, "patient"),
 });
 
-FlowRouter.route("/patients/:study_label/:patient_label/upDownGenes/:job_id", {
+FlowRouter.route("/data-set/:data_set_id/patient/:patient_label/upDownGenes/:job_id", {
   name: "upDownGenes",
   action: _.partial(defaultAction, "upDownGenesJob"),
 });
 
 // tools
 
-FlowRouter.route("/tools/limmaGSEA", {
+FlowRouter.route("/tools/limma-gsea", {
   name: "listLimmaGSEA",
   action: _.partial(defaultAction, "listLimmaGSEA"),
 });

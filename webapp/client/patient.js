@@ -2,23 +2,23 @@
 
 Template.patient.onCreated(function () {
   const instance = this;
-  const { study_label, patient_label } = instance.data;
+  const { data_set_id, patient_label } = instance.data;
 
   instance.autorun(function () {
     Meteor.userId(); // resubscribe when this changes
-    instance.subscribe("study", study_label);
-    instance.subscribe("patientSamples", study_label, patient_label);
+    instance.subscribe("dataSet", data_set_id);
+    instance.subscribe("patientSamples", data_set_id, patient_label);
   });
 
-  instance.patient = new ReactiveVar(); // from the study's `patients` list
+  instance.patient = new ReactiveVar(); // from the data set's `patients` list
   instance.autorun(function () {
-    let study = Studies.findOne({ id: study_label });
+    let dataSet = DataSets.findOne(data_set_id);
 
     let patient;
-    if (study) {
-      patient = _.findWhere(study.patients, { patient_label });
+    if (dataSet) {
+      patient = _.findWhere(dataSet.patients, { patient_label });
       _.extend(patient, {
-        study_label: study.id
+        data_set_id: dataSet._id
       });
     }
     instance.patient.set(patient);
@@ -51,9 +51,9 @@ Template.questions.onRendered(function () {
 Template.patientLoadedData.helpers({
   geneExpExists: function(normalization) {
     const sample_label = this.toString(); // IDK why `typeof this` === "object"
-    const study = Studies.findOne({id: Template.instance().data.study_label});
+    const dataSet = DataSets.findOne(Template.instance().data.data_set_id);
 
-    const samples = study.gene_expression;
+    const samples = dataSet.gene_expression;
     if (samples && samples.includes(sample_label)) {
       return "green checkmark";
     } else {
@@ -118,9 +118,9 @@ Template.tumorMapButton.events({
   "click .generate-bookmark": function (event, instance) {
     instance.creatingBookmark.set(true);
 
-    const { study_label } = instance.parent(3).data;
+    const { data_set_id } = instance.parent(3).data;
     const { sample_label, mapLabel } = instance.data;
-    Meteor.call("createTumorMapBookmark", study_label, sample_label, mapLabel,
+    Meteor.call("createTumorMapBookmark", data_set_id, sample_label, mapLabel,
         function (error, result) {
       // regardless of result, stop "creatingBookmark"
       instance.creatingBookmark.set(false);
@@ -166,7 +166,7 @@ Template.patientUpDownGenes.onRendered(function () {
         instance.createCustomSampleGroup.set(true);
         instance.sampleGroupId.set(null);
       } else {
-        instance.sampleGroupId.set(this._id);
+        instance.sampleGroupId.set(value);
         instance.createCustomSampleGroup.set(false);
       }
     }
@@ -221,7 +221,7 @@ Template.patientUpDownGenes.events({
     // sometimes we have to make two trips to the server, so we need to be
     // able to call this from async code (after a Meteor method has been run)
     function createUpDownGenes(sample_group_id) {
-      let args = _.pick(instance.data, "study_label", "patient_label");
+      let args = _.pick(instance.data, "data_set_id", "patient_label");
       _.extend(args, { sample_label, sample_group_id, iqr_multiplier });
 
       // submit to the server for consideration
@@ -251,10 +251,10 @@ Template.patientUpDownGenes.events({
         });
         return;
       }
-      if (customSampleGroup.studies.length === 0) {
+      if (customSampleGroup.data_sets.length === 0) {
         instance.error.set({
-          header: "No studies?",
-          message: "Please add at least one study to your sample group."
+          header: "No data sets",
+          message: "Please add at least one data set to your sample group."
         });
         return;
       }
@@ -278,7 +278,7 @@ Template.patientUpDownGenes.events({
 
       if (!sampleGroupId) {
         instance.error.set({
-          header: "Did you forget something?",
+          header: "No background selected",
           message: "Please select a background sample group to continue."
         });
         return;
@@ -298,7 +298,9 @@ Template.patientUpDownGenesTable.onCreated(function () {
   let instance = this;
   let { data } = instance;
 
-  instance.subscribe("upDownGenes", data.study_label, data.patient_label);
+  console.log("data:", data);
+
+  instance.subscribe("upDownGenes", data.data_set_id, data.patient_label);
 });
 
 Template.patientUpDownGenesTable.helpers({

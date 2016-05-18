@@ -1,19 +1,19 @@
 Meteor.methods({
-  createTumorMapBookmark: function (study_label, sample_label, mapLabel) {
+  createTumorMapBookmark: function (data_set_id, sample_label, mapLabel) {
     // TODO: check if mapLabel is valid?
-    check([study_label, sample_label, mapLabel], [String]);
+    check([data_set_id, sample_label, mapLabel], [String]);
 
     var user = MedBook.ensureUser(this.userId);
-    let study = Studies.findOne({id: study_label});
+    let study = DataSets.findOne(data_set_id);
     user.ensureAccess(study);
 
     // don't *need* to call referentialIntegrity, but we'll be safe
-    MedBook.referentialIntegrity.studies_expression3({ id: study_label });
+    MedBook.referentialIntegrity.dataSets_expression3(data_set_id);
     let sampleIndex = study.gene_expression_index[sample_label];
 
     console.log("loading data");
     let sampleExpressionData = {};
-    Expression3.find({ study_label }).forEach((doc) => {
+    Expression3.find({ data_set_id }).forEach((doc) => {
       sampleExpressionData[doc.gene_label] = doc.rsem_quan_log2[sampleIndex];
     });
 
@@ -32,7 +32,7 @@ Meteor.methods({
     });
 
     if (apiResponse.statusCode === 200) {
-      Samples.update({ study_label, sample_label }, {
+      Samples.update({ data_set_id, sample_label }, {
         $set: {
           [ "tumor_map_bookmarks." + mapLabel ]: apiResponse.data.bookmark,
         }
