@@ -34,7 +34,8 @@
       </div>
     </div>
     <div class="twelve wide stretched column">
-      <div class="ui segment">
+      <!-- <div class="ui segment"> -->
+        <div class="">
         {{#if isActiveRoute "manageCollaborations"}}
           {{#if getCollaboration}}
             {{> showCollaboration getCollaboration}}
@@ -295,7 +296,7 @@
   {{#if afFieldValueIs name="publiclyListed" value=true}}
     {{> afQuickField name="adminApprovalRequired" defaultValue=true}}
   {{else}}
-    {{> afQuickField name="adminApprovalRequired" value=false
+    {{> afQuickField name="adminApprovalRequired" value=true
         disabled=true}}
   {{/if}}
 </template>

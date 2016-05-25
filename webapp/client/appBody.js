@@ -6,18 +6,16 @@ Template.appBody.onCreated(function () {
   instance.autorun(function () {
     let params = instance.data.params();
 
-    if (params.data_set_id) {
-      instance.subscribe("dataSet", params.data_set_id);
+    if (params.patient_id) {
+      instance.subscribe("patientLabel", params.patient_id);
     }
   });
 });
 
 Template.appBody.helpers({
-  getDataSetName: function () {
-    let dataSet = DataSets.findOne(this.params().data_set_id);
-    if (dataSet) {
-      return dataSet.name;
-    }
+  getPatientLabel: function () {
+    let patient = Patients.findOne(this.params().patient_id);
+    if (patient) return patient.patient_label;
     return "loading";
   },
   invalidUrl() {

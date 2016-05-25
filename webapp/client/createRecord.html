@@ -10,8 +10,10 @@
           defaultValue=(queryParam "data_set_id")}}
       {{> afQuickField name="form_id" options=formOptions
           defaultValue=(queryParam "form_id")}}
-      {{> afQuickField name="collaborations" options=collaborationOptions
-          type="select" multiple=true search=true defaultValue=onlyPersonal}}
+      <div class="yop">
+        {{> afQuickField name="collaborations" options=collaborationOptions
+            type="select" multiple=true search=true defaultValue=onlyPersonal}}
+      </div>
 
       {{#if getInstanceReactive "data_set_id"}}
         {{#if getInstanceReactive "form_id"}}

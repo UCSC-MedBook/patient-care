@@ -1,7 +1,9 @@
 <template name="home">
   {{> homeWelcome}}
 
-  <h1>Teo's experiment</h1>
+  {{> mainOptions}}
+
+  <h1>Experimental</h1>
   <a href={{pathFor "createForm"}} class="ui button">
     Create form
   </a>
@@ -11,16 +13,8 @@
   <a href={{pathFor "editRecords"}} class="ui button">
     Edit records
   </a>
-  <a href={{pathFor "manageCollaborations"}} class="ui button">
-    Manage collaborations
-  </a>
 
-  {{> listDataSets}}
-
-  {{> listTools}}
 </template>
-
-
 
 <template name="homeWelcome">
   {{#if shouldWelcome}}
@@ -48,36 +42,91 @@
   {{/if}}
 </template>
 
+<template name="mainOptions">
+  <h1>What would you like to do today?</h1>
+  <div class="ui cards">
+    <a href={{pathFor "listPatients"}} class="ui card">
+      <div class="content">
+        <div class="header">Patients</div>
+        <div class="description">
+          View all patients
+        </div>
+        <!-- <div class="extra content">
+          <div class="ui grid">
+            <div class="eight wide column">
+              <i class="users icon"></i>
+              {{#if patient_count}}
+                {{patient_count}} Patients
+              {{else}}
+                No patients
+              {{/if}}
+            </div>
+            <div class="eight wide column">
+              <i class="flask icon"></i>
+              {{#if sample_count}}
+                {{sample_count}} Samples
+              {{else}}
+                No samples
+              {{/if}}
+            </div>
+          </div>
+        </div> -->
+      </div>
+    </a>
 
+    <a href={{pathFor "manageCollaborations"}} class="ui card">
+      <div class="content">
+        <div class="header">Collaborations</div>
+        <div class="description">
+          Create, join, and manage collaborations
+        </div>
+      </div>
+    </a>
 
-<template name="listDataSets">
-  <h1>Data sets</h1>
+    <a href={{pathFor "listTools"}} class="ui card">
+      <div class="content">
+        <div class="header">Tools</div>
+        <div class="description">
+          Run bioinformatic tools such as Limma, GSEA, and the
+          UCSC gene outlier analysis
+        </div>
+      </div>
+    </a>
+  </div>
+</template>
+
+<template name="listPatients">
+  <div class="ui grid">
+    <div class="eight wide column">
+      <h1>Patients</h1>
+    </div>
+    <div class="eight wide right aligned column">
+      <div class="ui icon input">
+        <input class="search-patients" type="text"
+            placeholder="Search patients...">
+        <i class="search icon"></i>
+      </div>
+    </div>
+  </div>
 
   {{#if Template.subscriptionsReady}}
-    {{#if length getDataSets}}
+    {{#if length getPatients}}
       <div class="ui cards">
-        {{#each getDataSets}}
-          <a href={{pathFor "dataSet" data_set_id=_id}} class="ui card">
+        {{#each getPatients}}
+          <a class="ui card" href={{pathFor "patient" patient_id=_id}}>
             <div class="content">
-              <div class="header">{{name}}</div>
-              <div class="description">
-                {{description}}
-              </div>
+              <div class="header">{{patient_label}}</div>
             </div>
             <div class="extra content">
               <div class="ui grid">
                 <div class="eight wide column">
-                  <i class="users icon"></i>
-                  {{#if length patients}}
-                    {{length patients}} Patients
-                  {{else}}
-                    No patients
-                  {{/if}}
+                  {{! TODO: specimin count}}
                 </div>
                 <div class="eight wide column">
                   <i class="flask icon"></i>
-                  {{#if length sample_labels}}
-                    {{length sample_labels}} Samples
+                  {{#if length samples}}
+                    {{samples.length}}
+                    Sample{{#unless compare (length samples) 1}}s{{/unless}}
                   {{else}}
                     No samples
                   {{/if}}
@@ -88,13 +137,14 @@
         {{/each}}
       </div>
     {{else}}
-      <div class="ui icon message">
-        <i class="frown icon"></i>
+      <div class="ui message massive">
         <div class="content">
           <div class="header">
-            No data sets
+            No patients
           </div>
-          <p>You don't have access to any data sets.</p>
+          <p>
+            You don't have access to any patients.
+          </p>
         </div>
       </div>
     {{/if}}

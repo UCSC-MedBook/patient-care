@@ -32,9 +32,24 @@ Template.createRecord.onCreated(function () {
   // forever
   instance.form_id = new ReactiveVar();
   instance.data_set_id = new ReactiveVar();
+});
+
+Template.createRecord.onRendered(function() {
+  let instance = this;
+
+  // update form_id based on AutoForm
   instance.autorun(() => {
-    instance.form_id.set(AutoForm.getFieldValue("form_id", "insertRecord"));
+    let formId = AutoForm.getFieldValue("form_id", "insertRecord");
+    instance.form_id.set(formId);
+
+    let form = Forms.findOne(formId);
+    if (form) {
+      instance.$(".yop .ui.dropdown")
+          .dropdown("set exactly", form.collaborations);
+    }
   });
+
+  // update data_set_id based on AutoForm
   instance.autorun(() => {
     let _id = AutoForm.getFieldValue("data_set_id", "insertRecord");
     instance.data_set_id.set(_id);
@@ -94,7 +109,6 @@ Template.createRecord.helpers({
   onlyPersonal() {
     return [MedBook.findUser(Meteor.userId()).personalCollaboration()];
   },
-
   collaborationOptions() {
     return _.map(Template.instance().sharableCollabs.get(), (name) => {
       return { value: name, label: name };

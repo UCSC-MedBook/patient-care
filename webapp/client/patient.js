@@ -2,77 +2,37 @@
 
 Template.patient.onCreated(function () {
   const instance = this;
-  const { data_set_id, patient_label } = instance.data;
 
-  instance.autorun(function () {
-    Meteor.userId(); // resubscribe when this changes
-    instance.subscribe("dataSet", data_set_id);
-    instance.subscribe("patientSamples", data_set_id, patient_label);
-  });
-
-  instance.patient = new ReactiveVar(); // from the data set's `patients` list
-  instance.autorun(function () {
-    let dataSet = DataSets.findOne(data_set_id);
-
-    let patient;
-    if (dataSet) {
-      patient = _.findWhere(dataSet.patients, { patient_label });
-      _.extend(patient, {
-        data_set_id: dataSet._id
-      });
-    }
-    instance.patient.set(patient);
-  });
+  instance.subscribe("patient", instance.data.patient_id);
 });
 
 Template.patient.helpers({
   getPatient: function () {
-    return Template.instance().patient.get();
+    return Patients.findOne(this.patient_id);
   },
 });
 
 
 
-// Template.questions
+// Template.sampleLoadedData
 
-Template.questions.onRendered(function () {
-  const instance = this;
+Template.sampleLoadedData.onCreated(function() {
+  let instance = this;
 
-  // make the accordion work
-  instance.$('.ui.accordion')
-    .accordion()
-  ;
+  instance.subscribe("sampleLoadedData", instance.data.patient._id,
+      instance.data.sample.sample_label);
 });
 
+Template.sampleLoadedData.helpers({
+  dataExistsClasses: function(attribute) {
+    let dataSet = DataSets.findOne(this.sample.data_set_id);
 
-
-// Template.patientLoadedData
-
-Template.patientLoadedData.helpers({
-  geneExpExists: function(normalization) {
-    const sample_label = this.toString(); // IDK why `typeof this` === "object"
-    const dataSet = DataSets.findOne(Template.instance().data.data_set_id);
-
-    const samples = dataSet.gene_expression;
-    if (samples && samples.includes(sample_label)) {
+    if (dataSet &&
+        dataSet[attribute][this.sample.sample_label] !== undefined) {
       return "green checkmark";
     } else {
       return "red remove";
     }
-  },
-});
-
-
-
-// Template.patientTumorMap
-
-Template.patientTumorMap.helpers({
-  mapTypes: function() {
-    return [
-      { title: "Gene Expression", mapLabel: "gene_expression" },
-      { title: "Copy Number", mapLabel: "copy_number" },
-      { title: "Mutations", mapLabel: "mutations" },
-    ];
   },
 });
 
@@ -99,19 +59,27 @@ Template.tumorMapButton.onCreated(function() {
 });
 
 Template.tumorMapButton.helpers({
-  bookmarkExists: function () {
-    let sample = Samples.findOne({sample_label: this.sample_label});
-
-    return !!sample.tumor_map_bookmarks &&
-        sample.tumor_map_bookmarks[this.mapLabel.toString()];
-  },
-  creatingBookmark: function () {
-    return Template.instance().creatingBookmark.get();
-  },
-  getBookmark: function () {
-    let sample = Samples.findOne({sample_label: this.sample_label});
-    return sample.tumor_map_bookmarks[this.mapLabel.toString()];
-  },
+  // bookmarkExists() {
+  //   _.findWhere(this.tumor_map_bookmarks, {
+  //     map: "mRNA",
+  //     layout: "",
+  //   });
+  //
+  //   if (this.tumor_map_bookmarks &&
+  //   console.log("yop:", yop);
+  //   console.log("this:", this);
+  //   // let sample = Samples.findOne({sample_label: this.sample_label});
+  //
+  //   // return !!sample.tumor_map_bookmarks &&
+  //   //     sample.tumor_map_bookmarks[this.mapLabel.toString()];
+  // },
+  // creatingBookmark: function () {
+  //   return Template.instance().creatingBookmark.get();
+  // },
+  // getBookmark: function () {
+  //   let sample = Samples.findOne({sample_label: this.sample_label});
+  //   return sample.tumor_map_bookmarks[this.mapLabel.toString()];
+  // },
 });
 
 Template.tumorMapButton.events({
@@ -297,8 +265,6 @@ Template.patientUpDownGenes.events({
 Template.patientUpDownGenesTable.onCreated(function () {
   let instance = this;
   let { data } = instance;
-
-  console.log("data:", data);
 
   instance.subscribe("upDownGenes", data.data_set_id, data.patient_label);
 });

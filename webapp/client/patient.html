@@ -14,9 +14,12 @@
         <i class="warning sign icon"></i>
         <div class="content">
           <div class="header">
-            Uh oh...
+            No patient found
           </div>
-          <p>We couldn't find the patient with that ID</p>
+          <p>
+            We couldn't find a patient with that id. It's possible that
+            a patient exists with that id but you do not have access.
+          </p>
         </div>
       </div>
     {{/unless}}
@@ -28,7 +31,7 @@
 
 
 <template name="questions">
-    {{#if length sample_labels}}
+    {{#if length samples}}
       <h2 class="title ui">
         Which data have been loaded?
       </h2>
@@ -78,22 +81,28 @@
       </tr>
     </thead>
     <tbody>
-      {{#each sample_labels}}
-        <tr>
-          <td><i class="fa fa-flask"></i>{{this}}</td>
-          <td class="center aligned">
-            <i class="large icon {{geneExpExists "rsem_quan_log2"}}"></i>
-          </td>
-          <!-- <td class="center aligned">
-            <i class="large icon {{geneExpExists "tpm"}}"></i>
-          </td>
-          <td class="center aligned">
-            <i class="large icon {{geneExpExists "fpkm"}}"></i>
-          </td> -->
-        </tr>
-      {{/each}}
+      {{#let patient=this}}
+        {{#each samples}}
+          {{> sampleLoadedData patient=patient sample=this}}
+        {{/each}}
+      {{/let}}
     </tbody>
   </table>
+</template>
+
+<template name="sampleLoadedData">
+  <tr>
+    <td><i class="fa fa-flask"></i>{{sample.sample_label}}</td>
+    <td class="center aligned">
+      <i class="large icon {{dataExistsClasses "gene_expression_index"}}"></i>
+    </td>
+    <!-- <td class="center aligned">
+      <i class="large icon {{dataExistsClasses "tpm"}}"></i>
+    </td>
+    <td class="center aligned">
+      <i class="large icon {{dataExistsClasses "fpkm"}}"></i>
+    </td> -->
+  </tr>
 </template>
 
 <template name="patientTumorMap">
@@ -110,28 +119,20 @@
         <th colspan="3">Cluster by...</th>
       </tr>
       <tr>
-        {{#each mapTypes}}
-          <th>{{title}}</th>
-        {{/each}}
+        <th>Gene Expression</th>
+        <th>Copy Number</th>
+        <th>Mutations</th>
       </tr>
     </thead>
     <tbody>
-      {{#each sample_labels}}
+      {{#each samples}}
         <tr>
-          <td><i class="fa fa-flask"></i>{{this}}</td>
-          {{! #let here so that we can get to it inside the #each}}
-          {{#let sample_label=this}}
-            {{#each mapTypes}}
-              <td>
-                {{#if compare mapLabel "gene_expression"}} {{! XXX}}
-                  {{> tumorMapButton mapLabel=this.mapLabel
-                      sample_label=sample_label}}
-                {{else}}
-                  No data
-                {{/if}}
-              </td>
-            {{/each}}
-          {{/let}}
+          <td><i class="fa fa-flask"></i>{{sample_label}}</td>
+          <td>
+            {{> tumorMapButton}}
+          </td>
+          <td>No data</td>
+          <td>No data</td>
         </tr>
       {{/each}}
     </tbody>
@@ -151,8 +152,6 @@
     </div>
   {{/if}}
 </template>
-
-
 
 <template name="patientUpDownGenes">
   <p>

@@ -1,72 +1,103 @@
-Meteor.publish("dataSetsNames", function() {
-  var user = MedBook.ensureUser(this.userId);
+// appBody metadata
 
-  return DataSets.find({
-    collaborations: {$in: user.getCollaborations() },
-  }, {
-    fields: { name: 1, collaborations: 1 },
-  });
+Meteor.publish("patientLabel", function(patientId) {
+  let user = MedBook.ensureUser(this.userId);
+  let patient = Patients.findOne(patientId);
+  user.ensureAccess(patient);
+
+  return Patients.find(patientId, { fields: { patient_label: 1 } });
 });
 
-Meteor.publish("dataSets", function () {
-  var user = MedBook.ensureUser(this.userId);
+// patients
 
-  return DataSets.find({
-    collaborations: {$in: user.getCollaborations() },
-  }, {
-    fields: {
-      name: 1,
-      description: 1,
-      sample_labels: 1,
-      patients: 1,
-      collaborations: 1,
-    }
-  });
-});
+Meteor.publish("patients", function(searchString) {
+  check(searchString, String);
 
-Meteor.publish("dataSet", function (dataSetId) {
-  check(dataSetId, String);
-  var user = MedBook.ensureUser(this.userId);
+  let user = MedBook.ensureUser(this.userId);
 
-  return DataSets.find({
-    _id: dataSetId,
-    collaborations: {$in: user.getCollaborations() },
-  });
-});
+  let query = { collaborations: { $in: user.getCollaborations() } };
 
-Meteor.publish("patientSamples", function (data_set_id, patient_label) {
-  check([data_set_id, patient_label], [String]);
-
-  var user = MedBook.ensureUser(this.userId);
-  var dataSet = DataSets.findOne(data_set_id);
-  user.ensureAccess(dataSet);
-
-  var cursor = Samples.find({
-    data_set_id,
-    patient_label,
-  });
-
-  // if the samples don't exist for the patient, create them
-  var asArray = cursor.fetch();
-  var sample_labels = _.pluck(asArray, "sample_label");
-  var patient = _.findWhere(dataSet.patients, { patient_label });
-  if (!patient) {
-    this.ready();
-    return;
+  // only use regex if there's something to search for
+  if (searchString) {
+    query.patient_label = {
+      $regex: new RegExp(searchString, "i")
+    };
   }
 
-  _.each(patient.sample_labels, (sample_label) => {
-    if (sample_labels.indexOf(sample_label) === -1) {
-      Samples.insert({
-        data_set_id,
-        patient_label,
-        sample_label
-      });
+  return Patients.find(query, {
+    sort: { patient_label: 1 }
+  });
+});
+
+Meteor.publish("patient", function (patientId) {
+  check(patientId, String);
+
+  let user = MedBook.ensureUser(this.userId);
+  let patient = Patients.findOne(patientId);
+  user.ensureAccess(patient);
+
+  return Patients.find(patientId);
+});
+
+Meteor.publish("sampleLoadedData", function (patientId, sample_label) {
+  check(patientId, String);
+
+  let user = MedBook.ensureUser(this.userId);
+  let patient = Patients.findOne(patientId);
+  user.ensureAccess(patient);
+
+  let sample = _.findWhere(patient.samples, { sample_label });
+
+  return DataSets.find(sample.data_set_id, {
+    fields: {
+      ["gene_expression_index." + sample_label]: 1
     }
   });
-
-  return cursor;
 });
+
+// collaborations
+
+Meteor.publish("adminAndCollaboratorCollaborations", function() {
+  let user = MedBook.ensureUser(this.userId);
+  let userCollabs = user.getCollaborations();
+
+  return Collaborations.find({
+    $or: [
+      { name: { $in: userCollabs } },
+      { administrators: { $in: userCollabs } },
+    ],
+  });
+});
+
+Meteor.publish("browseCollaborations", function() {
+  let user = MedBook.ensureUser(this.userId);
+
+  return Collaborations.find({
+    publiclyListed: true,
+    administrators: { $ne: [] }
+  });
+});
+
+// tools
+
+Meteor.publish("dataSets", function() {
+  var user = MedBook.ensureUser(this.userId);
+
+  return DataSets.find({
+    collaborations: {$in: user.getCollaborations() },
+  });
+});
+
+
+
+
+
+
+
+
+
+
+
 
 Meteor.publish("upDownGenes", function (data_set_id, patient_label) {
   check([data_set_id, patient_label], [String]);
@@ -140,30 +171,13 @@ Meteor.publish("forms", function () {
 Meteor.publish("records", function(form_id, data_set_id) {
   let user = MedBook.ensureUser(this.userId);
 
+  console.log("form_id, data_set_id:", form_id, data_set_id);
+  let collabs = user.getCollaborations();
+  console.log("collabs:", collabs);
+
   return Records.find({
-    collaborations: { $in: user.getCollaborations() },
+    collaborations: { $in: collabs },
     form_id,
     data_set_id,
-  });
-});
-
-Meteor.publish("adminAndCollaboratorCollaborations", function() {
-  let user = MedBook.ensureUser(this.userId);
-  let userCollabs = user.getCollaborations();
-
-  return Collaborations.find({
-    $or: [
-      { name: { $in: userCollabs } },
-      { administrators: { $in: userCollabs } },
-    ],
-  });
-});
-
-Meteor.publish("browseCollaborations", function() {
-  let user = MedBook.ensureUser(this.userId);
-
-  return Collaborations.find({
-    publiclyListed: true,
-    administrators: { $ne: [] }
   });
 });

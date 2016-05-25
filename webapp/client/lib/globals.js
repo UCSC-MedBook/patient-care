@@ -17,6 +17,10 @@ Template.registerHelper("concat", function (first, second) {
   return first + second;
 });
 
-Template.registerHelper("or", function (first, second, third) {
+Template.registerHelper("or", function (first, second) {
+  return first || second;
+});
+
+Template.registerHelper("threeOr", function (first, second, third) {
   return first || second || third;
 });
