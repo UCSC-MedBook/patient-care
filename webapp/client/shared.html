@@ -1,0 +1,66 @@
+<template name="jobActions">
+  <div class="ui labeled icon tiny buttons">
+    <button class="ui secondary share button">
+      <i class="share icon"></i>
+      Share
+    </button>
+    <button class="ui negative delete button">
+      <i class="trash icon"></i>
+      {{#if deleteClicked}}
+        Really?
+      {{else}}
+        Delete
+      {{/if}}
+    </button>
+  </div>
+
+
+  <!-- {{#each object.collaborations}}
+    <div class="ui horizontal label collaboration">
+      <i class="{{#if isPersonalCollaboration}}user{{else}}users{{/if}}
+          icon"></i>
+      {{this}}
+    </div>
+  {{/each}}
+
+  <button class="ui labeled icon secondary mini button edit">
+    <i class="edit icon"></i>
+    Edit
+  </button> -->
+</template>
+
+<template name="editCollaborationsModal">
+  <div class="ui edit-collaborations modal">
+    <i class="close modal icon"></i>
+    <div class="header">
+      Edit collaborations
+    </div>
+    <div class="content">
+      <div class="description">
+        <div class="ui header">
+          These collaborations can see and edit this object.
+        </div>
+        {{#if collaborationOptions}}
+          {{#autoForm id="editCollaborations" schema=onlyCollaborations
+              doc=getObject}}
+            {{> afQuickField name="collaborations" options=collaborationOptions
+                type="select" multiple=true search=true}}
+          {{/autoForm}}
+        {{else}}
+          {{> dataLoading}}
+        {{/if}}
+      </div>
+    </div>
+    <div class="actions">
+      <div class="ui negative right labeled icon button">
+        Cancel
+        <i class="cancel icon"></i>
+      </div>
+      <div class="ui positive right labeled icon button
+          {{#if waitingForServer}}loading{{/if}}">
+        Set collaborations
+        <i class="checkmark icon"></i>
+      </div>
+    </div>
+  </div>
+</template>

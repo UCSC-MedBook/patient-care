@@ -39,6 +39,7 @@ Meteor.methods({
       name: "UpDownGenes",
       status: "waiting",
       user_id: user._id,
+      collaborations: [ user.personalCollaboration() ],
       args
     });
   },
@@ -185,6 +186,7 @@ Meteor.methods({
       name: "RunLimmaGSEA",
       status: "waiting",
       user_id: user._id,
+      collaborations: [ user.personalCollaboration() ],
       args,
     });
   },
@@ -372,5 +374,41 @@ Meteor.methods({
     }
 
     Collaborations.update(collaborationId, modifier);
+  },
+
+  removeObject(collectionName, mongoId) {
+    check([collectionName, mongoId], [String]);
+
+    let user = MedBook.findUser(Meteor.userId());
+    let object = MedBook.collections[collectionName].findOne(mongoId);
+    user.ensureAccess(object);
+
+    // do some additional checking before actually removing the object
+    if (collectionName === "Jobs") {
+      let deleteableJobs = [
+        "RunLimmaGSEA",
+      ];
+
+      if (deleteableJobs.indexOf(object.name) === -1) {
+        return new Meteor.Error("permission-denied");
+      }
+    } else {
+      throw new Meteor.Error("invalid-collection");
+    }
+
+    MedBook.collections[collectionName].remove(mongoId);
+  },
+  updateObjectCollaborations(collectionName, mongoId, collaborations) {
+    check([collectionName, mongoId], [String]);
+    check(collaborations, [String]);
+
+    let user = MedBook.findUser(Meteor.userId());
+    let collection = MedBook.collections[collectionName];
+    let object = collection.findOne(mongoId);
+    user.ensureAccess(object);
+
+    collection.update(mongoId, {
+      $set: { collaborations }
+    });
   }
 });

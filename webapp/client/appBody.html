@@ -4,6 +4,9 @@
 </head> -->
 
 <template name="appBody">
+  {{! shared modals that are used on multiple pages}}
+  {{> editCollaborationsModal}}
+
   <div class="ui container">
     <div style="margin-bottom: 15px;">
       <div class="ui breadcrumb large">
@@ -26,7 +29,9 @@
           {{/if}}
         {{/if}}
 
-        {{#if or (isActiveRoute "listTools") (isActiveRoute "listLimmaGSEA")}}
+        {{#if threeOr (isActiveRoute "listTools")
+            (isActiveRoute "listLimmaGSEA")
+            (isActiveRoute "listTumorMap")}}
           {{#breadcrumbItem isActive=(isActiveRoute "listTools")
               href=(pathFor "listTools")}}
             Tools
@@ -35,6 +40,12 @@
           {{#if isActiveRoute "listLimmaGSEA"}}
             {{#breadcrumbItem isActive=true}}
               Limma <i class="right arrow icon"></i> GSEA
+            {{/breadcrumbItem}}
+          {{/if}}
+
+          {{#if isActiveRoute "listTumorMap"}}
+            {{#breadcrumbItem isActive=true}}
+              Tumor Map
             {{/breadcrumbItem}}
           {{/if}}
         {{/if}}

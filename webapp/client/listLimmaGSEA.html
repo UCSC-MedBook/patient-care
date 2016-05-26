@@ -105,6 +105,7 @@
             <th>Top genes count for Limma</th>
             <th>Gene sets</th>
             <th>Status</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -117,7 +118,7 @@
               <td>
                 {{#if compare status "done"}}
                   <a href={{pathFor getJobResultUrl}} target="_blank"
-                      class="ui right labeled icon button">
+                      class="ui right labeled icon primary button">
                     <i class="book icon"></i>
                     View result
                   </a>
@@ -125,6 +126,7 @@
                   {{status}}
                 {{/if}}
               </td>
+              <td>{{> jobActions object=this}}</td>
             </tr>
           {{/each}}
         </tbody>

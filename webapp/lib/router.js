@@ -64,6 +64,11 @@ tools.route("/limma-gsea", {
   action: _.partial(defaultAction, "listLimmaGSEA"),
 });
 
+tools.route("/tumor-map", {
+  name: "listTumorMap",
+  action: _.partial(defaultAction, "listTumorMap"),
+});
+
 
 
 

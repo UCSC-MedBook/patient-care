@@ -156,7 +156,7 @@ Meteor.publish("limmaGSEAJobs", function () {
 
   return Jobs.find({
     name: "RunLimmaGSEA",
-    user_id: this.userId,
+    collaborations: { $in: user.getCollaborations() },
   });
 });
 
