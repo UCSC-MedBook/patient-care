@@ -88,7 +88,55 @@ Meteor.publish("dataSets", function() {
   });
 });
 
+Meteor.publish("dataSetNamesAndSamples", function() {
+  var user = MedBook.ensureUser(this.userId);
 
+  return DataSets.find({
+    collaborations: {$in: user.getCollaborations() },
+  }, { fields: { name: 1, sample_labels: 1 } });
+});
+
+Meteor.publish("limmaGSEAJobs", function () {
+  let user = MedBook.ensureUser(this.userId);
+
+  return Jobs.find({
+    name: "RunLimmaGSEA",
+    collaborations: { $in: user.getCollaborations() },
+  });
+});
+
+Meteor.publish("tumorMapOverlayJobs", function() {
+  let user = MedBook.ensureUser(this.userId);
+
+  return Jobs.find({
+    name: "TumorMapOverlay",
+    collaborations: { $in: user.getCollaborations() },
+  });
+});
+
+// experimenal
+
+Meteor.publish("forms", function () {
+  let user = MedBook.ensureUser(this.userId);
+
+  return Forms.find({
+    collaborations: { $in: user.getCollaborations() },
+  });
+});
+
+Meteor.publish("records", function(form_id, data_set_id) {
+  let user = MedBook.ensureUser(this.userId);
+
+  console.log("form_id, data_set_id:", form_id, data_set_id);
+  let collabs = user.getCollaborations();
+  console.log("collabs:", collabs);
+
+  return Records.find({
+    collaborations: { $in: collabs },
+    form_id,
+    data_set_id,
+  });
+});
 
 
 
@@ -148,36 +196,5 @@ Meteor.publish("geneSetCollections", function () {
 
   return GeneSetCollections.find({
     collaborations: { $in: user.getCollaborations() },
-  });
-});
-
-Meteor.publish("limmaGSEAJobs", function () {
-  let user = MedBook.ensureUser(this.userId);
-
-  return Jobs.find({
-    name: "RunLimmaGSEA",
-    collaborations: { $in: user.getCollaborations() },
-  });
-});
-
-Meteor.publish("forms", function () {
-  let user = MedBook.ensureUser(this.userId);
-
-  return Forms.find({
-    collaborations: { $in: user.getCollaborations() },
-  });
-});
-
-Meteor.publish("records", function(form_id, data_set_id) {
-  let user = MedBook.ensureUser(this.userId);
-
-  console.log("form_id, data_set_id:", form_id, data_set_id);
-  let collabs = user.getCollaborations();
-  console.log("collabs:", collabs);
-
-  return Records.find({
-    collaborations: { $in: collabs },
-    form_id,
-    data_set_id,
   });
 });

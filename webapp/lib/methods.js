@@ -139,6 +139,8 @@ Meteor.methods({
 
     SampleGroups.remove(sampleGroupId);
   },
+
+  // jobs
   createLimmaGSEA: function (args) {
     check(args, new SimpleSchema({
       sample_group_a_id: { type: String },
@@ -189,6 +191,85 @@ Meteor.methods({
       collaborations: [ user.personalCollaboration() ],
       args,
     });
+  },
+  createTumorMapOverlay(args) {
+    check(args, MedBook.jobSchemas.TumorMapOverlay.args);
+
+    let user = MedBook.ensureUser(Meteor.userId());
+
+    // group sample labels by data set id
+    let samplesByDataSetId = {};
+    _.each(args.samples, (sample) => {
+      if (!samplesByDataSetId[sample.data_set_id]) {
+        samplesByDataSetId[sample.data_set_id] = [];
+      }
+
+      samplesByDataSetId[sample.data_set_id].push(sample.sample_label)
+    });
+
+    let jobId = Jobs.insert({
+      name: "TumorMapOverlay",
+      status: "creating",
+      user_id: user._id,
+      collaborations: [ user.personalCollaboration() ],
+      args,
+    });
+
+    // if it's on the server go get the bookmark
+    if (Meteor.isServer) {
+      this.unblock();
+
+      // build up the sample (aka "nodes") data
+      console.log("loading data for tumor map");
+      let nodes = {};
+
+      _.each(samplesByDataSetId, (sampleLabels, data_set_id) => {
+        // data set security
+        let dataSet = DataSets.findOne(data_set_id);
+        user.ensureAccess(dataSet);
+
+        // initialize nodes[sampleLabels] to put gene data there
+        _.each(sampleLabels, (label) => { nodes[label] = {}; });
+
+        // load the data for this data set
+        Expression3.find({ data_set_id }).forEach((doc) => {
+          _.each(sampleLabels, (sample_label) => {
+            let sampleIndex = dataSet.gene_expression_index[sample_label];
+            let expValue = doc.rsem_quan_log2[sampleIndex];
+
+            nodes[sample_label][doc.gene_label] = expValue;
+          });
+        });
+      });
+      console.log("done loading data");
+
+      // do this to allow non-SSL connections (I think)
+      process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+
+      // do the API call
+      apiResponse = HTTP.call("POST",
+          "https://tumormap.ucsc.edu:8112/query/overlayNodes", {
+        data: {
+          map: "CKCC/v1",
+          layout: "mRNA",
+          nodes
+        }
+      });
+
+      if (apiResponse.statusCode === 200) {
+        Jobs.update(jobId, {
+          $set: {
+            status: "done",
+            output: {
+              // TODO: should be `bookmark`
+              bookmark_url: apiResponse.data.bookmarks[0],
+            }
+          }
+        });
+      } else {
+        Jobs.update(jobId, { $set: { status: "error" } });
+      }
+    }
   },
 
   // return a list of the collaborations this user can share with
@@ -460,6 +541,7 @@ Meteor.methods({
     if (collectionName === "Jobs") {
       let deleteableJobs = [
         "RunLimmaGSEA",
+        "TumorMapOverlay",
       ];
 
       if (deleteableJobs.indexOf(object.name) === -1) {
