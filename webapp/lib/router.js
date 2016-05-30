@@ -3,98 +3,47 @@ function defaultAction(templateName, params) {
   BlazeLayout.render("appBody", { content: templateName, params });
 }
 
+function sameNameAndAction(name) {
+  return { name, action: _.partial(defaultAction, name) }
+}
+
 FlowRouter.notFound = {
   action: _.partial(defaultAction, "routeNotFound"),
 };
 
-FlowRouter.route("/", {
-  name: "home",
-  action: _.partial(defaultAction, "home"),
-});
-
-
+FlowRouter.route("/", sameNameAndAction("home"));
 
 var patients = FlowRouter.group({ prefix: "/patients" });
-
-patients.route("/", {
-  name: "listPatients",
-  action: _.partial(defaultAction, "listPatients"),
-});
-
-patients.route("/:patient_id", {
-  name: "patient",
-  action: _.partial(defaultAction, "patient"),
-});
-
-// FlowRouter.route("/patient/:patient_id/upDownGenes/:job_id", {
-//   name: "upDownGenes",
-//   action: _.partial(defaultAction, "upDownGenesJob"),
-// });
-
-
+patients.route("/", sameNameAndAction("listPatients"));
+patients.route("/:patient_id", sameNameAndAction("patient"));
 
 var collaborations = FlowRouter.group({ prefix: "/collaborations" });
-
-collaborations.route("/", {
-  name: "manageCollaborations",
-  action: _.partial(defaultAction,  "manageCollaborations"),
-});
-
+collaborations.route("/", sameNameAndAction("manageCollaborations"));
 collaborations.route("/create", {
   name: "createCollaboration",
   action: _.partial(defaultAction,  "manageCollaborations"),
 });
-
 collaborations.route("/browse", {
   name: "browseCollaborations",
   action: _.partial(defaultAction,  "manageCollaborations"),
 });
 
-
+var dataSets = FlowRouter.group({ prefix: "/data-sets" });
+dataSets.route("/", sameNameAndAction("manageDataSets"));
+dataSets.route("/create", {
+  name: "createDataSet",
+  action: _.partial(defaultAction,  "manageDataSets"),
+});
 
 var tools = FlowRouter.group({ prefix: "/tools" });
+tools.route("/", sameNameAndAction("listTools"));
+tools.route("/limma-gsea", sameNameAndAction("listLimmaGSEA"));
+tools.route("/tumor-map", sameNameAndAction("listTumorMap"));
+tools.route("/outlier-analysis", sameNameAndAction("listUpDownGenes"));
+tools.route("/outlier-analysis/:job_id", sameNameAndAction("upDownGenesJob"));
 
-tools.route("/", {
-  name: "listTools",
-  action: _.partial(defaultAction, "listTools"),
-});
+// Experimental
 
-tools.route("/limma-gsea", {
-  name: "listLimmaGSEA",
-  action: _.partial(defaultAction, "listLimmaGSEA"),
-});
-
-tools.route("/tumor-map", {
-  name: "listTumorMap",
-  action: _.partial(defaultAction, "listTumorMap"),
-});
-
-tools.route("/outlier-analysis", {
-  name: "listUpDownGenes",
-  action: _.partial(defaultAction, "listUpDownGenes"),
-});
-
-tools.route("/outlier-analysis/:job_id", {
-  name: "upDownGenesJob",
-  action: _.partial(defaultAction, "upDownGenesJob"),
-});
-
-
-
-
-
-
-FlowRouter.route("/create-record", {
-  name: "createRecord",
-  action: _.partial(defaultAction, "createRecord"),
-});
-
-FlowRouter.route("/create-form", {
-  name: "createForm",
-  action: _.partial(defaultAction, "createForm"),
-});
-
-FlowRouter.route("/edit-records", {
-  name: "editRecords",
-  action: _.partial(defaultAction, "editRecords"),
-});
+FlowRouter.route("/create-record", sameNameAndAction("createRecord"));
+FlowRouter.route("/create-form", sameNameAndAction("createForm"));
+FlowRouter.route("/edit-records", sameNameAndAction("editRecords"));

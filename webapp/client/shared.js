@@ -1,18 +1,18 @@
-// Template.jobActions
+// Template.shareAndDeleteButtons
 
-Template.jobActions.onCreated(function() {
+Template.shareAndDeleteButtons.onCreated(function() {
   let instance = this;
 
   instance.deleteClicked = new ReactiveVar(false);
 });
 
-Template.jobActions.helpers({
+Template.shareAndDeleteButtons.helpers({
   deleteClicked() { return Template.instance().deleteClicked.get(); },
 });
 
-Template.jobActions.events({
+Template.shareAndDeleteButtons.events({
   "click .share.button"(event, instance) {
-    Session.set("editCollaborationsCollection", "Jobs");
+    Session.set("editCollaborationsCollection", instance.data.collectionName);
     Session.set("editCollaborationsMongoId", instance.data.object._id);
 
     $('.edit-collaborations.modal').modal('show');
@@ -24,7 +24,8 @@ Template.jobActions.events({
     var deleteClicked = instance.deleteClicked;
 
     if (deleteClicked.get()) {
-      Meteor.call("removeObject", "Jobs", instance.data.object._id,
+      Meteor.call("removeObject", instance.data.collectionName,
+          instance.data.object._id,
           (error) => { if (error) throw error; });
     } else {
       deleteClicked.set(true);

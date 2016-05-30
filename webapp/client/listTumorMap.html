@@ -106,13 +106,13 @@ blob/master/templates/semantic-ui/components/afObjectField/afObjectField.html
                 {{else}}
                   {{#if compare status "error"}}
                     An error occurred...
-                    {{{contactTeoText}}}
+                    {{> contactTeoButton}}
                   {{else}}
                     Creating...
                   {{/if}}
                 {{/if}}
               </td>
-              <td>{{> jobActions object=this}}</td>
+              <td>{{> shareAndDeleteButtons object=this collectionName="Jobs"}}</td>
             </tr>
           {{/each}}
         </tbody>

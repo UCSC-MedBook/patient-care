@@ -7,6 +7,7 @@ aldeed:collection2@2.3.3
 aldeed:simple-schema@1.5.3
 aldeed:template-extension@4.0.0
 arillo:flow-router-helpers@0.5.1
+audit-argument-checks@1.0.4
 autoupdate@1.2.4
 babel-compiler@5.8.24_1
 babel-runtime@0.1.4
@@ -51,7 +52,6 @@ ecmascript-runtime@0.2.6
 ejson@1.0.7
 email@1.0.8
 erasaur:meteor-lodash@4.0.0
-fabienb4:autoform-semantic-ui@0.9.3
 fastclick@1.0.7
 flemay:less-autoprefixer@1.2.0
 fortawesome:fontawesome@4.5.0
@@ -70,6 +70,7 @@ livedata@1.0.15
 localstorage@1.0.5
 logging@1.0.8
 mdg:validation-error@0.2.0
+medbook:autoform-semantic-ui@0.9.3
 medbook:collaborations@2.4.12
 medbook:namespace@0.0.2
 medbook:primary-collections@0.0.19

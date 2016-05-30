@@ -70,14 +70,14 @@
           {{/breadcrumbItem}}
         {{/if}}
 
-        <!-- {{#if params.job_id}}
-          {{#breadcrumbItem isActive=(isActiveRoute "upDownGenes")
-              href="TODO"}}
-            Gene Outlier Analysis
+        {{#if or (isActiveRoute "manageDataSets")
+            (isActiveRoute "createDataSet")}}
+          {{#breadcrumbItem isActive=true}}
+            Data sets
           {{/breadcrumbItem}}
-        {{/if}} -->
+        {{/if}}
 
-
+        {{! Experimental}}
 
         {{#if isActiveRoute "createRecord"}}
           {{#breadcrumbItem isActive=true}}Create record{{/breadcrumbItem}}
@@ -91,7 +91,7 @@
           {{#breadcrumbItem isActive=true}}Edit records{{/breadcrumbItem}}
         {{/if}}
 
-
+        {{! Utility}}
 
         {{#if invalidUrl}}
           {{#breadcrumbItem isActive=true}}Invalid URL{{/breadcrumbItem}}
@@ -192,7 +192,15 @@
       </a>
     </p>
     <p>
-      If you think you are seeing this message in error, please {{{contactTeoText}}}
+      If you think you are seeing this message in error, please {{> contactTeoButton}}
     </p>
   </div>
+</template>
+
+<template name="contactTeoButton">
+  <a href="mailto:dtflemin@gmail.com?subject=MedBook%20Patient%20Care"
+      class="ui button teal">
+    <i class="bug icon"></i>
+    Contact Teo
+  </a>
 </template>

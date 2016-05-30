@@ -7,3 +7,6 @@
 [submodule "webapp/packages/referential-integrity"]
 	path = webapp/packages/referential-integrity
 	url = https://github.com/UCSC-MedBook/referential-integrity
+[submodule "webapp/packages/meteor-autoform-semantic-ui"]
+	path = webapp/packages/meteor-autoform-semantic-ui
+	url = https://github.com/UCSC-MedBook/meteor-autoform-semantic-ui

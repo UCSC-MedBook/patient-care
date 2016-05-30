@@ -367,6 +367,8 @@ Meteor.methods({
     return Collaborations.insert(newCollaboration);
   },
   collabNameTaken: function (collabName) {
+    check(collabName, String);
+
     return !!Collaborations.findOne({name: collabName});
   },
   removeCollaboration(collaborationId) {
@@ -386,6 +388,7 @@ Meteor.methods({
     });
   },
   updateCollaboration(collaborationId, updateFields) {
+    check(collaborationId, String);
     check(updateFields, new SimpleSchema({
       description: { type: String, optional: true },
       publiclyListed: { type: Boolean, optional: true },
@@ -569,6 +572,7 @@ Meteor.methods({
     });
   },
 
+  // shareAndDeleteButtons
   removeObject(collectionName, mongoId) {
     check([collectionName, mongoId], [String]);
 
@@ -576,7 +580,12 @@ Meteor.methods({
     let object = MedBook.collections[collectionName].findOne(mongoId);
     user.ensureAccess(object);
 
-    // do some additional checking before actually removing the object
+    let removeAllowedCollections = [ "Jobs", "DataSets" ];
+    if (removeAllowedCollections.indexOf(collectionName) === -1) {
+      return new Meteor.Error("permission-denied");
+    }
+
+    // do some collection-specific checking before actually removing the object
     if (collectionName === "Jobs") {
       let deleteableJobs = [
         "RunLimmaGSEA",
@@ -586,8 +595,6 @@ Meteor.methods({
       if (deleteableJobs.indexOf(object.name) === -1) {
         return new Meteor.Error("permission-denied");
       }
-    } else {
-      throw new Meteor.Error("invalid-collection");
     }
 
     MedBook.collections[collectionName].remove(mongoId);
@@ -604,5 +611,30 @@ Meteor.methods({
     collection.update(mongoId, {
       $set: { collaborations }
     });
-  }
+  },
+
+  // manage data sets
+  insertDataSet(newDataSet) {
+    check(newDataSet, DataSets.simpleSchema().pick(["name", "description"]));
+
+    var user = MedBook.ensureUser(Meteor.userId());
+
+    newDataSet.collaborations = [ user.personalCollaboration() ];
+    return DataSets.insert(newDataSet);
+  },
+  newSampleLabel(sampleDefinition) {
+    check(sampleDefinition, new SimpleSchema({
+      data_set_id: { type: String },
+      sample_label: { type: String },
+    }));
+
+    let user = MedBook.findUser(Meteor.userId());
+    user.ensureAccess(DataSets.findOne(sampleDefinition.data_set_id));
+
+    DataSets.update(sampleDefinition.data_set_id, {
+      $push: {
+        sample_labels: sampleDefinition.sample_label
+      }
+    });
+  },
 });

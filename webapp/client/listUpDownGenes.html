@@ -89,13 +89,13 @@
                   </a>
                 {{else}}
                   {{#if compare status "error"}}
-                    An error occurred... {{{contactTeoText}}}
+                    An error occurred... {{> contactTeoButton}}
                   {{else}}
                     {{status}}
                   {{/if}}
                 {{/if}}
               </td>
-              <td>{{> jobActions object=this}}</td>
+              <td>{{> shareAndDeleteButtons object=this collectionName="Jobs"}}</td>
             </tr>
           {{/each}}
         </tbody>

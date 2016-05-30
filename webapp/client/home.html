@@ -3,6 +3,16 @@
 
   <h1>What would you like to do today?</h1>
   <div class="ui cards">
+    <a href={{pathFor "listTools"}} class="ui card">
+      <div class="content">
+        <div class="header">Tools</div>
+        <div class="description">
+          Run bioinformatic tools such as Limma, GSEA, and the
+          UCSC gene outlier analysis
+        </div>
+      </div>
+    </a>
+
     <a href={{pathFor "manageCollaborations"}} class="ui card">
       <div class="content">
         <div class="header">Collaborations</div>
@@ -12,12 +22,11 @@
       </div>
     </a>
 
-    <a href={{pathFor "listTools"}} class="ui card">
+    <a href={{pathFor "manageDataSets"}} class="ui card">
       <div class="content">
-        <div class="header">Tools</div>
+        <div class="header">Data sets</div>
         <div class="description">
-          Run bioinformatic tools such as Limma, GSEA, and the
-          UCSC gene outlier analysis
+          Create, share, and manage data sets
         </div>
       </div>
     </a>

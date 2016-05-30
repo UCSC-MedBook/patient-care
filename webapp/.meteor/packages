@@ -43,5 +43,6 @@ medbook:referential-integrity
 meteorhacks:picker
 
 aldeed:autoform
-fabienb4:autoform-semantic-ui
+medbook:autoform-semantic-ui
 email
+audit-argument-checks

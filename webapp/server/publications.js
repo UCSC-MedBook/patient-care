@@ -93,6 +93,26 @@ Meteor.publish("browseCollaborations", function() {
   });
 });
 
+// data sets
+
+Meteor.publish("dataSetNames", function() {
+  let user = MedBook.ensureUser(this.userId);
+
+  return DataSets.find({
+    collaborations: { $in: user.getCollaborations() },
+  }, { fields: { name: 1 } });
+});
+
+Meteor.publish("dataSet", function(dataSetId) {
+  check(dataSetId, String);
+  let user = MedBook.ensureUser(this.userId);
+
+  return DataSets.find({
+    _id: dataSetId,
+    collaborations: { $in: user.getCollaborations() },
+  });
+});
+
 // tools
 
 Meteor.publish("dataSets", function() {

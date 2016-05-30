@@ -25,29 +25,31 @@
             {{name}}
           </a>
         {{/each}}
-        <!-- {{#unless length getCollaborations}}
-          <div class="item">
-            No collaborations
-            <i class="frown icon"></i>
-          </div>
-        {{/unless}} -->
       </div>
     </div>
     <div class="twelve wide stretched column">
-      <!-- <div class="ui segment"> -->
-        <div class="">
+      {{! some things look funky if we remove this wrapper div}}
+      <div>
         {{#if isActiveRoute "manageCollaborations"}}
           {{#if getCollaboration}}
             {{> showCollaboration getCollaboration}}
           {{else}}
             {{#if Template.subscriptionsReady}}
-              {{#if queryParam "data_set"}}
+              {{#if queryParam "collaboration_id"}}
                 <div class="ui error message">
                   <div class="header">
-                    Invalid data set.
+                    Invalid collaboration id in the URL
                   </div>
-                  This data set either doesn't exist or you don't have
-                  access to it.
+                  <p>
+                    The collaboration either doesn't exist or you don't
+                    have access to it. You likely got this URL from
+                    someone who has access to the collaboration, in which
+                    case you should ask them to add you to the collaboration.
+                  </p>
+                  <p>
+                    If you believe you are seeing this message in error,
+                    please {{> contactTeoButton}}
+                  </p>
                 </div>
               {{else}}
                 {{#if length getCollaborations}}
@@ -122,8 +124,6 @@
     <button type="submit" class="ui primary button">Create!</button>
   {{/autoForm}}
 </template>
-
-
 
 <template name="showCollaboration">
   <h3>

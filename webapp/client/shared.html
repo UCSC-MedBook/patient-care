@@ -1,5 +1,5 @@
-<template name="jobActions">
-  <div class="ui labeled icon tiny buttons">
+<template name="shareAndDeleteButtons">
+  <div class="ui labeled icon tiny buttons {{extraButtonsClass}}">
     <button class="ui secondary share button">
       <i class="share icon"></i>
       Share
@@ -13,20 +13,6 @@
       {{/if}}
     </button>
   </div>
-
-
-  <!-- {{#each object.collaborations}}
-    <div class="ui horizontal label collaboration">
-      <i class="{{#if isPersonalCollaboration}}user{{else}}users{{/if}}
-          icon"></i>
-      {{this}}
-    </div>
-  {{/each}}
-
-  <button class="ui labeled icon secondary mini button edit">
-    <i class="edit icon"></i>
-    Edit
-  </button> -->
 </template>
 
 <template name="editCollaborationsModal">
@@ -41,10 +27,10 @@
           These collaborations can see and edit this object.
         </div>
         {{#if collaborationOptions}}
-          {{#autoForm id="editCollaborations" schema=onlyCollaborations
-              doc=getObject}}
+          {{#autoForm id="editCollaborations" schema=onlyCollaborations}}
             {{> afQuickField name="collaborations" options=collaborationOptions
-                type="select" multiple=true search=true}}
+                type="select" multiple=true search=true
+                value=getObject.collaborations}}
           {{/autoForm}}
         {{else}}
           {{> dataLoading}}
