@@ -69,6 +69,16 @@ tools.route("/tumor-map", {
   action: _.partial(defaultAction, "listTumorMap"),
 });
 
+tools.route("/outlier-analysis", {
+  name: "listUpDownGenes",
+  action: _.partial(defaultAction, "listUpDownGenes"),
+});
+
+tools.route("/outlier-analysis/:job_id", {
+  name: "upDownGenesJob",
+  action: _.partial(defaultAction, "upDownGenesJob"),
+});
+
 
 
 

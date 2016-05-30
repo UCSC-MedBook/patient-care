@@ -44,7 +44,7 @@ Template.afObjectField_dataSetsAndSamples.helpers({
 Template.previouslyRunTumorMapOverlays.onCreated(function() {
   let instance = this;
 
-  instance.subscribe("tumorMapOverlayJobs");
+  instance.subscribe("jobsOfType", "TumorMapOverlay");
 });
 
 Template.previouslyRunTumorMapOverlays.helpers({

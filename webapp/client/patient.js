@@ -186,61 +186,10 @@ Template.patientUpDownGenes.events({
       return;
     }
 
-    // sometimes we have to make two trips to the server, so we need to be
-    // able to call this from async code (after a Meteor method has been run)
-    function createUpDownGenes(sample_group_id) {
-      let args = _.pick(instance.data, "data_set_id", "patient_label");
-      _.extend(args, { sample_label, sample_group_id, iqr_multiplier });
 
-      // submit to the server for consideration
-      Meteor.call("createUpDownGenes", args, function (error, job_id) {
-        if (error) {
-          instance.error.set({
-            header: "Internal error",
-            message: "We had a problem processing your request... If this " +
-                "messages persists, please " + contactTeoText,
-          });
-        } else {
-          FlowRouter.go("upDownGenes", _.extend(args, { job_id }));
-        }
-
-        instance.waitingForResponse.set(false);
-      });
-    }
 
     if (instance.createCustomSampleGroup.get()) {
-      let customSampleGroup = instance.customSampleGroup.get();
 
-      // sanity checks
-      if (!customSampleGroup.name) {
-        instance.error.set({
-          header: "Whoops!",
-          message: "Please name your sample group."
-        });
-        return;
-      }
-      if (customSampleGroup.data_sets.length === 0) {
-        instance.error.set({
-          header: "No data sets",
-          message: "Please add at least one data set to your sample group."
-        });
-        return;
-      }
-
-      instance.waitingForResponse.set(true);
-      Meteor.call("createSampleGroup", customSampleGroup, (error, result) => {
-        if (error) {
-          instance.waitingForResponse.set(false);
-
-          instance.error.set({
-            header: "Internal error",
-            message: "We had a problem creating a sample group... If this " +
-                "messages persists, please " + contactTeoText,
-          });
-        } else {
-          createUpDownGenes(result);
-        }
-      });
     } else {
       let sampleGroupId = instance.sampleGroupId.get();
 

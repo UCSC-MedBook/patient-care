@@ -1,40 +1,70 @@
 Meteor.methods({
   // Starts a new job with the given args. If a job already exists with
   // the given args, it instead returns the _id of that duplicate job.
-  createUpDownGenes: function (args) {
-    check(args, new SimpleSchema({
-      data_set_id: { type: String },
-      patient_label: { type: String },
-      sample_label: { type: String },
-      sample_group_id: { type: String },
+  createUpDownGenes: function (formValues, customSampleGroup) {
+    check(formValues, new SimpleSchema({
+      data_set_or_patient_id: { type: String, label: "Data set or patient" },
+      sample_label: { type: String, label: "Sample" },
+      sample_group_id: { type: String, label: "Sample group" },
       iqr_multiplier: { type: Number, decimal: true },
     }));
 
     let user = MedBook.ensureUser(Meteor.userId());
-    let dataSet = DataSets.findOne(args.data_set_id);
-    user.ensureAccess(dataSet);
 
-    let sampleGroup = SampleGroups.findOne(args.sample_group_id);
+    let {
+      data_set_or_patient_id,
+      sample_label,
+      sample_group_id,
+      iqr_multiplier,
+    } = formValues;
+
+    // if we need to create a new sample group, do so
+    if (formValues.sample_group_id === "creating") {
+      check(customSampleGroup, Object);
+      sample_group_id = Meteor.call("createSampleGroup", customSampleGroup);
+    }
+
+    // security for the sample group
+    let sampleGroup = SampleGroups.findOne(sample_group_id);
     user.ensureAccess(sampleGroup);
-    _.extend(args, {
-      sample_group_name: sampleGroup.name,
-      data_set_name: dataSet.name,
-    });
 
-    // make sure they have access to each of the data sets in the sample group
-    _.each(sampleGroup.data_sets, (sampleGroupDataSet) => {
-      user.ensureAccess(DataSets.findOne(sampleGroupDataSet.data_set_id));
-    });
+    let args = {
+      sample_label,
+      iqr_multiplier,
+      sample_group_id,
+      sample_group_name: sampleGroup.name,
+    };
+
+    // set args.data_set_id and args.data_set_name_or_patient_label
+    if (data_set_or_patient_id.startsWith("patient-")) {
+      let patientId = data_set_or_patient_id.slice("patient-".length);
+      let patient = Patients.findOne(patientId);
+      let sample = _.findWhere(patient.samples, { sample_label });
+
+      args.data_set_id = sample.data_set_id;
+      args.data_set_name_or_patient_label = patient.patient_label;
+
+      // collaborations not necessarily loaded on client
+      if (Meteor.isServer) user.ensureAccess(patient);
+    } else if (data_set_or_patient_id.startsWith("data_set-")) {
+      args.data_set_id = data_set_or_patient_id.slice("data_set-".length);
+
+      let dataSet = DataSets.findOne(args.data_set_id);
+      args.data_set_name_or_patient_label = dataSet.name;
+
+      // collaborations not necessarily loaded on client
+      if (Meteor.isServer) user.ensureAccess(dataSet);
+    }
 
     // check to see if a job like this one has already been run,
     // and if so, return that job's _id
+    // NOTE: I believe there could be a race condition here, but
+    // I don't think Meteor handles more than one Meteor method at once.
     let duplicateJob = Jobs.findOne({ args });
     if (duplicateJob) {
       return duplicateJob._id;
     }
 
-    // NOTE: I believe there could be a race condition here, but
-    // I don't think Meteor handles more than one Meteor method at once.
     return Jobs.insert({
       name: "UpDownGenes",
       status: "waiting",
@@ -65,14 +95,23 @@ Meteor.methods({
     return 1; // default value
   },
   createSampleGroup: function (sampleGroup) {
-    check(sampleGroup, Object); // more checking down below...
-
     // NOTE: this method might produce "unclean" errors because I don't
     // feel like rewriting most of the schema for SampleGroups for the
     // check function (above)
+    check(sampleGroup, Object);
 
     let user = MedBook.ensureUser(Meteor.userId());
-    user.ensureAccess(sampleGroup.collaborations);
+    user.ensureAccess(sampleGroup);
+
+    // sanity checks (complete with nice error messages)
+    if (!sampleGroup.name) {
+      throw new Meteor.Error("name-missing", "Name missing",
+          "Please name your sample group.");
+    }
+    if (sampleGroup.data_sets.length === 0) {
+      throw new Meteor.Error("no-data-sets", "No data sets",
+          "Please add at least one data set to your sample group.");
+    }
 
     // make sure the version is correct (aka don't trust the user)
     // TODO: when should we increment the version?

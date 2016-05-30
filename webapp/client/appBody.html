@@ -12,7 +12,7 @@
       <div class="ui breadcrumb large">
         {{#breadcrumbItem isActive=(isActiveRoute "home")
             href=(pathFor 'home')}}
-          Home
+          MedBook Patient Care
         {{/breadcrumbItem}}
 
         {{#if or (isActiveRoute "listPatients") (isActiveRoute "patient")}}
@@ -29,9 +29,7 @@
           {{/if}}
         {{/if}}
 
-        {{#if threeOr (isActiveRoute "listTools")
-            (isActiveRoute "listLimmaGSEA")
-            (isActiveRoute "listTumorMap")}}
+        {{#if activeRouteIsInTools}}
           {{#breadcrumbItem isActive=(isActiveRoute "listTools")
               href=(pathFor "listTools")}}
             Tools
@@ -46,6 +44,20 @@
           {{#if isActiveRoute "listTumorMap"}}
             {{#breadcrumbItem isActive=true}}
               Tumor Map
+            {{/breadcrumbItem}}
+          {{/if}}
+
+          {{#if or (isActiveRoute "listUpDownGenes")
+              (isActiveRoute "upDownGenesJob")}}
+            {{#breadcrumbItem isActive=(isActiveRoute "listUpDownGenes")
+                href=(pathFor "listUpDownGenes")}}
+              Outlier Analysis
+            {{/breadcrumbItem}}
+          {{/if}}
+
+          {{#if isActiveRoute "upDownGenesJob"}}
+            {{#breadcrumbItem isActive=true}}
+              Result
             {{/breadcrumbItem}}
           {{/if}}
         {{/if}}

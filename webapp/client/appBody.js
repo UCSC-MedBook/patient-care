@@ -21,6 +21,15 @@ Template.appBody.helpers({
   invalidUrl() {
     return FlowRouter.getRouteName() === undefined;
   },
+  activeRouteIsInTools() {
+    return [
+      "listTools",
+      "listLimmaGSEA",
+      "listTumorMap",
+      "listUpDownGenes",
+      "upDownGenesJob",
+    ].indexOf(FlowRouter.getRouteName()) !== -1;
+  },
 });
 
 

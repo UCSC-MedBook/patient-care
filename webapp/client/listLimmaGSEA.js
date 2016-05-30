@@ -204,7 +204,7 @@ Template.limmaGSEAGroupSelector.helpers({
 Template.previouslyRunLimmaGSEA.onCreated(function () {
   let instance = this;
 
-  instance.subscribe("limmaGSEAJobs");
+  instance.subscribe("jobsOfType", "RunLimmaGSEA");
 });
 
 Template.previouslyRunLimmaGSEA.helpers({
@@ -214,6 +214,6 @@ Template.previouslyRunLimmaGSEA.helpers({
     });
   },
   getJobResultUrl: function() {
-    return "/tools/gsea-result/" + this._id + "/index.html";
+    return "/tools/limma-gsea/" + this._id + "/index.html";
   },
 });

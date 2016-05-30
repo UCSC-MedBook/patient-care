@@ -55,6 +55,21 @@ Meteor.publish("sampleLoadedData", function (patientId, sample_label) {
   });
 });
 
+Meteor.publish("upDownGenes", function (data_set_id, patient_label) {
+  check([data_set_id, patient_label], [String]);
+
+  let user = MedBook.ensureUser(this.userId);
+  let dataSet = DataSets.findOne(data_set_id);
+  user.ensureAccess(dataSet);
+
+  return Jobs.find({
+    name: "UpDownGenes",
+    status: { $ne: "creating" },
+    "args.data_set_id": data_set_id,
+    "args.patient_label": patient_label,
+  });
+});
+
 // collaborations
 
 Meteor.publish("adminAndCollaboratorCollaborations", function() {
@@ -96,71 +111,36 @@ Meteor.publish("dataSetNamesAndSamples", function() {
   }, { fields: { name: 1, sample_labels: 1 } });
 });
 
-Meteor.publish("limmaGSEAJobs", function () {
+Meteor.publish("jobsOfType", function (name) {
+  check(name, String);
+
   let user = MedBook.ensureUser(this.userId);
 
+  // only allow certain job names
+  let allowedJobNames = [
+    "RunLimmaGSEA",
+    "UpDownGenes",
+    "TumorMapOverlay"
+  ];
+  if (allowedJobNames.indexOf(name) === -1) {
+    return null;
+  }
+
   return Jobs.find({
-    name: "RunLimmaGSEA",
+    name,
     collaborations: { $in: user.getCollaborations() },
   });
 });
 
-Meteor.publish("tumorMapOverlayJobs", function() {
-  let user = MedBook.ensureUser(this.userId);
+Meteor.publish("patientAndSampleLabels", function() {
+  var user = MedBook.ensureUser(this.userId);
 
-  return Jobs.find({
-    name: "TumorMapOverlay",
-    collaborations: { $in: user.getCollaborations() },
-  });
+  return Patients.find({
+    collaborations: {$in: user.getCollaborations() },
+  }, { fields: { patient_label: 1, "samples.sample_label": 1 } });
 });
 
-// experimenal
-
-Meteor.publish("forms", function () {
-  let user = MedBook.ensureUser(this.userId);
-
-  return Forms.find({
-    collaborations: { $in: user.getCollaborations() },
-  });
-});
-
-Meteor.publish("records", function(form_id, data_set_id) {
-  let user = MedBook.ensureUser(this.userId);
-
-  console.log("form_id, data_set_id:", form_id, data_set_id);
-  let collabs = user.getCollaborations();
-  console.log("collabs:", collabs);
-
-  return Records.find({
-    collaborations: { $in: collabs },
-    form_id,
-    data_set_id,
-  });
-});
-
-
-
-
-
-
-
-
-
-
-Meteor.publish("upDownGenes", function (data_set_id, patient_label) {
-  check([data_set_id, patient_label], [String]);
-
-  let user = MedBook.ensureUser(this.userId);
-  let dataSet = DataSets.findOne(data_set_id);
-  user.ensureAccess(dataSet);
-
-  return Jobs.find({
-    name: "UpDownGenes",
-    status: { $ne: "creating" },
-    "args.data_set_id": data_set_id,
-    "args.patient_label": patient_label,
-  });
-});
+// tools/OutlierAnalysis
 
 Meteor.publish("upDownGenesJob", function (jobId) {
   check(jobId, String);
@@ -176,11 +156,38 @@ Meteor.publish("upDownGenesJob", function (jobId) {
   return Jobs.find({ _id: jobId });
 });
 
-Meteor.publish("blob", function (blobId) {
-  check(blobId, String);
+// experimenal
 
-  // NOTE: no security... if they have the _id they can have it
-  return Blobs.find(blobId);
+Meteor.publish("forms", function () {
+  let user = MedBook.ensureUser(this.userId);
+
+  return Forms.find({
+    collaborations: { $in: user.getCollaborations() },
+  });
+});
+
+Meteor.publish("records", function(form_id) {
+  let user = MedBook.ensureUser(this.userId);
+
+  let form = Forms.findOne(form_id);
+
+
+
+  return Records.find({
+    collaborations: { $in: user.getCollaborations() },
+    form_id,
+    data_set_id,
+  });
+});
+
+// general
+
+Meteor.publish("geneSetCollections", function () {
+  let user = MedBook.ensureUser(this.userId);
+
+  return GeneSetCollections.find({
+    collaborations: { $in: user.getCollaborations() },
+  });
 });
 
 Meteor.publish("sampleGroups", function () {
@@ -191,10 +198,10 @@ Meteor.publish("sampleGroups", function () {
   });
 });
 
-Meteor.publish("geneSetCollections", function () {
-  let user = MedBook.ensureUser(this.userId);
+Meteor.publish("blob", function (blobId) {
+  check(blobId, String);
 
-  return GeneSetCollections.find({
-    collaborations: { $in: user.getCollaborations() },
-  });
+  // TODO
+  // NOTE: no security... if they have the _id they can have it
+  return Blobs.find(blobId);
 });

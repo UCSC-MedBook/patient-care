@@ -1,5 +1,5 @@
-// Picker.route("/tools/:userId/:loginToken/gsea-result/:job_id/:file_path",
-Picker.route("/tools/gsea-result/:job_id/:file_path",
+// Picker.route("/tools/:userId/:loginToken/limma-gsea/:job_id/:file_path",
+Picker.route("/tools/limma-gsea/:job_id/:file_path",
     function(params, req, res, next) {
   // let hashedToken = Accounts._hashLoginToken(loginToken);
   //

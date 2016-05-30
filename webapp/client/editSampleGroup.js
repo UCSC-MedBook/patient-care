@@ -7,7 +7,9 @@ Template.editSampleGroup.onCreated(function () {
   instance.subscribe("dataSets");
 
   instance.sampleGroup = instance.data.sampleGroup;
-  if (!instance.sampleGroup.get()) { // make sure it's initialized
+
+  // make sure it's initialized
+  if (!instance.sampleGroup.get()) {
     instance.sampleGroup.set({
       name: "",
       version: 1,
@@ -63,7 +65,7 @@ Template.editSampleGroup.helpers({
 
     // only return data sets that haven't already been added
     return DataSets.find({
-      id: { $nin: _.pluck(addedDataSets, "_id") },
+      _id: { $nin: _.pluck(addedDataSets, "data_set_id") },
     });
   },
   dataSetName: function () {

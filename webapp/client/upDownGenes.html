@@ -2,7 +2,7 @@
   {{#if Template.subscriptionsReady}}
     {{#with getJob}}
       <h1 class="title ui">
-        Gene Outlier Analysis
+        Outlier Analysis Result
       </h1>
 
       {{#if compare status "done"}}
@@ -56,9 +56,9 @@
 <template name="outlierAnalysis">
   <h2>Options</h2>
   <p>
-    Data set name: {{args.data_set_name}}<br>
-    Patient: {{args.patient_label}}<br>
+    Data set/patient: {{args.data_set_name_or_patient_label}}<br>
     Sample: {{args.sample_label}}<br>
+    Comparison group: {{args.sample_group_name}}<br>
     IQR multiplier: {{args.iqr_multiplier}}<br>
   </p>
 

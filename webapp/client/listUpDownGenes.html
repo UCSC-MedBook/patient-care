@@ -1,0 +1,118 @@
+<template name="listUpDownGenes">
+  <h1>
+    Outlier Analysis
+  </h1>
+
+  <p>
+    Outlier genes are defined as being more than N IQRs away from the median.
+    The maximum number of genes returned is 5% of the total number of genes.
+    If there are more than 5% of the total number of genes that are outliers,
+    only the top 5% of the outliers will be returned.
+  </p>
+
+  <h2>Start a new analysis</h2>
+
+  {{#autoForm id="createUpDownGenes" schema=formSchema}}
+    <div class="two fields">
+      {{> afQuickField name="data_set_or_patient_id"
+          options=patientAndDataSets type="select" search=true
+          placeholder="Select a data set/patient..."}}
+
+      {{#if afFieldValueIs name="data_set_or_patient_id" value=undefined}}
+        {{> afQuickField name="sample_label" type="select"
+            placeholder="Select a data set/patient" disabled=true}}
+      {{else}}
+        {{! use basic-select if there's a whole lot of samples}}
+        {{#if firstGreater (length sampleOptions) 500}}
+          {{> afQuickField name="sample_label" type="basic-select" search=true
+              placeholder="Select a sample..." options=sampleOptions}}
+        {{else}}
+          {{> afQuickField name="sample_label" type="select" search=true
+              placeholder="Select a sample..." options=sampleOptions}}
+        {{/if}}
+      {{/if}}
+    </div>
+
+    <div class="two fields">
+      {{> afQuickField name="iqr_multiplier" value=1.5}}
+
+      {{> afQuickField name="sample_group_id" options=sampleGroupOptions
+          type="select" search=true placeholder="Choose background..."}}
+    </div>
+
+    {{#if afFieldValueIs name="sample_group_id" value="creating"}}
+      {{> editSampleGroup sampleGroup=customSampleGroup}}
+    {{/if}}
+
+    <button type="submit" class="ui primary button">
+      Start analysis
+    </button>
+  {{/autoForm}}
+
+  {{> previouslyRunUpDownGenes}}
+</template>
+
+<template name="previouslyRunUpDownGenes">
+  <h2>Previously run analyses</h2>
+
+  {{#if Template.subscriptionsReady}}
+    {{#if length getJobs}}
+      <table class="ui single line table">
+        <thead>
+          <tr>
+            <th>Sample</th>
+            <th>Comparison group</th>
+            <th>IQR multiplier</th>
+            <th>Upregulated genes</th>
+            <th>Downregulated genes</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each getJobs}}
+            <tr>
+              <td>
+                <i class="fa fa-flask"></i>{{args.sample_label}}
+                <!-- from {{args.comparison_group_name}} -->
+              </td>
+              <td>{{args.sample_group_name}}</td>
+              <td>{{args.iqr_multiplier}}</td>
+              <td>{{output.up_genes.length}}</td>
+              <td>{{output.down_genes.length}}</td>
+              <td>
+                {{#if compare status "done"}}
+                  <a href={{pathFor "upDownGenesJob" job_id=_id}}
+                      class="ui right labeled icon primary button">
+                    <i class="right arrow icon"></i>
+                    View
+                  </a>
+                {{else}}
+                  {{#if compare status "error"}}
+                    An error occurred... {{{contactTeoText}}}
+                  {{else}}
+                    {{status}}
+                  {{/if}}
+                {{/if}}
+              </td>
+              <td>{{> jobActions object=this}}</td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    {{else}}
+      <div class="ui message">
+        <div class="content">
+          <div class="header">
+            No analyses... yet!
+          </div>
+          <p>
+            You haven't run any analyses.
+          </p>
+        </div>
+      </div>
+    {{/if}}
+  {{else}}
+    {{> dataLoading}}
+  {{/if}}
+</template>
