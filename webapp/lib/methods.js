@@ -1,5 +1,4 @@
 Meteor.methods({
-  
   getSampleGroupVersion: function (name) {
     check(name, String);
 
@@ -434,7 +433,7 @@ Meteor.methods({
 
     let removeAllowedCollections = [ "Jobs", "DataSets" ];
     if (removeAllowedCollections.indexOf(collectionName) === -1) {
-      return new Meteor.Error("permission-denied");
+      throw new Meteor.Error("permission-denied");
     }
 
     // do some collection-specific checking before actually removing the object
@@ -442,10 +441,11 @@ Meteor.methods({
       let deleteableJobs = [
         "RunLimmaGSEA",
         "TumorMapOverlay",
+        "UpDownGenes",
       ];
 
       if (deleteableJobs.indexOf(object.name) === -1) {
-        return new Meteor.Error("permission-denied");
+        throw new Meteor.Error("permission-denied");
       }
     }
 

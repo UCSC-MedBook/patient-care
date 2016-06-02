@@ -17,9 +17,6 @@ Template.shareAndDeleteButtons.events({
 
     $('.edit-collaborations.modal').modal('show');
   },
-  // "click .close.modal.icon"(event, instance) {
-  //   console.log("hi");
-  // },
   "click .delete.button": function(event, instance) {
     var deleteClicked = instance.deleteClicked;
 
@@ -112,4 +109,18 @@ Template.editCollaborationsModal.helpers({
     });
   },
   waitingForServer() { return Template.instance().waitingForServer.get(); },
+});
+
+// Template.showErrorMessage
+
+Template.showErrorMessage.helpers({
+  getError: function () {
+    return Template.instance().data.get();
+  },
+});
+
+Template.showErrorMessage.events({
+  "click .close-error-message": function (event, instance) {
+    instance.data.set(null);
+  },
 });

@@ -5,36 +5,15 @@ Template.upDownGenesJob.onCreated(function () {
 
   // subscribe and keep up to date
   instance.autorun(function () {
-    let { data_set_id, job_id } = Template.currentData();
+    let { job_id } = Template.currentData();
 
-    instance.subscribe("dataSet", data_set_id);
     instance.subscribe("upDownGenesJob", job_id);
-  });
-
-  // combine data set and patient within data set
-  instance.patient = new ReactiveVar(); // from the data sets's `patients` list
-  instance.autorun(function () {
-    let { data_set_id, patient_label } = Template.currentData();
-    let dataSet = DataSets.findOne(data_set_id);
-
-    let patient;
-    if (dataSet) {
-      patient = _.findWhere(dataSet.patients, { patient_label });
-
-      if (patient) {
-        _.extend(patient, { data_set_id });
-      }
-    }
-    instance.patient.set(patient);
   });
 });
 
 Template.upDownGenesJob.helpers({
   getJob: function () {
     return Jobs.findOne(Template.instance().data.job_id);
-  },
-  getPatient: function () {
-    return Template.instance().patient.get();
   },
 });
 

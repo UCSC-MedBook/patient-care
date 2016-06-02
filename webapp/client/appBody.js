@@ -31,19 +31,3 @@ Template.appBody.helpers({
     ].indexOf(FlowRouter.getRouteName()) !== -1;
   },
 });
-
-
-
-// Template.showErrorMessage
-
-Template.showErrorMessage.helpers({
-  getError: function () {
-    return Template.instance().data.get();
-  },
-});
-
-Template.showErrorMessage.events({
-  "click .close-error-message": function (event, instance) {
-    instance.data.set(null);
-  },
-});

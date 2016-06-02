@@ -241,6 +241,7 @@ Template.sampleLabelListFilter.helpers({
     return this.options.sample_labels.join("\n");
   },
   getInvalidSampleLabels: function () {
+    console.log("Template.instance().invalidSampleLabels.get():", Template.instance().invalidSampleLabels.get());
     return Template.instance().invalidSampleLabels.get();
   },
   getEditing: function () {
@@ -250,6 +251,8 @@ Template.sampleLabelListFilter.helpers({
 
 Template.sampleLabelListFilter.events({
   "click .done-editing": function (event, instance) {
+    event.preventDefault();
+
     // clear errors
     instance.invalidSampleLabels.set(null);
 
@@ -276,6 +279,9 @@ Template.sampleLabelListFilter.events({
     instance.editing.set(false);
   },
   "click .edit-filter": function (event, instance) {
+    // unclear why we need this, but otherwise it submits the form
+    event.preventDefault();
+
     instance.editing.set(true);
   },
   "click .close-sample-error-message": function (event, instance) {

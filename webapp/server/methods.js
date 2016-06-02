@@ -24,9 +24,17 @@ Meteor.methods({
     // if we need to create a new sample group, do so
     if (formValues.sample_group_id === "creating") {
       this.unblock()
-      console.log("calling");
-      sample_group_id = Meteor.call("createSampleGroup", customSampleGroup);
-      console.log("back in createUpDownGenes");
+
+      let creatingError;
+      Meteor.call("createSampleGroup", customSampleGroup, (err, ret) => {
+        // NOTE: this callback is executed before the Meteor.call returns
+
+        creatingError = err;
+        sample_group_id = ret;
+      });
+
+      // if there was a problem with that one, throw the associated error
+      if (creatingError) throw creatingError;
     }
 
     // security for the sample group
@@ -49,16 +57,14 @@ Meteor.methods({
       args.data_set_id = sample.data_set_id;
       args.data_set_name_or_patient_label = patient.patient_label;
 
-      // collaborations not necessarily loaded on client
-      if (Meteor.isServer) user.ensureAccess(patient);
+      user.ensureAccess(patient);
     } else if (data_set_or_patient_id.startsWith("data_set-")) {
       args.data_set_id = data_set_or_patient_id.slice("data_set-".length);
 
       let dataSet = DataSets.findOne(args.data_set_id);
       args.data_set_name_or_patient_label = dataSet.name;
 
-      // collaborations not necessarily loaded on client
-      if (Meteor.isServer) user.ensureAccess(dataSet);
+      user.ensureAccess(dataSet);
     }
 
     // check to see if a job like this one has already been run,
@@ -156,6 +162,15 @@ Meteor.methods({
     // handle inserting objects with very large arrays (ex. sample_labels).
     // Instead, handle the autoValues and check the schema manually...
 
+    // check to make sure sample_labels are valid in actual sample group
+    // (not done below because SimpleSchema hangs)
+    _.each(sampleGroup.data_sets, (dataSet) => {
+      check(dataSet.sample_labels, [String]);
+
+      dataSet.sample_labels_count = dataSet.sample_labels.length;
+      check(dataSet.sample_labels_count, Number);
+    });
+
     // clone object to be checked for the schema
     let clonedSampleGroup = JSON.parse(JSON.stringify(sampleGroup));
     _.each(clonedSampleGroup.data_sets, (dataSet) => {
@@ -171,13 +186,15 @@ Meteor.methods({
     }
 
     sampleGroup.date_created = new Date();
+    let newId = Random.id(); // XXX: might cause collisions
+    sampleGroup._id = newId;
 
     // insert asynchronously -- thanks @ArnaudGallardo
     var future = new Future();
     SampleGroups.rawCollection().insert(sampleGroup, (err, insertedObj) => {
       if (err) future.throw(err);
 
-      future.return(insertedObj._id);
+      future.return(newId);
     });
 
     return future.wait();

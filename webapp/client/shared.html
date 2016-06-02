@@ -50,3 +50,13 @@
     </div>
   </div>
 </template>
+
+<template name="showErrorMessage">
+  {{#with getError}}
+    <div class="ui negative message">
+      <i class="close icon close-error-message"></i>
+      <div class="header">{{header}}</div>
+      {{{message}}}
+    </div>
+  {{/with}}
+</template>

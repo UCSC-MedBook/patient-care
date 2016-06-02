@@ -68,6 +68,7 @@ Template.listUpDownGenes.helpers({
     } ].concat(sgOptions);
   },
   customSampleGroup() { return Template.instance().customSampleGroup; },
+  error() { return Template.instance().error; },
 });
 
 Template.listUpDownGenes.events({
@@ -77,13 +78,22 @@ Template.listUpDownGenes.events({
     let formValues = AutoForm.getFormValues("createUpDownGenes");
     let customSampleGroup = instance.customSampleGroup.get();
 
+    // until Match.Maybe is available, make sure this is an Object
+    if (!customSampleGroup) customSampleGroup = {};
+
     Meteor.call("createUpDownGenes", formValues.insertDoc, customSampleGroup,
         (error, job_id) => {
       if (error) {
-        instance.error.set({
-          header: error.message,
-          message: error.description
-        });
+        if (error.reason === "Match failed") {
+          // there might be edge cases here which I haven't found yet so other
+          // messages might have to be shown instead
+          instance.error.set({ header: "Please correct errors above" });
+        } else {
+          instance.error.set({
+            header: error.reason,
+            message: error.details
+          });
+        }
       } else {
         FlowRouter.go("upDownGenesJob", { job_id });
       }
