@@ -32,7 +32,22 @@
           <div class="header">
             Error running job.
           </div>
-          We have encountered an error running your job.
+          <p>
+            We have encountered an error running your job.
+            If you believe this is an internal error, please contact us using
+            the button below.
+          </p>
+          <p>
+            Description: <code>{{error_description}}</code>
+          </p>
+          {{#if stack_trace}}
+            <p>
+              <pre><code>{{stack_trace}}</code></pre>
+            </p>
+          {{/if}}
+          <p>
+            {{{contactTeoText}}}
+          </p>
         </div>
       {{/if}}
     {{/with}}
