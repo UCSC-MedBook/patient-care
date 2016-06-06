@@ -201,7 +201,7 @@ Meteor.methods({
   },
 });
 
-Moko.ensureIndex(Expression3, {
+Moko.ensureIndex(GeneExpression, {
   gene_label: 1,
   data_set_id: 1,
 });

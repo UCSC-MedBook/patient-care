@@ -122,7 +122,7 @@ Meteor.methods({
         _.each(sampleLabels, (label) => { nodes[label] = {}; });
 
         // load the data for this data set
-        Expression3.find({ data_set_id }).forEach((doc) => {
+        GeneExpression.find({ data_set_id }).forEach((doc) => {
           _.each(sampleLabels, (sample_label) => {
             let sampleIndex = dataSet.gene_expression_index[sample_label];
             let expValue = doc.rsem_quan_log2[sampleIndex];
