@@ -16,7 +16,7 @@ Template.listUpDownGenes.helpers({
     return new SimpleSchema({
       data_set_or_patient_id: { type: String, label: "Data set or patient" },
       sample_label: { type: String, label: "Sample" },
-      sample_group_id: { type: String, label: "Sample group" },
+      sample_group_id: { type: String, label: "Background sample group" },
       iqr_multiplier: { type: Number, decimal: true },
     });
   },
