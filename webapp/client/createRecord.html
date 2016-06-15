@@ -1,0 +1,128 @@
+<template name="createRecord">
+  <h1>Create a new record</h1>
+
+  {{! NOTE: By only using one autoForm we disallow fields which collide with
+      fields in the record schema. There is a better way but it's harder.}}
+  {{#if Template.subscriptionsReady}}
+    {{#autoForm id="insertRecord" schema=recordSchema
+        type="method" meteormethod="insertRecord"}}
+      {{> afQuickField name="data_set_id" options=dataSetOptions
+          defaultValue=(queryParam "data_set_id")}}
+      {{> afQuickField name="form_id" options=formOptions
+          defaultValue=(queryParam "form_id")}}
+      <div class="yop">
+        {{> afQuickField name="collaborations" options=collaborationOptions
+            type="select" multiple=true search=true defaultValue=onlyPersonal}}
+      </div>
+
+      {{#if getInstanceReactive "data_set_id"}}
+        {{#if getInstanceReactive "form_id"}}
+          {{#with getForm}}
+            <div class="reset-dropdown" style="margin-bottom: 14px;">
+              {{! patient/sample}}
+              {{> patientAndOrSampleFields form=getForm dataSet=getDataSet}}
+
+              {{! form-defined fields}}
+              {{#each getForm.fields}}
+                {{#if compare type "Select"}}
+                  {{> afQuickField name=label options="allowed"
+                      search=true type="select"}}
+                {{else}}
+                  {{#if compare type "Integer"}}
+                    {{> afQuickField name=label step="1"}}
+                  {{else}}
+                    {{> afQuickField name=label}}
+                  {{/if}}
+                {{/if}}
+              {{/each}}
+            </div>
+
+            <button type="submit" class="ui primary button">
+              Create record
+            </button>
+          {{/with}}
+
+          {{#unless getForm}}
+            <div class="ui negative message">
+              <div class="header">
+                Invalid form.
+              </div>
+              It's possible this form exists but you do not have access.
+            </div>
+          {{/unless}}
+
+          {{#unless getDataSet}}
+            <div class="ui negative message">
+              <div class="header">
+                Invalid data set.
+              </div>
+              It's possible this data set exists but you do not have access.
+            </div>
+          {{/unless}}
+        {{else}}
+          <div class="ui message">
+            <div class="header">
+              Pick a form to continue...
+            </div>
+          </div>
+        {{/if}}
+      {{else}}
+        <div class="ui message">
+          <div class="header">
+            {{#if getInstanceReactive "form_id"}}
+              Pick a data set to continue...
+            {{else}}
+              Pick a data set and a form to continue...
+            {{/if}}
+          </div>
+        </div>
+      {{/if}}
+    {{/autoForm}}
+  {{else}}
+    {{> dataLoading}}
+  {{/if}}
+</template>
+
+<template name="patientAndOrSampleFields">
+  {{#if compare form.specificity "patient"}}
+    {{#if firstGreater (length dataSet.patients) 250}}
+      {{! javascript search slows it down so much}}
+      <div class="ui negative message">
+        <div class="header">Too many patients in the data set!</div>
+        <p>Please contact us to insert records.</p>
+        <p>{{> contactTeoButton}}</p>
+      </div>
+    {{else}}
+      {{> afQuickField name="patient_label" options="allowed"
+          defaultValue=(queryParam "patient_label")
+          search=true}}
+    {{/if}}
+  {{else}}
+    {{#if firstGreater (length dataSet.patients) 250}}
+      {{! javascript search slows it down so much}}
+      <div class="ui negative message">
+        <div class="header">Too many samples in the data set!</div>
+        <p>Please contact us to insert records.</p>
+        <p>{{> contactTeoButton}}</p>
+      </div>
+    {{else}}
+      <div class="ui two fields">
+        {{> automaticPatientLabelField lookedUpPatient}}
+
+        {{> afQuickField name="sample_label" options="allowed"
+            search=true}}
+            <!-- defaultValue=(queryParam "sample_label")}} -->
+      </div>
+    {{/if}}
+  {{/if}}
+</template>
+
+<template name="automaticPatientLabelField">
+  {{#if compare this ""}}
+    {{> afQuickField name="patient_label" readonly=true
+        placeholder="No patient"}}
+  {{else}}
+    {{> afQuickField name="patient_label" readonly=true
+        placeholder="Set automatically" value=this}}
+  {{/if}}
+</template>

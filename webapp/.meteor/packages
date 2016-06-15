@@ -40,6 +40,9 @@ check
 ecmascript
 http
 medbook:referential-integrity
-aldeed:autoform
 meteorhacks:picker
-accounts-google
+
+aldeed:autoform
+medbook:autoform-semantic-ui
+email
+audit-argument-checks

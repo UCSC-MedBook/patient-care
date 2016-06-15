@@ -1,12 +1,52 @@
 <template name="home">
   {{> homeWelcome}}
 
-  {{> studiesForPatients}}
+  <h1>What would you like to do today?</h1>
+  <div class="ui cards">
+    <a href={{pathFor "listTools"}} class="ui card">
+      <div class="content">
+        <div class="header">Tools</div>
+        <div class="description">
+          Run bioinformatic tools such as Limma, GSEA, and the
+          UCSC gene outlier analysis
+        </div>
+      </div>
+    </a>
 
-  {{> listTools}}
+    <a href={{pathFor "manageCollaborations"}} class="ui card">
+      <div class="content">
+        <div class="header">Collaborations</div>
+        <div class="description">
+          Create, join, and manage collaborations
+        </div>
+      </div>
+    </a>
+
+    <a href={{pathFor "manageDataSets"}} class="ui card">
+      <div class="content">
+        <div class="header">Data sets</div>
+        <div class="description">
+          Create, share, and manage data sets
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <h1>Experimental</h1>
+
+  <a href={{pathFor "listPatients"}} class="ui button">Patients</a>
+
+  <a href={{pathFor "createForm"}} class="ui button">
+    Create form
+  </a>
+  <a href={{pathFor "createRecord"}} class="ui button">
+    Create record
+  </a>
+  <a href={{pathFor "editRecords"}} class="ui button">
+    Edit records
+  </a>
+
 </template>
-
-
 
 <template name="homeWelcome">
   {{#if shouldWelcome}}
@@ -34,46 +74,56 @@
   {{/if}}
 </template>
 
-
-
-<template name="studiesForPatients">
-  <h1>Pick a study to access patient views</h1>
+<template name="listPatients">
+  <div class="ui grid">
+    <div class="eight wide column">
+      <h1>Patients</h1>
+    </div>
+    <div class="eight wide right aligned column">
+      <div class="ui icon input">
+        <input class="search-patients" type="text"
+            placeholder="Search patients...">
+        <i class="search icon"></i>
+      </div>
+    </div>
+  </div>
 
   {{#if Template.subscriptionsReady}}
-    {{#if length getStudies}}
+    {{#if length getPatients}}
       <div class="ui cards">
-        {{#each getStudies}}
-          <a href={{pathFor "study" study_label=id}} class="ui card">
+        {{#each getPatients}}
+          <a class="ui card" href={{pathFor "patient" patient_id=_id}}>
             <div class="content">
-              <div class="header">{{short_name}}</div>
-              <!-- <div class="meta">
-                <span class="date">Joined in 2013</span>
-              </div> -->
-              <div class="description">
-                {{description}}
-              </div>
+              <div class="header">{{patient_label}}</div>
             </div>
             <div class="extra content">
-              <div>
-                <i class="users icon"></i>
-                {{#if length patients}}
-                  {{length patients}} Patients
-                {{else}}
-                  No patients
-                {{/if}}
+              <div class="ui grid">
+                <div class="eight wide column">
+                  {{! TODO: specimin count}}
+                </div>
+                <div class="eight wide column">
+                  <i class="flask icon"></i>
+                  {{#if length samples}}
+                    {{samples.length}}
+                    Sample{{#unless compare (length samples) 1}}s{{/unless}}
+                  {{else}}
+                    No samples
+                  {{/if}}
+                </div>
               </div>
             </div>
           </a>
         {{/each}}
       </div>
     {{else}}
-      <div class="ui icon message">
-        <i class="frown icon"></i>
+      <div class="ui message massive">
         <div class="content">
           <div class="header">
-            No studies
+            No patients
           </div>
-          <p>You don't have access to any studies.</p>
+          <p>
+            You don't have access to any patients.
+          </p>
         </div>
       </div>
     {{/if}}
@@ -95,6 +145,29 @@
         </div>
         <div class="description">
           Run Limma on a contrast and then run GSEA on the output.
+        </div>
+      </div>
+    </a>
+
+    <a href={{pathFor "listTumorMap"}} class="ui card">
+      <div class="content">
+        <div class="header">
+          Tumor Map
+        </div>
+        <div class="description">
+          Overlay single samples or groups of samples on UCSC Tumor Maps
+        </div>
+      </div>
+    </a>
+
+    <a href={{pathFor "listUpDownGenes"}} class="ui card">
+      <div class="content">
+        <div class="header">
+          Outlier Analysis
+        </div>
+        <div class="description">
+          UCSC's N-of-One analysis tool to find gene outliers in a sample
+          with a defined comparison cohort
         </div>
       </div>
     </a>

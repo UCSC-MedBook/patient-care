@@ -2,7 +2,7 @@
   {{#if Template.subscriptionsReady}}
     {{#with getJob}}
       <h1 class="title ui">
-        Gene Outlier Analysis
+        Outlier Analysis Result
       </h1>
 
       {{#if compare status "done"}}
@@ -32,7 +32,22 @@
           <div class="header">
             Error running job.
           </div>
-          We have encountered an error running your job.
+          <p>
+            We have encountered an error running your job.
+            If you believe this is an internal error, please contact us using
+            the button below.
+          </p>
+          <p>
+            Description: <code>{{error_description}}</code>
+          </p>
+          {{#if stack_trace}}
+            <p>
+              <pre><code>{{stack_trace}}</code></pre>
+            </p>
+          {{/if}}
+          <p>
+            {{{contactTeoText}}}
+          </p>
         </div>
       {{/if}}
     {{/with}}
@@ -56,9 +71,9 @@
 <template name="outlierAnalysis">
   <h2>Options</h2>
   <p>
-    Study: {{args.study_label}}<br>
-    Patient: {{args.patient_label}}<br>
+    Data set/patient: {{args.data_set_name_or_patient_label}}<br>
     Sample: {{args.sample_label}}<br>
+    Comparison group: {{args.sample_group_name}}<br>
     IQR multiplier: {{args.iqr_multiplier}}<br>
   </p>
 

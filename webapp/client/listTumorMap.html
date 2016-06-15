@@ -1,0 +1,133 @@
+<template name="listTumorMap">
+  <h1>
+    Tumor Map
+  </h1>
+
+  <p>
+    Tumor Map clusters samples by genomic data and allows for single-sample
+    overlays.
+  </p>
+
+  <h2>Create a new overlay</h2>
+
+  {{#autoForm id="tumorMapOverlay" schema=overlaySchema
+      type="method" meteormethod="createTumorMapOverlay"}}
+    {{> afQuickField name="map" options="allowed"
+        placeholder="Select a map..."}}
+    {{> afQuickField name="layout" options="allowed"
+        placeholder="Select a layout..."}}
+
+    {{> afArrayField name="samples" template="dataSetsAndSamples"}}
+
+    <button type="submit" class="ui primary button">
+      Create overlay
+    </button>
+  {{/autoForm}}
+
+  {{> previouslyRunTumorMapOverlays}}
+</template>
+
+<!--
+Modified from:
+https://github.com/fabienb4/meteor-autoform-semantic-ui/
+blob/master/templates/semantic-ui/components/afObjectField/afObjectField.html
+-->
+<template name="afObjectField_dataSetsAndSamples">
+  <div class="ui secondary bottom attached segment form
+      {{#if afFieldIsInvalid name=this.name}}error{{/if}}">
+    {{#if afFieldIsInvalid name=this.name}}
+      <div class="ui pointing red basic label">
+        {{{afFieldMessage name=this.name}}}
+      </div>
+    {{/if}}
+
+    {{#if Template.subscriptionsReady}}
+      <div class="two fields">
+        {{> afQuickField name=(concat name ".data_set_id")
+            options=dataSetOptions placeholder="Select a data set..."
+            type="select" search=true template="semanticUI"}}
+        {{> afQuickField name=(concat name ".data_set_name") type="hidden"
+            value=getDataSetName}}
+
+        {{#if afFieldValueIs name=(concat name ".data_set_id") value=undefined}}
+          {{> afQuickField name=(concat name ".sample_label") type="select"
+              placeholder="Select a data set to continue"
+              disabled=true template="semanticUI"}}
+        {{else}}
+          {{> afQuickField name=(concat name ".sample_label")
+              placeholder="Select a sample..." options=sampleOptions
+              type="select" search=true template="semanticUI"}}
+        {{/if}}
+      </div>
+    {{else}}
+      {{> dataLoading}}
+    {{/if}}
+  </div>
+</template>
+
+<template name="previouslyRunTumorMapOverlays">
+  <h2>Previously generated overlays</h2>
+
+  {{#if Template.subscriptionsReady}}
+    {{#if length getJobs}}
+      <table class="ui single line table">
+        <thead>
+          <tr>
+            <th>Map</th>
+            <th>Layout</th>
+            <th>Samples</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each getJobs}}
+            <tr>
+              <td>{{args.map}}</td>
+              <td>{{args.layout}}</td>
+              <td>
+                <div class="ui list">
+                  {{#each args.samples}}
+                    <div class="item">
+                      <div class="content">
+                        {{sample_label}} from {{data_set_name}}
+                      </div>
+                    </div>
+                  {{/each}}
+                </div>
+              </td>
+              <td>
+                {{#if compare status "done"}}
+                  <a href={{output.bookmark_url}} target="_blank"
+                      class="ui right labeled icon primary button">
+                    <i class="external icon"></i>
+                    View
+                  </a>
+                {{else}}
+                  {{#if compare status "error"}}
+                    An error occurred...
+                    {{> contactTeoButton}}
+                  {{else}}
+                    Creating...
+                  {{/if}}
+                {{/if}}
+              </td>
+              <td>{{> shareAndDeleteButtons object=this collectionName="Jobs"}}</td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    {{else}}
+      <div class="ui message">
+        <div class="content">
+          <div class="header">
+            No overlays... yet!
+          </div>
+          <p>
+            You haven't created any Tumor Map overlays yet.
+          </p>
+        </div>
+      </div>
+    {{/if}}
+  {{/if}}
+</template>

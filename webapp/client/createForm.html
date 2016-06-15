@@ -1,0 +1,98 @@
+<template name="createForm">
+  <h1>Create a new form</h1>
+
+  {{#if Template.subscriptionsReady}}
+    {{#autoForm id="insertForm" schema=formSchema
+        type="method" meteormethod="insertForm"}}
+      {{> afQuickField name="name" placeholder="Name of the form"}}
+
+      {{> afQuickField name="collaborations" options=collaborationOptions
+          type="select" multiple=true search=true defaultValue=onlyPersonal}}
+
+      <div class="reset-dropdown">
+        {{> afQuickField name="specificity" options="allowed"
+            placeholder="Whether this form is per-patient or per-sample"}}
+
+        {{> afArrayField name="fields" template="patientCare"}}
+
+        <button type="submit" class="ui primary button">
+          Create form
+        </button>
+      </div>
+    {{/autoForm}}
+  {{/if}}
+</template>
+
+<!--
+Modified from:
+https://github.com/fabienb4/meteor-autoform-semantic-ui/
+blob/master/templates/semantic-ui/components/afObjectField/afObjectField.html
+-->
+<template name="afObjectField_patientCare">
+  <div class="ui secondary bottom attached segment form
+      {{#if afFieldIsInvalid name=this.name}}error{{/if}}">
+    {{#if afFieldIsInvalid name=this.name}}
+      <div class="ui pointing red basic label">
+        {{{afFieldMessage name=this.name}}}
+      </div>
+    {{/if}}
+
+    <!-- <div class="two fields">
+      {{> afQuickField name=(thisField "label") template="semanticUI"}}
+      {{> afQuickField name=(thisField "type") type="select"
+          options="allowed" template="semanticUI"}}
+    </div> -->
+
+    <div class="fields">
+      {{#with name=(makeName "label")}}
+        <div class="nine wide field
+            {{#if afFieldIsInvalid name=name}}error{{/if}}">
+          <label>Field name</label>
+          {{> afFieldInput name=name template="semanticUI"}}
+          {{#if afFieldIsInvalid name=name}}
+            <div class="ui pointing red basic label">
+              {{{afFieldMessage name=name}}}
+            </div>
+          {{/if}}
+        </div>
+      {{/with}}
+      {{#with name=(makeName "type")}}
+        <div class="four wide field
+            {{#if afFieldIsInvalid name=name}}error{{/if}}">
+          <label>Type</label>
+
+          {{> afFieldInput name=name type="select"
+              options="allowed" template="semanticUI"}}
+          {{#if afFieldIsInvalid name=name}}
+            <div class="ui pointing red basic label">
+              {{{afFieldMessage name=name}}}
+            </div>
+          {{/if}}
+        </div>
+      {{/with}}
+      <div class="three wide field">
+        <label style="margin-bottom: 13px">&nbsp;</label>
+        {{> afFieldInput name=(makeName "optional") template="semanticUI"}}
+      </div>
+    </div>
+
+    {{#if afFieldValueIs name=(makeName "type") value="Integer"}}
+      {{> minMaxFields minName=(makeName "min") maxName=(makeName "max")}}
+    {{/if}}
+
+    {{#if afFieldValueIs name=(makeName "type") value="Decimal"}}
+      {{> minMaxFields minName=(makeName "min") maxName=(makeName "max")}}
+    {{/if}}
+
+    {{#if afFieldValueIs name=(makeName "type") value="Select"}}
+      {{> afQuickField name=(makeName "allowedValues") template="semanticUI"}}
+    {{/if}}
+  </div>
+</template>
+
+<template name="minMaxFields">
+  <div class="two fields">
+    {{> afQuickField name=minName placeholder="Leave blank for none"}}
+    {{> afQuickField name=maxName placeholder="Leave blank for none"}}
+  </div>
+</template>

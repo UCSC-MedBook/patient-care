@@ -2,77 +2,37 @@
 
 Template.patient.onCreated(function () {
   const instance = this;
-  const { study_label, patient_label } = instance.data;
 
-  instance.autorun(function () {
-    Meteor.userId(); // resubscribe when this changes
-    instance.subscribe("study", study_label);
-    instance.subscribe("patientSamples", study_label, patient_label);
-  });
-
-  instance.patient = new ReactiveVar(); // from the study's `patients` list
-  instance.autorun(function () {
-    let study = Studies.findOne({ id: study_label });
-
-    let patient;
-    if (study) {
-      patient = _.findWhere(study.patients, { patient_label });
-      _.extend(patient, {
-        study_label: study.id
-      });
-    }
-    instance.patient.set(patient);
-  });
+  instance.subscribe("patient", instance.data.patient_id);
 });
 
 Template.patient.helpers({
   getPatient: function () {
-    return Template.instance().patient.get();
+    return Patients.findOne(this.patient_id);
   },
 });
 
 
 
-// Template.questions
+// Template.sampleLoadedData
 
-Template.questions.onRendered(function () {
-  const instance = this;
+Template.sampleLoadedData.onCreated(function() {
+  let instance = this;
 
-  // make the accordion work
-  instance.$('.ui.accordion')
-    .accordion()
-  ;
+  instance.subscribe("sampleLoadedData", instance.data.patient._id,
+      instance.data.sample.sample_label);
 });
 
+Template.sampleLoadedData.helpers({
+  dataExistsClasses: function(attribute) {
+    let dataSet = DataSets.findOne(this.sample.data_set_id);
 
-
-// Template.patientLoadedData
-
-Template.patientLoadedData.helpers({
-  geneExpExists: function(normalization) {
-    const sample_label = this.toString(); // IDK why `typeof this` === "object"
-    const study = Studies.findOne({id: Template.instance().data.study_label});
-
-    const samples = study.gene_expression;
-    if (samples && samples.includes(sample_label)) {
+    if (dataSet &&
+        dataSet[attribute][this.sample.sample_label] !== undefined) {
       return "green checkmark";
     } else {
       return "red remove";
     }
-  },
-});
-
-
-
-// Template.patientTumorMap
-
-Template.patientTumorMap.helpers({
-  mapTypes: function() {
-    return [
-      { title: "Gene Expression", mapLabel: "gene_expression" },
-      { title: "Copy Number", mapLabel: "copy_number" },
-      { title: "Mutations", mapLabel: "mutations" },
-    ];
   },
 });
 
@@ -99,28 +59,36 @@ Template.tumorMapButton.onCreated(function() {
 });
 
 Template.tumorMapButton.helpers({
-  bookmarkExists: function () {
-    let sample = Samples.findOne({sample_label: this.sample_label});
-
-    return !!sample.tumor_map_bookmarks &&
-        sample.tumor_map_bookmarks[this.mapLabel.toString()];
-  },
-  creatingBookmark: function () {
-    return Template.instance().creatingBookmark.get();
-  },
-  getBookmark: function () {
-    let sample = Samples.findOne({sample_label: this.sample_label});
-    return sample.tumor_map_bookmarks[this.mapLabel.toString()];
-  },
+  // bookmarkExists() {
+  //   _.findWhere(this.tumor_map_bookmarks, {
+  //     map: "mRNA",
+  //     layout: "",
+  //   });
+  //
+  //   if (this.tumor_map_bookmarks &&
+  //   console.log("yop:", yop);
+  //   console.log("this:", this);
+  //   // let sample = Samples.findOne({sample_label: this.sample_label});
+  //
+  //   // return !!sample.tumor_map_bookmarks &&
+  //   //     sample.tumor_map_bookmarks[this.mapLabel.toString()];
+  // },
+  // creatingBookmark: function () {
+  //   return Template.instance().creatingBookmark.get();
+  // },
+  // getBookmark: function () {
+  //   let sample = Samples.findOne({sample_label: this.sample_label});
+  //   return sample.tumor_map_bookmarks[this.mapLabel.toString()];
+  // },
 });
 
 Template.tumorMapButton.events({
   "click .generate-bookmark": function (event, instance) {
     instance.creatingBookmark.set(true);
 
-    const { study_label } = instance.parent(3).data;
+    const { data_set_id } = instance.parent(3).data;
     const { sample_label, mapLabel } = instance.data;
-    Meteor.call("createTumorMapBookmark", study_label, sample_label, mapLabel,
+    Meteor.call("createTumorMapBookmark", data_set_id, sample_label, mapLabel,
         function (error, result) {
       // regardless of result, stop "creatingBookmark"
       instance.creatingBookmark.set(false);
@@ -166,7 +134,7 @@ Template.patientUpDownGenes.onRendered(function () {
         instance.createCustomSampleGroup.set(true);
         instance.sampleGroupId.set(null);
       } else {
-        instance.sampleGroupId.set(this._id);
+        instance.sampleGroupId.set(value);
         instance.createCustomSampleGroup.set(false);
       }
     }
@@ -218,67 +186,16 @@ Template.patientUpDownGenes.events({
       return;
     }
 
-    // sometimes we have to make two trips to the server, so we need to be
-    // able to call this from async code (after a Meteor method has been run)
-    function createUpDownGenes(sample_group_id) {
-      let args = _.pick(instance.data, "study_label", "patient_label");
-      _.extend(args, { sample_label, sample_group_id, iqr_multiplier });
 
-      // submit to the server for consideration
-      Meteor.call("createUpDownGenes", args, function (error, job_id) {
-        if (error) {
-          instance.error.set({
-            header: "Internal error",
-            message: "We had a problem processing your request... If this " +
-                "messages persists, please " + contactTeoText,
-          });
-        } else {
-          FlowRouter.go("upDownGenes", _.extend(args, { job_id }));
-        }
-
-        instance.waitingForResponse.set(false);
-      });
-    }
 
     if (instance.createCustomSampleGroup.get()) {
-      let customSampleGroup = instance.customSampleGroup.get();
 
-      // sanity checks
-      if (!customSampleGroup.name) {
-        instance.error.set({
-          header: "Whoops!",
-          message: "Please name your sample group."
-        });
-        return;
-      }
-      if (customSampleGroup.studies.length === 0) {
-        instance.error.set({
-          header: "No studies?",
-          message: "Please add at least one study to your sample group."
-        });
-        return;
-      }
-
-      instance.waitingForResponse.set(true);
-      Meteor.call("createSampleGroup", customSampleGroup, (error, result) => {
-        if (error) {
-          instance.waitingForResponse.set(false);
-
-          instance.error.set({
-            header: "Internal error",
-            message: "We had a problem creating a sample group... If this " +
-                "messages persists, please " + contactTeoText,
-          });
-        } else {
-          createUpDownGenes(result);
-        }
-      });
     } else {
       let sampleGroupId = instance.sampleGroupId.get();
 
       if (!sampleGroupId) {
         instance.error.set({
-          header: "Did you forget something?",
+          header: "No background selected",
           message: "Please select a background sample group to continue."
         });
         return;
@@ -298,7 +215,7 @@ Template.patientUpDownGenesTable.onCreated(function () {
   let instance = this;
   let { data } = instance;
 
-  instance.subscribe("upDownGenes", data.study_label, data.patient_label);
+  instance.subscribe("upDownGenes", data.data_set_id, data.patient_label);
 });
 
 Template.patientUpDownGenesTable.helpers({

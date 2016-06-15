@@ -1,62 +1,49 @@
+function defaultAction(templateName, params) {
+  // renders appBody with templateName inside
+  BlazeLayout.render("appBody", { content: templateName, params });
+}
+
+function sameNameAndAction(name) {
+  return { name, action: _.partial(defaultAction, name) }
+}
+
 FlowRouter.notFound = {
-  action: function(params) {
-    BlazeLayout.render("appBody", {
-      content: "routeNotFound",
-      params,
-    });
-  }
+  action: _.partial(defaultAction, "routeNotFound"),
 };
 
-FlowRouter.route("/", {
-  name: "home",
-  action: function(params) {
-    BlazeLayout.render("appBody", {
-      content: "home",
-      params
-    });
-  }
+FlowRouter.route("/", sameNameAndAction("home"));
+
+var patients = FlowRouter.group({ prefix: "/patients" });
+patients.route("/", sameNameAndAction("listPatients"));
+patients.route("/:patient_id", sameNameAndAction("patient"));
+
+var collaborations = FlowRouter.group({ prefix: "/collaborations" });
+collaborations.route("/", sameNameAndAction("manageCollaborations"));
+collaborations.route("/create", {
+  name: "createCollaboration",
+  action: _.partial(defaultAction,  "manageCollaborations"),
+});
+collaborations.route("/browse", {
+  name: "browseCollaborations",
+  action: _.partial(defaultAction,  "manageCollaborations"),
 });
 
-// patient-view
-
-FlowRouter.route("/patients/:study_label", {
-  name: "study",
-  action: function(params) {
-    BlazeLayout.render("appBody", {
-      content: "study",
-      params
-    });
-  }
+var dataSets = FlowRouter.group({ prefix: "/data-sets" });
+dataSets.route("/", sameNameAndAction("manageDataSets"));
+dataSets.route("/create", {
+  name: "createDataSet",
+  action: _.partial(defaultAction,  "manageDataSets"),
 });
 
-FlowRouter.route("/patients/:study_label/:patient_label", {
-  name: "patient",
-  action: function(params) {
-    BlazeLayout.render("appBody", {
-      content: "patient",
-      params
-    });
-  }
-});
+var tools = FlowRouter.group({ prefix: "/tools" });
+tools.route("/", sameNameAndAction("listTools"));
+tools.route("/limma-gsea", sameNameAndAction("listLimmaGSEA"));
+tools.route("/tumor-map", sameNameAndAction("listTumorMap"));
+tools.route("/outlier-analysis", sameNameAndAction("listUpDownGenes"));
+tools.route("/outlier-analysis/:job_id", sameNameAndAction("upDownGenesJob"));
 
-FlowRouter.route("/patients/:study_label/:patient_label/upDownGenes/:job_id", {
-  name: "upDownGenes",
-  action: function(params) {
-    BlazeLayout.render("appBody", {
-      content: "upDownGenesJob",
-      params
-    });
-  }
-});
+// Experimental
 
-// tools
-
-FlowRouter.route("/tools/limmaGSEA", {
-  name: "listLimmaGSEA",
-  action: function(params) {
-    BlazeLayout.render("appBody", {
-      content: "listLimmaGSEA",
-      params
-    });
-  }
-});
+FlowRouter.route("/create-record", sameNameAndAction("createRecord"));
+FlowRouter.route("/create-form", sameNameAndAction("createForm"));
+FlowRouter.route("/edit-records", sameNameAndAction("editRecords"));

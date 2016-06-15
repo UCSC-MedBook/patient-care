@@ -3,37 +3,18 @@
 Template.editSampleGroup.onCreated(function () {
   let instance = this;
 
-  // load all available studies
-  instance.subscribe("studies");
+  // load all available data sets
+  instance.subscribe("dataSets");
 
   instance.sampleGroup = instance.data.sampleGroup;
-  if (!instance.sampleGroup.get()) { // make sure it's initialized
-    let samples = Studies.findOne({id: "prad_wcdt"}).gene_expression;
-    let filtered = samples.slice(0, 10);
 
+  // make sure it's initialized
+  if (!instance.sampleGroup.get()) {
     instance.sampleGroup.set({
       name: "",
       version: 1,
       collaborations: [ Meteor.user().collaborations.personal ],
-      studies: [
-        // {
-        //   study_label: "prad_wcdt",
-        //   filters: [
-        //     {
-        //       type: "sample_label_list",
-        //       options: {
-        //         sample_labels: [ "DTB-001", "DTB-002" ]
-        //       }
-        //     },
-        //     {
-        //       type: "data_loaded",
-        //       options: {
-        //         gene_expression: false,
-        //       },
-        //     }
-        //   ]
-        // }
-      ]
+      data_sets: []
     });
   }
 
@@ -79,20 +60,21 @@ Template.editSampleGroup.helpers({
   getSampleGroup: function () {
     return Template.instance().sampleGroup.get();
   },
-  addableStudies: function () {
-    let existingStudies = Template.instance().sampleGroup.get().studies;
+  addableDataSets: function () {
+    let addedDataSets = Template.instance().sampleGroup.get().data_sets;
 
-    // only return studies that haven't already been added
-    return Studies.find({
-      id: { $nin: _.pluck(existingStudies, "study_label") },
+    // only return data sets that haven't already been added
+    return DataSets.find({
+      _id: { $nin: _.pluck(addedDataSets, "data_set_id") },
     });
   },
-  getStudyName: function (study_label) {
-    let study = Studies.findOne({id: study_label});
-    if (study) {
-      return study.name;
+  dataSetName: function () {
+    let dataSet = DataSets.findOne(this.data_set_id);
+
+    if (dataSet) {
+      return dataSet.name;
     } else {
-      return "You don't have access to this study.";
+      return "You don't have access to this data set.";
     }
   },
 });
@@ -101,11 +83,11 @@ Template.editSampleGroup.events({
   "keyup .sample-group-name": function (event, instance) {
     instance.name.set(event.target.value);
   },
-  "click .remove-study": function (event, instance) {
+  "click .remove-data-set": function (event, instance) {
     let sampleGroup = instance.sampleGroup.get();
 
-    sampleGroup.studies = _.filter(sampleGroup.studies, (study) => {
-      return study.study_label !== this.study_label
+    sampleGroup.data_sets = _.filter(sampleGroup.data_sets, (dataSet) => {
+      return dataSet.data_set_id !== this.data_set_id
     });
 
     instance.sampleGroup.set(sampleGroup);
@@ -114,9 +96,9 @@ Template.editSampleGroup.events({
 
 
 
-// Template.addStudyMenu
+// Template.addDataSetMenu
 
-Template.addStudyMenu.onRendered(function () {
+Template.addDataSetMenu.onRendered(function () {
   let instance = this;
 
   instance.$(".dropdown").popup({
@@ -125,12 +107,12 @@ Template.addStudyMenu.onRendered(function () {
   });
 });
 
-Template.addStudyMenu.events({
-  "click .add-study-to-sample-group": function (event, instance) {
+Template.addDataSetMenu.events({
+  "click .add-data-set-to-sample-group": function (event, instance) {
     let sampleGroup = instance.data.sampleGroup.get();
 
-    sampleGroup.studies.push({
-      study_label: this.id,
+    sampleGroup.data_sets.push({
+      data_set_id: this._id,
       filters: [],
     });
 
@@ -145,13 +127,13 @@ Template.addStudyMenu.events({
 Template.addFilterButton.onCreated(function () {
   let instance = this;
 
-  instance.addFilterToStudy = function(filterObject) {
+  instance.addFilter = function(filterObject) {
     // the popup moves down weirdly, so hide it
     instance.$(".dropdown").popup("hide");
 
-    // add the filter to the study
+    // add the filter to the data set
     let sampleGroup = instance.data.sampleGroup.get();
-    sampleGroup.studies[instance.data.studyIndex].filters.push(filterObject);
+    sampleGroup.data_sets[instance.data.dataSetIndex].filters.push(filterObject);
     instance.data.sampleGroup.set(sampleGroup);
   }
 });
@@ -167,7 +149,7 @@ Template.addFilterButton.onRendered(function () {
 
 Template.addFilterButton.events({
   "click .add-sample-label-list-filter": function (event, instance) {
-    instance.addFilterToStudy({
+    instance.addFilter({
       type: "sample_label_list",
       options: {
         sample_labels: []
@@ -175,7 +157,7 @@ Template.addFilterButton.events({
     });
   },
   "click .add-exclude-sample-label-list-filter": function (event, instance) {
-    instance.addFilterToStudy({
+    instance.addFilter({
       type: "exclude_sample_label_list",
       options: {
         sample_labels: []
@@ -183,7 +165,7 @@ Template.addFilterButton.events({
     });
   },
   "click .add-data-loaded-filter": function (event, instance) {
-    instance.addFilterToStudy({
+    instance.addFilter({
       type: "data_loaded",
       options: {
         gene_expression: false,
@@ -205,8 +187,8 @@ Template.showFilter.onCreated(function () {
   instance.setOptions = function (newOptions) {
     let sampleGroup = instance.sampleGroup.get();
 
-    let { filterIndex, studyIndex } = instance.data;
-    sampleGroup.studies[studyIndex].filters[filterIndex].options = newOptions;
+    let { filterIndex, dataSetIndex } = instance.data;
+    sampleGroup.data_sets[dataSetIndex].filters[filterIndex].options = newOptions;
 
     instance.sampleGroup.set(sampleGroup);
   };
@@ -216,18 +198,18 @@ Template.showFilter.helpers({
   getFilter: function () {
     let { sampleGroup, data } = Template.instance();
 
-    let study = sampleGroup.get().studies[data.studyIndex];
-    if (study) { // remove error on remove study
-      return study.filters[data.filterIndex];
+    let dataSet = sampleGroup.get().data_sets[data.dataSetIndex];
+    if (dataSet) { // remove error on remove dataSet
+      return dataSet.filters[data.filterIndex];
     }
   },
   setOptions: function () {
     return Template.instance().setOptions;
   },
-  study_label: function () {
+  data_set_id: function () {
     let instance = Template.instance();
     return instance.sampleGroup.get()
-        .studies[instance.data.studyIndex].study_label;
+        .data_sets[instance.data.dataSetIndex].data_set_id;
   },
 });
 
@@ -236,8 +218,8 @@ Template.showFilter.events({
     // define a button with this class in a sub-template to make it work
     let sampleGroup = instance.sampleGroup.get();
 
-    let { filterIndex, studyIndex } = instance.data;
-    sampleGroup.studies[studyIndex].filters.splice(filterIndex, 1);
+    let { filterIndex, dataSetIndex } = instance.data;
+    sampleGroup.data_sets[dataSetIndex].filters.splice(filterIndex, 1);
 
     instance.sampleGroup.set(sampleGroup);
   },
@@ -259,6 +241,7 @@ Template.sampleLabelListFilter.helpers({
     return this.options.sample_labels.join("\n");
   },
   getInvalidSampleLabels: function () {
+    console.log("Template.instance().invalidSampleLabels.get():", Template.instance().invalidSampleLabels.get());
     return Template.instance().invalidSampleLabels.get();
   },
   getEditing: function () {
@@ -268,6 +251,8 @@ Template.sampleLabelListFilter.helpers({
 
 Template.sampleLabelListFilter.events({
   "click .done-editing": function (event, instance) {
+    event.preventDefault();
+
     // clear errors
     instance.invalidSampleLabels.set(null);
 
@@ -279,8 +264,8 @@ Template.sampleLabelListFilter.events({
       .value();
 
     // make sure we don't have any bad values
-    let study = Studies.findOne({id: instance.data.study_label});
-    let badValues = _.difference(sample_labels, study.Sample_IDs);
+    let dataSet = DataSets.findOne(instance.data.data_set_id);
+    let badValues = _.difference(sample_labels, dataSet.sample_labels);
 
     if (badValues.length) {
       instance.invalidSampleLabels.set(badValues);
@@ -294,6 +279,9 @@ Template.sampleLabelListFilter.events({
     instance.editing.set(false);
   },
   "click .edit-filter": function (event, instance) {
+    // unclear why we need this, but otherwise it submits the form
+    event.preventDefault();
+
     instance.editing.set(true);
   },
   "click .close-sample-error-message": function (event, instance) {
