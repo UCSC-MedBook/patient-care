@@ -1,9 +1,7 @@
 {
   "public": {
-    "medbook_apps": {
-      "Wrangler": {
-        "url": "http://localhost:3002/"
-      }
+    "analyticsSettings": {
+      "Google Analytics" : {"trackingId": "UA-77676037-2"}
     }
   }
 }
