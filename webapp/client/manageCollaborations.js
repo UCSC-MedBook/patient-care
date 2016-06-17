@@ -121,6 +121,12 @@ Template.showCollaboration.onCreated(function() {
 
   // if an update call is out but hasn't gotten back yet
   instance.waitingForServer = new ReactiveVar(false);
+
+  // cancel editing when selecting another collaboration from the list
+  instance.autorun(() => {
+    let queryParam = FlowRouter.getQueryParam("collaboration_id");
+    instance.editing.set(false);
+  });
 });
 
 Template.showCollaboration.helpers({
@@ -133,6 +139,9 @@ Template.showCollaboration.helpers({
 Template.showCollaboration.events({
   "click .edit-collaboration": function(event, instance) {
     instance.editing.set(true);
+  },
+  "click .cancel-editing-collaboration"(event, instance) {
+    instance.editing.set(false);
   },
   "click .done-editing-collaboration": function(event, instance) {
     var valid = AutoForm.validateForm("editCollaboration");

@@ -3,21 +3,21 @@
 Template.manageDataSets.onCreated(function () {
   let instance = this;
 
-  instance.subscribe("dataSetNames");
+  instance.subscribe("allOfCollectionOnlyName", "DataSets");
 });
 
 Template.manageDataSets.helpers({
   getDataSets() { return DataSets.find({}); },
   getDataSet() {
-    return DataSets.findOne(FlowRouter.getQueryParam("data_set_id"));
+    return DataSets.findOne(FlowRouter.getQueryParam("selected_id"));
   },
 });
 
 // Template.createDataSet
 
 AutoForm.addHooks("insertDataSet", {
-  onSuccess(submitType, data_set_id) {
-    FlowRouter.go("manageDataSets", {}, { data_set_id });
+  onSuccess(submitType, selected_id) {
+    FlowRouter.go("manageDataSets", {}, { selected_id });
   },
 });
 
@@ -33,7 +33,8 @@ Template.showDataSet.onCreated(function() {
   let instance = this;
 
   instance.autorun(() => {
-    instance.subscribe("dataSet", FlowRouter.getQueryParam("data_set_id"));
+    let selectedId = FlowRouter.getQueryParam("selected_id");
+    instance.subscribe("objectFromCollection", "DataSets", selectedId);
   });
 });
 
@@ -53,5 +54,10 @@ Template.showDataSet.helpers({
       data_set_id: { type: String },
       sample_label: { type: String, label: "Sample name" },
     });
+  },
+  onDelete() {
+    return () => {
+      FlowRouter.setQueryParams({ selected_id: null });
+    };
   },
 });

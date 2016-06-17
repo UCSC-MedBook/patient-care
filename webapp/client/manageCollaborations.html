@@ -132,9 +132,13 @@
     <div class="ui right floated icon buttons">
       {{#if isAdmin}}
         {{#if editing}}
-          <button class="ui positive button done-editing-collaboration
+          <button class="ui primary button done-editing-collaboration
               {{#if waitingForServer}}loading{{/if}}">
             <i class="checkmark icon"></i> Done
+          </button>
+          <button class="ui secondary button cancel-editing-collaboration
+              {{#if waitingForServer}}loading{{/if}}">
+            <i class="cancel icon"></i> Cancel
           </button>
         {{else}}
           <button class="ui primary button edit-collaboration">
