@@ -22,8 +22,14 @@ Template.shareAndDeleteButtons.events({
 
     if (deleteClicked.get()) {
       Meteor.call("removeObject", instance.data.collectionName,
-          instance.data.object._id,
-          (error) => { if (error) throw error; });
+          instance.data.object._id, (error) => {
+        if (error) throw error;
+
+        let onDelete = instance.data.onDelete;
+        if (onDelete) {
+          onDelete();
+        }
+      });
     } else {
       deleteClicked.set(true);
 
