@@ -167,9 +167,14 @@ Meteor.methods({
     let user = MedBook.ensureUser(this.userId);
 
     // TODO: who can we share with?
-    let usersCursor = Meteor.users.find({}, {
+    // XXX: can only share with users whose last-used app is using
+    // the new medbook:collaborations code
+    let usersCursor = Meteor.users.find({
+      "collaborations.personal": { $exists: true }
+    }, {
       fields: { "collaborations.personal": 1 }
     });
+
     let usersPersonalCollabs =
         _.pluck(_.pluck(usersCursor.fetch(), "collaborations"), "personal");
 
