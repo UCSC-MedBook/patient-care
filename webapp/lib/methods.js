@@ -436,7 +436,11 @@ Meteor.methods({
     let object = MedBook.collections[collectionName].findOne(mongoId);
     user.ensureAccess(object);
 
-    let removeAllowedCollections = [ "Jobs", "DataSets" ];
+    let removeAllowedCollections = [
+      "Jobs",
+      "DataSets",
+      "SampleGroups",
+    ];
     if (removeAllowedCollections.indexOf(collectionName) === -1) {
       throw new Meteor.Error("permission-denied");
     }

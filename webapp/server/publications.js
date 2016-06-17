@@ -93,22 +93,29 @@ Meteor.publish("browseCollaborations", function() {
   });
 });
 
-// data sets
+// manage DataSets/SampleGroups/GeneSetCollections
 
-Meteor.publish("dataSetNames", function() {
+var allowedCollections = [
+  "DataSets",
+  "SampleGroups",
+  "GeneSetCollections",
+];
+
+Meteor.publish("allOfCollectionOnlyName", function(collectionName) {
+  check(collectionName, String);
   let user = MedBook.ensureUser(this.userId);
 
-  return DataSets.find({
+  return MedBook.collections[collectionName].find({
     collaborations: { $in: user.getCollaborations() },
   }, { fields: { name: 1 } });
 });
 
-Meteor.publish("dataSet", function(dataSetId) {
-  check(dataSetId, String);
+Meteor.publish("objectFromCollection", function(collectionName, objectId) {
+  check([collectionName, objectId], [String]);
   let user = MedBook.ensureUser(this.userId);
 
-  return DataSets.find({
-    _id: dataSetId,
+  return MedBook.collections[collectionName].find({
+    _id: objectId,
     collaborations: { $in: user.getCollaborations() },
   });
 });

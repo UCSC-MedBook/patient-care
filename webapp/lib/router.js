@@ -35,6 +35,20 @@ dataSets.route("/create", {
   action: _.partial(defaultAction,  "manageDataSets"),
 });
 
+var sampleGroups = FlowRouter.group({ prefix: "/sample-groups" });
+sampleGroups.route("/", sameNameAndAction("manageSampleGroups"));
+sampleGroups.route("/create", {
+  name: "createSampleGroup",
+  action: _.partial(defaultAction,  "manageSampleGroups"),
+});
+
+var geneSets = FlowRouter.group({ prefix: "/gene-sets" });
+geneSets.route("/", sameNameAndAction("manageGeneSetCollections"));
+geneSets.route("/create", {
+  name: "manageGeneSetCollections",
+  action: _.partial(defaultAction,  "manageGeneSetCollections"),
+});
+
 var tools = FlowRouter.group({ prefix: "/tools" });
 tools.route("/", sameNameAndAction("listTools"));
 tools.route("/limma-gsea", sameNameAndAction("listLimmaGSEA"));

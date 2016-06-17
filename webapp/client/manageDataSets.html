@@ -6,7 +6,7 @@
   </p>
 
   <div class="ui grid">
-    <div class="four wide column">
+    <div class="six wide column">
       <div class="ui vertical fluid tabular menu">
         <a href={{pathFor "createDataSet"}}
             class="item {{#if (isActiveRoute "createDataSet")}}
@@ -25,7 +25,7 @@
         {{/each}}
       </div>
     </div>
-    <div class="twelve wide stretched column">
+    <div class="ten wide stretched column">
       {{! some things look funky if we remove this wrapper div}}
       <div>
         {{#if isActiveRoute "manageDataSets"}}

@@ -3,7 +3,7 @@
 Template.manageDataSets.onCreated(function () {
   let instance = this;
 
-  instance.subscribe("dataSetNames");
+  instance.subscribe("allOfCollectionOnlyName", "DataSets");
 });
 
 Template.manageDataSets.helpers({
@@ -33,7 +33,8 @@ Template.showDataSet.onCreated(function() {
   let instance = this;
 
   instance.autorun(() => {
-    instance.subscribe("dataSet", FlowRouter.getQueryParam("selected_id"));
+    let selectedId = FlowRouter.getQueryParam("selected_id");
+    instance.subscribe("objectFromCollection", "DataSets", selectedId);
   });
 });
 

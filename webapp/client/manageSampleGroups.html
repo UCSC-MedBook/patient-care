@@ -1,0 +1,121 @@
+<template name="manageSampleGroups">
+  <h1>Sample groups</h1>
+
+  <p>
+    A sample group is a collection of samples.
+  </p>
+
+  <div class="ui grid">
+    <div class="six wide column">
+      <div class="ui vertical fluid tabular menu">
+        <a href={{pathFor "createSampleGroup"}}
+            class="item {{#if (isActiveRoute "createSampleGroup")}}
+                active{{/if}}">
+          Create new
+          <i class="plus icon"></i>
+        </a>
+
+        {{#each getSampleGroups}}
+          <a href={{pathFor "manageSampleGroups"
+                  query=(concat "selected_id=" _id)}}
+              class="{{#if compare (queryParam "selected_id") _id}}
+                  active{{/if}} item">
+            {{name}}
+          </a>
+        {{/each}}
+      </div>
+    </div>
+    <div class="ten wide stretched column">
+      {{! some things look funky if we remove this wrapper div}}
+      <div>
+        {{#if isActiveRoute "manageSampleGroups"}}
+          {{#if getSampleGroup}}
+            {{> showSampleGroup getSampleGroup}}
+          {{else}}
+            {{#if Template.subscriptionsReady}}
+              {{#if queryParam "selected_id"}}
+                {{> waitAndThenPermissionDenied}}
+              {{else}}
+                {{#if length getSampleGroups}}
+                  <h3>
+                    Nothing selected
+                  </h3>
+                  <p>
+                    Select a sample group on the left panel to
+                    view more information about it.
+                  </p>
+                {{else}}
+                  <h3>
+                    You do not have access to any sample groups... yet!
+                  </h3>
+                  <p>
+                    <a href={{pathFor "createSampleGroup"}}>
+                      Click here to create a new sample group.
+                    </a>
+                  </p>
+                {{/if}}
+              {{/if}}
+            {{else}}
+              {{> dataLoading}}
+            {{/if}}
+          {{/if}}
+        {{else}}
+          {{> createSampleGroup}}
+        {{/if}}
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="createSampleGroup">
+  <h3>Create new sample group</h3>
+
+  {{> editSampleGroup sampleGroup=newSampleGroup}}
+
+  {{> showErrorMessage error}}
+
+  <button class="ui primary button create-sample-group">Create!</button>
+</template>
+
+<template name="showSampleGroup">
+  <h3>
+    {{name}}
+
+    {{#if Template.subscriptionsReady}}
+      {{> shareAndDeleteButtons object=this collectionName="SampleGroups"
+          extraButtonsClass="right floated" onDelete=onDelete}}
+    {{/if}}
+  </h3>
+
+  {{#if Template.subscriptionsReady}}
+    <p>Viewing details about a sample group is coming soon!</p>
+  {{else}}
+    {{> dataLoading}}
+  {{/if}}
+</template>
+
+<template name="waitAndThenPermissionDenied">
+  {{#if getInstanceReactive "waitForTheServer"}}
+    {{> dataLoading}}
+
+    <div class="ui message">
+      This will take up to 15 seconds.
+    </div>
+  {{else}}
+    <div class="ui error message">
+      <div class="header">
+        Permission denied
+      </div>
+      <p>
+        The sample group either doesn't exist or you don't
+        have access to it. You likely got this URL from
+        someone who has access to the sample group, in which
+        case you should ask them to share the sample group with you.
+      </p>
+      <p>
+        If you believe you are seeing this message in error,
+        please {{> contactTeoButton}}
+      </p>
+    </div>
+  {{/if}}
+</template>

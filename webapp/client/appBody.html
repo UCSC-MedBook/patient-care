@@ -73,7 +73,14 @@
         {{#if or (isActiveRoute "manageDataSets")
             (isActiveRoute "createDataSet")}}
           {{#breadcrumbItem isActive=true}}
-            Data sets
+            Data Sets
+          {{/breadcrumbItem}}
+        {{/if}}
+
+        {{#if or (isActiveRoute "manageSampleGroups")
+            (isActiveRoute "createSampleGroup")}}
+          {{#breadcrumbItem isActive=true}}
+            Sample Groups
           {{/breadcrumbItem}}
         {{/if}}
 
