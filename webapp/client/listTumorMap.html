@@ -54,9 +54,15 @@ blob/master/templates/semantic-ui/components/afObjectField/afObjectField.html
               placeholder="Select a data set to continue"
               disabled=true template="semanticUI"}}
         {{else}}
-          {{> afQuickField name=(concat name ".sample_label")
-              placeholder="Select a sample..." options=sampleOptions
-              type="select" search=true template="semanticUI"}}
+          {{#if firstGreater (length sampleOptions) 250}}
+            {{> afQuickField name=(concat name ".sample_label")
+                placeholder="Select a sample..." options=sampleOptions
+                type="basic-select" search=true template="semanticUI"}}
+          {{else}}
+            {{> afQuickField name=(concat name ".sample_label")
+                placeholder="Select a sample..." options=sampleOptions
+                type="select" search=true template="semanticUI"}}
+          {{/if}}
         {{/if}}
       </div>
     {{else}}
