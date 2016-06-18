@@ -130,12 +130,12 @@ Meteor.publish("dataSets", function() {
   });
 });
 
-Meteor.publish("dataSetNamesAndSamples", function() {
+Meteor.publish("dataSetNamesAndGeneExpression", function() {
   var user = MedBook.ensureUser(this.userId);
 
   return DataSets.find({
     collaborations: {$in: user.getCollaborations() },
-  }, { fields: { name: 1, sample_labels: 1 } });
+  }, { fields: { name: 1, gene_expression: 1 } });
 });
 
 Meteor.publish("jobsOfType", function (name) {

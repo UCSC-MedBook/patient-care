@@ -3,7 +3,7 @@
 Template.listUpDownGenes.onCreated(function() {
   let instance = this;
 
-  instance.subscribe("dataSetNamesAndSamples");
+  instance.subscribe("dataSetNamesAndGeneExpression");
   instance.subscribe("patientAndSampleLabels");
   instance.subscribe("sampleGroups");
 
@@ -51,7 +51,7 @@ Template.listUpDownGenes.helpers({
     } else if (fieldValue.startsWith("data_set-")) {
       let _id = fieldValue.slice("data_set-".length);
 
-      return _.map(DataSets.findOne(_id).sample_labels, (label) => {
+      return _.map(DataSets.findOne(_id).gene_expression, (label) => {
         return { value: label, label };
       });
     }
