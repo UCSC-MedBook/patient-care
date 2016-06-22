@@ -11,7 +11,7 @@ Template.listTumorMap.helpers({
 Template.afObjectField_dataSetsAndSamples.onCreated(function() {
   let instance = this;
 
-  instance.subscribe("dataSetNamesAndSamples");
+  instance.subscribe("dataSetNamesAndGeneExpression");
 });
 
 Template.afObjectField_dataSetsAndSamples.helpers({
@@ -33,7 +33,7 @@ Template.afObjectField_dataSetsAndSamples.helpers({
     let dataSetField = this.name + ".data_set_id";
     let dataSetId = AutoForm.getFieldValue(dataSetField, "tumorMapOverlay");
 
-    return _.map(DataSets.findOne(dataSetId).sample_labels, (label) => {
+    return _.map(DataSets.findOne(dataSetId).gene_expression, (label) => {
       return { value: label, label };
     });
   },
