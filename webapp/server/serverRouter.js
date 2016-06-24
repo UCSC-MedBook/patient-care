@@ -1,5 +1,5 @@
 // Picker.route("/tools/:userId/:loginToken/limma-gsea/:job_id/:file_path",
-Picker.route("/tools/limma-gsea/:job_id/:file_path",
+Picker.route("/patient-care/tools/limma-gsea/:job_id/:file_path",
     function(params, req, res, next) {
   // let hashedToken = Accounts._hashLoginToken(loginToken);
   //
@@ -23,6 +23,9 @@ Picker.route("/tools/limma-gsea/:job_id/:file_path",
     res.end();
     return;
   }
+
+  res.setHeader("Content-Type", blob.original.type);
+  res.writeHead(200);
 
   let blobReadStream = blob.createReadStream();
   blobReadStream.pipe(res);
