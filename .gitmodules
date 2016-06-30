@@ -10,3 +10,6 @@
 [submodule "webapp/packages/meteor-autoform-semantic-ui"]
 	path = webapp/packages/meteor-autoform-semantic-ui
 	url = https://github.com/UCSC-MedBook/meteor-autoform-semantic-ui
+[submodule "webapp/packages/blobs"]
+	path = webapp/packages/blobs
+	url = https://github.com/UCSC-MedBook/blobs

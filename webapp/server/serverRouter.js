@@ -1,5 +1,7 @@
-// Picker.route("/tools/:userId/:loginToken/limma-gsea/:job_id/:file_path",
-Picker.route("/patient-care/tools/limma-gsea/:job_id/:file_path",
+fs = Npm.require("fs");
+
+// Picker.route("/tools/:userId/:loginToken/limma-gsea/:job_id/:file_name",
+Picker.route("/patient-care/tools/limma-gsea/:job_id/:file_name",
     function(params, req, res, next) {
   // let hashedToken = Accounts._hashLoginToken(loginToken);
   //
@@ -12,10 +14,10 @@ Picker.route("/patient-care/tools/limma-gsea/:job_id/:file_path",
   // let job = Jobs.findOne(params.job_id);
   // user.ensureAccess(job);
 
-  let blob = Blobs.findOne({
-    "metadata.job_id": params.job_id,
-    "metadata.tool_label": "gsea",
-    "metadata.file_path": params.file_path
+  let blob = Blobs2.findOne({
+    "associated_object.collection_name": "Jobs",
+    "associated_object.mongo_id": params.job_id,
+    file_name: params.file_name
   });
 
   if (!blob) {
@@ -27,7 +29,8 @@ Picker.route("/patient-care/tools/limma-gsea/:job_id/:file_path",
   res.setHeader("Content-Type", blob.original.type);
   res.writeHead(200);
 
-  let blobReadStream = blob.createReadStream();
-  blobReadStream.pipe(res);
+  var path = blob.getFilePath();
+  fs.createReadStream(path).pipe(res);
+
   return;
 });
