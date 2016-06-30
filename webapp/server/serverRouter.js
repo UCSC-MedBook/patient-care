@@ -26,7 +26,7 @@ Picker.route("/patient-care/tools/limma-gsea/:job_id/:file_name",
     return;
   }
 
-  res.setHeader("Content-Type", blob.original.type);
+  res.setHeader("Content-Type", blob.mime_type);
   res.writeHead(200);
 
   var path = blob.getFilePath();
