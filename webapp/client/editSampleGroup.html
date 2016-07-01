@@ -40,9 +40,9 @@
                     <div class="ui mini buttons">
                       {{> addFilterButton data_set=this sampleGroup=sampleGroup
                           dataSetIndex=@index}}
-                      <button class="ui icon button remove-data-set">
+                      <div class="ui icon button remove-data-set">
                         <i class="minus icon"></i> Remove
-                      </button>
+                      </div>
                     </div>
                   </div>
                   <div class="description"></div>
@@ -172,11 +172,11 @@
     {{/if}}
 
     <div class="ui mini buttons">
-      <button class="ui icon mini button edit-filter">
+      <button class="ui icon mini button edit-filter" type="button">
         <i class="edit icon"></i> Edit filter
       </button>
 
-      <button class="ui icon button remove-filter">
+      <button class="ui icon button remove-filter" type="button">
         <i class="minus icon"></i> Remove filter
       </button>
     </div>
