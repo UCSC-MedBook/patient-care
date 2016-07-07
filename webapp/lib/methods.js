@@ -1,4 +1,68 @@
+// Right now, getFormsMatchingDataSet uses CRFs
+// I'm guessing it will use something else soon
+// put the CRF stuff here
+CRFs = new Meteor.Collection("CRFs");
+
 Meteor.methods({
+  getFormsMatchingDataSet: function(data_set_id) {
+    // get all samples in data set
+    // find all forms that have at least one sample
+    // return the forms and whether they have all samples or just at least 1.
+
+    // for now, return a random form
+    // what is a form ?
+
+    check(data_set_id, String);
+
+    // TODO -- user verification    
+    // only check forms that are visible to the user
+    let dataset = DataSets.findOne(data_set_id);
+    let samples = dataset.sample_labels;
+    console.log("found samples", samples);
+
+    // each CRF has a sampleID --
+    // so find all CRFs where the sampleID is in the list of samples
+    // and get the union of fields for those CRFs 
+
+  
+  
+    let foundCRFs = CRFs.find({"sampleID":
+       { $in: samples }},
+       {"CRF" : 1}
+      ).fetch();
+
+    // Why does this show the other fields too ?
+    console.log("heres the crfs", foundCRFs);
+  
+    // Then, for each different CRF found, get 
+    // an example of the document and get the fields
+    
+    let namesCRF = _.uniq(_.pluck(foundCRFs, "CRF"));
+
+    console.log("unique names:", namesCRF);
+
+//    namesCRF.forEach(function(CRFname){
+      // find one CRF with this name and 
+  //  });
+
+    //foundCRFs.forEach(function(crf){
+      
+    //});
+
+    // 
+
+    // Iterate through and make the fields --
+    // the result will be an array of objects
+    // name -> name
+    // fields -> [ fields ]
+    // covers all samples -> true/false
+  
+    
+
+    return namesCRF;
+
+  },
+
   getSampleGroupVersion: function (name) {
     check(name, String);
 

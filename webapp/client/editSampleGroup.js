@@ -148,6 +148,12 @@ Template.addFilterButton.onRendered(function () {
 });
 
 Template.addFilterButton.events({
+  "click .add-form-values-filter": function (event, instance) {
+    instance.addFilter({
+      type: "form_values",
+      options : {},
+    });
+  },
   "click .add-sample-label-list-filter": function (event, instance) {
     instance.addFilter({
       type: "sample_label_list",
@@ -311,4 +317,75 @@ Template.dataLoadedFilter.onRendered(function () {
   if (instance.data.options.gene_expression) {
     $geneExpression.checkbox("check");
   }
+});
+
+Template.formValuesFilter.onCreated(function(){
+  // Find forms that share samples with this data set
+  // let them be options for which form to filter on
+  let instance = this;
+
+  let dataset_id = instance.data.data_set_id ;
+  instance.available_filter_forms = new ReactiveVar(); 
+  // Set it to an empty array first and add forms later
+  instance.available_filter_forms.set(['Loading forms...']);
+
+  Meteor.call("getFormsMatchingDataSet", dataset_id, (err, res) => {
+    if(err) {
+      console.log("forms error", err);
+      throw err; 
+    } else {
+      console.log("retrieved available forms", res);
+      // put the res in the available forms so that we can get it later
+      instance.available_filter_forms.set(res);
+      console.log("filter forms are", instance.available_filter_forms);
+    }
+  });
+
+  
+  // get list of samples in this data set
+
+  // for each form visible to user
+  
+  // get list of samples in that form
+  console.log("instance is", instance);
+});
+
+Template.formValuesFilter.helpers({
+  getAvailableFilterForms: function() {
+    console.log("in the helper - available form:", Template.instance().available_filter_forms);
+    let foundForms = Template.instance().available_filter_forms.get();
+    console.log("forms?", foundForms);
+    return foundForms;
+  },
+});
+
+// attach the querybuilder object?
+Template.formValuesFilter.onRendered(function(){
+  // 
+
+
+    // this might get called a bunch of times
+    // so do stuff the first time and save it in `this` if possible
+    // right now its attaching in events click instead.   
+ 
+});
+
+Template.formValuesFilter.events({
+  "click .chosen-form-filter": function(event, instance) {
+    // We picked one
+    // use a meteor method to get the fields & values for this form
+    // and attach the querybuilder
+
+  $('#querybuilder').queryBuilder({
+                filters: [
+              {
+                  id: 'name',
+                  label: 'form',
+                  type: 'string'
+                },
+            ]
+    });
+
+
+  },
 });
