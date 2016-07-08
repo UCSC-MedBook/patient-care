@@ -89,11 +89,13 @@
     <i class="filter icon"></i> Add filter
   </div>
   <div class="ui flowing popup">
-    <div class="ui list" style="padding: 0px;">
-      <a class="item add-form-values-filter">
-        Filter by form values
-      </a>
-    </div>
+    {{#if getNoActiveFormValuesFilter}}
+      <div class="ui list" style="padding: 0px;">
+        <a class="item add-form-values-filter">
+          Filter by form values
+        </a>
+      </div>
+    {{/if}}
     <div class="ui list" style="padding: 0px;">
       <a class="item add-sample-label-list-filter">
         Include Specific samples
@@ -147,23 +149,41 @@
 
 <template name="formValuesFilter">
   {{title}}:
-<!--  TODO - display note if no forms
-    not sure how to make this happen -->
-  {{#if length getAvailableFilterForms}}
-  {{else}}
-    No forms found for this data set.
-  {{/if}}
-  <div class="ui list">
-  {{#each getAvailableFilterForms}}
-          <div class="item chosen-form-filter">
-            [{{this}}]
+  {{#if getEditing}}
+    {{#if length getAvailableFilterForms}}
+        <div>
+          Forms for this dataset: <i class="dropdown icon"></i>
+        </div>
+        <div class="ui flowing">
+          <div class="ui list">
+              {{#each getAvailableFilterForms}}
+                      <a class="item chosen-form-filter" id={{this.urlencodedId}}>
+                        [{{this.name}}]
+                      </a>
+               {{/each}}
           </div>
-   {{/each}}
-  </div>
-  <br>
-  Choose the fields from the form
-  <!-- querybuilder is attached in onRendered for this template  -->
-  <div id="querybuilder"></div>
+        </div>
+      <!-- Set up the potential queryBuilder divs to be attached in onRendered -->
+      {{#each getAvailableFilterForms}}
+        <div class="querybuilder" id="{{this.urlencodedId}}_querybuilder">
+        </div>
+      {{/each}}
+    {{else}}
+      No forms found for this data set. Add a form in Fusion or use a different data set.
+    {{/if}}
+    <div class="ui icon primary mini button done-editing">
+      <i class="check icon"></i>Done
+    </div>
+  {{else}}
+    <div class="ui mini buttons">
+      <button class="ui icon mini button edit-filter" type="button">
+        <i class="edit icon"></i> Edit filter
+      </button>
+      <button class="ui icon button remove-filter" type="button">
+        <i class="minus icon"></i> Remove filter
+      </button>
+    </div>
+  {{/if}}
 </template>
 
 <template name="sampleLabelListFilter">

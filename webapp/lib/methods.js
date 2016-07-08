@@ -18,49 +18,90 @@ Meteor.methods({
     // only check forms that are visible to the user
     let dataset = DataSets.findOne(data_set_id);
     let samples = dataset.sample_labels;
-    console.log("found samples", samples);
 
     // each CRF has a sampleID --
     // so find all CRFs where the sampleID is in the list of samples
     // and get the union of fields for those CRFs 
 
-  
-  
-    let foundCRFs = CRFs.find({"sampleID":
+    let result = {} ;
+    let formsAndIds = []; // Used for identifying divs
+    // Format: [ { name: CRFname, urlencodedId: crfSampleID},... ]
+    //  it's not the CRF ID but the _id of an arbitrary sample in that CRF
+    let fieldsToSkip = ["_id", "sampleID"];
+    let seenCRFs = [] // form names we have already encountered
+ 
+    CRFs.find({"sampleID":
        { $in: samples }},
-       {"CRF" : 1}
-      ).fetch();
+      ).forEach((doc) => {  
 
-    // Why does this show the other fields too ?
-    console.log("heres the crfs", foundCRFs);
-  
-    // Then, for each different CRF found, get 
-    // an example of the document and get the fields
-    
-    let namesCRF = _.uniq(_.pluck(foundCRFs, "CRF"));
+      let CRFname = doc.CRF;
+      let CRFencodedId = encodeURI(doc._id); //remove spaces etc for use as dom id
 
-    console.log("unique names:", namesCRF);
+      // Upon encountering a new CRF name
+      // Use its fields as a template for this CRF
+      // also add it to formsAndIds
+      if( seenCRFs.indexOf(CRFname) === -1) {
+        seenCRFs.push(CRFname);
+        result[CRFencodedId] = {};
 
-//    namesCRF.forEach(function(CRFname){
-      // find one CRF with this name and 
-  //  });
+        formsAndIds.push(
+          {name: CRFname,
+           urlencodedId: CRFencodedId }
+        );
 
-    //foundCRFs.forEach(function(crf){
-      
-    //});
+        for(field in doc){
+          if(fieldsToSkip.indexOf(field) === -1){ 
+            result[CRFencodedId][field] = [];
+          } 
+        }
+      }
+      // Then add unique values from that CRF to the field
+      for(field in result[CRFencodedId]){
+        if(fieldsToSkip.indexOf(field) === -1){ 
+          result[CRFencodedId][field] = _.union([doc[field]], result[CRFencodedId][field]);
+        }
+      }
+    });
+    return { formFields: result, formIds: formsAndIds};
+  },
 
-    // 
+  getSamplesFromFormFilter: function(data_set_id, query, sampleCrfId){
+    check(data_set_id, String);
+    check(query, Object); // TODO: more stringent?
+    check(sampleCrfId, String);
 
-    // Iterate through and make the fields --
-    // the result will be an array of objects
-    // name -> name
-    // fields -> [ fields ]
-    // covers all samples -> true/false
-  
-    
+    // Don't run client-side.
+    if(Meteor.isClient){
+      return [];
+    }
 
-    return namesCRF;
 
+    console.log("got query", query);
+
+    let dataset = DataSets.findOne(data_set_id);
+    let samples = dataset.sample_labels;
+    let foundSampleCRF = CRFs.findOne({_id: sampleCrfId});
+    console.log("foundSample", foundSampleCRF);
+
+    let nameCRF = foundSampleCRF.CRF;
+
+    console.log("got namecrf", nameCRF);
+
+    // run the provided query to get all
+    // CRFs as follows :
+    // samples are in the provided sample list
+    // the query applies
+    // the CRF name is the passed crf name // TODO pass it
+
+    let foundSamples = _.pluck(CRFs.find({
+      "$and": [
+        {'sampleID': {$in: samples}},
+        {'CRF' : nameCRF},
+        query,
+      ]
+    }).fetch(), 'sampleID')
+
+    return foundSamples;
   },
 
   getSampleGroupVersion: function (name) {

@@ -136,6 +136,8 @@ Template.addFilterButton.onCreated(function () {
     sampleGroup.data_sets[instance.data.dataSetIndex].filters.push(filterObject);
     instance.data.sampleGroup.set(sampleGroup);
   }
+  // Only allow one form values filter
+  instance.noActiveFormValuesFilter = new ReactiveVar(true);
 });
 
 Template.addFilterButton.onRendered(function () {
@@ -147,12 +149,23 @@ Template.addFilterButton.onRendered(function () {
   });
 });
 
+Template.addFilterButton.helpers({
+  getNoActiveFormValuesFilter: function(){
+    return Template.instance().noActiveFormValuesFilter.get();
+  },
+});
+
 Template.addFilterButton.events({
   "click .add-form-values-filter": function (event, instance) {
     instance.addFilter({
       type: "form_values",
-      options : {},
+      options : {
+        sample_labels: []
+      },
     });
+    instance.noActiveFormValuesFilter.set(false)
+    // TODO : if this filter is removed the only way to re-add is to
+    // remove and re-add the data set.
   },
   "click .add-sample-label-list-filter": function (event, instance) {
     instance.addFilter({
@@ -324,68 +337,98 @@ Template.formValuesFilter.onCreated(function(){
   // let them be options for which form to filter on
   let instance = this;
 
+  instance.editing = new ReactiveVar(false);
+
   let dataset_id = instance.data.data_set_id ;
   instance.available_filter_forms = new ReactiveVar(); 
-  // Set it to an empty array first and add forms later
-  instance.available_filter_forms.set(['Loading forms...']);
+  instance.available_filter_forms.set([{name: 'Loading forms...', urlencodedId: 'Loadingforms...'}]);
+  instance.filter_forms_options = new ReactiveVar();
+  instance.filter_forms_options.set({});
 
-  Meteor.call("getFormsMatchingDataSet", dataset_id, (err, res) => {
+  instance.active_querybuilder = new ReactiveVar("");
+  instance.active_crf = new ReactiveVar("");
+
+  Meteor.call("getFormsMatchingDataSet", dataset_id, function(err, res){
     if(err) {
-      console.log("forms error", err);
+      instance.available_filter_forms.set([{name:'Error loading forms!', urlencodedId: 'Errorloadingforms!'}]);
+      console.log("Error getting forms for this data set", err);
       throw err; 
     } else {
-      console.log("retrieved available forms", res);
       // put the res in the available forms so that we can get it later
-      instance.available_filter_forms.set(res);
-      console.log("filter forms are", instance.available_filter_forms);
+      instance.filter_forms_options.set(res.formFields);
+      instance.available_filter_forms.set(res.formIds);
     }
   });
-
-  
-  // get list of samples in this data set
-
-  // for each form visible to user
-  
-  // get list of samples in that form
-  console.log("instance is", instance);
 });
 
 Template.formValuesFilter.helpers({
   getAvailableFilterForms: function() {
-    console.log("in the helper - available form:", Template.instance().available_filter_forms);
-    let foundForms = Template.instance().available_filter_forms.get();
-    console.log("forms?", foundForms);
-    return foundForms;
+    return Template.instance().available_filter_forms.get();
   },
-});
-
-// attach the querybuilder object?
-Template.formValuesFilter.onRendered(function(){
-  // 
-
-
-    // this might get called a bunch of times
-    // so do stuff the first time and save it in `this` if possible
-    // right now its attaching in events click instead.   
- 
+  getEditing: function(){
+    return Template.instance().editing.get();
+  },
 });
 
 Template.formValuesFilter.events({
   "click .chosen-form-filter": function(event, instance) {
-    // We picked one
-    // use a meteor method to get the fields & values for this form
-    // and attach the querybuilder
 
-  $('#querybuilder').queryBuilder({
-                filters: [
-              {
-                  id: 'name',
-                  label: 'form',
-                  type: 'string'
-                },
-            ]
+    
+    let whichFormId = event.target.id;
+
+    // then find it in filter_forms_options
+    let formFields = instance.filter_forms_options.get()[whichFormId];
+
+    // Then build the filters for the querybuilder
+    let queryFilters = [];
+    for(field in formFields){
+      let fieldOptions = formFields[field];
+      queryFilters.push(
+        { id: field,
+          label: field,
+          type: "string",
+          input: "select",
+          values: fieldOptions,
+          operators: ['equal', 'not_equal', 'is_null', 'is_not_null'],
+        }
+      );
+    } 
+  let queryBuilderDivId = "#" + whichFormId + "_querybuilder";
+  $(queryBuilderDivId).queryBuilder({
+    filters: queryFilters,
     });
 
-
+  // And set it as active so we can find it later
+  instance.active_querybuilder.set(queryBuilderDivId);
+  instance.active_crf.set(whichFormId);
   },
+
+  "click .done-editing": function(event, instance){
+    event.preventDefault();
+
+    let queryBuilderDivId = instance.active_querybuilder.get();
+
+    let query = $(queryBuilderDivId).queryBuilder('getMongo');
+    let sampleCrfId = decodeURI(instance.active_crf.get());
+     let dataset_id = instance.data.data_set_id;
+
+    instance.editing.set(false);
+    
+    // Call a MeteorMethod to return the list of samples that match.
+     Meteor.call("getSamplesFromFormFilter",  dataset_id, query, sampleCrfId, function(err, res){
+      if(err){
+        console.log("Error getting samples from form filter:", err);
+        throw err;
+      }else{ 
+        console.log("got sample list", res);
+      }
+    });
+
+   },
+  "click .edit-filter": function(event, instance){
+    event.preventDefault();
+    instance.editing.set(true);
+  },
+
+
 });
