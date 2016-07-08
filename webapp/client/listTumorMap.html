@@ -10,6 +10,23 @@
 
   <h2>Create a new overlay</h2>
 
+  <div class="ui large negative message">
+    <div class="header">
+      Tumor Map API Warning
+    </div>
+    <p>
+      The Tumor Map API is not yet fully functional.
+      You will see results but those results are based on
+      only a subset of the genomic data.
+    </p>
+    <p>
+      Please contact us to request to be notified when the full API goes online.
+    </p>
+    <p>
+      {{> contactUsButton}}
+    </p>
+  </div>
+
   {{#autoForm id="tumorMapOverlay" schema=overlaySchema
       type="method" meteormethod="createTumorMapOverlay"}}
     {{> afQuickField name="map" options="allowed"
@@ -112,7 +129,7 @@ blob/master/templates/semantic-ui/components/afObjectField/afObjectField.html
                 {{else}}
                   {{#if compare status "error"}}
                     An error occurred...
-                    {{> contactTeoButton}}
+                    {{> contactUsButton}}
                   {{else}}
                     Creating...
                   {{/if}}
