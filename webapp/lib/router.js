@@ -52,6 +52,7 @@ geneSets.route("/create", {
 var tools = FlowRouter.group({ prefix: "/tools" });
 tools.route("/", sameNameAndAction("listTools"));
 tools.route("/limma-gsea", sameNameAndAction("listLimmaGSEA"));
+tools.route("/limma-gsea/:job_id", sameNameAndAction("limmaGSEAJob"));
 tools.route("/tumor-map", sameNameAndAction("listTumorMap"));
 tools.route("/outlier-analysis", sameNameAndAction("listUpDownGenes"));
 tools.route("/outlier-analysis/:job_id", sameNameAndAction("upDownGenesJob"));

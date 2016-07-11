@@ -1,7 +1,7 @@
 fs = Npm.require("fs");
 
 // Picker.route("/tools/:userId/:loginToken/limma-gsea/:job_id/:file_name",
-Picker.route("/patient-care/tools/limma-gsea/:job_id/:file_name",
+Picker.route("/tools/limma-gsea/:job_id/:file_name", // FIXME
     function(params, req, res, next) {
   // let hashedToken = Accounts._hashLoginToken(loginToken);
   //

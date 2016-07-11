@@ -25,6 +25,7 @@ Template.appBody.helpers({
     return [
       "listTools",
       "listLimmaGSEA",
+      "limmaGSEAJob",
       "listTumorMap",
       "listUpDownGenes",
       "upDownGenesJob",

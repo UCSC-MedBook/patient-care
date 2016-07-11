@@ -1,0 +1,63 @@
+<template name="limmaGSEAJob">
+  <h1>hi</h1>
+
+  {{#with getJob}}
+    <h1 class="title ui">
+      Outlier Analysis Result
+    </h1>
+
+    {{#if compare status "done"}}
+      <h1>hi</h1>
+    {{/if}}
+
+    {{#if compare status "waiting"}}
+      <div class="ui info message">
+        <div class="header">
+          Waiting...
+        </div>
+        Your job will be run soon.
+      </div>
+    {{/if}}
+
+    {{#if compare status "running"}}
+      <div class="ui info message">
+        <div class="header">
+          Running!
+        </div>
+        Your job is running!
+      </div>
+    {{/if}}
+
+    {{#if compare status "error"}}
+      <div class="ui error message">
+        <div class="header">
+          Error running job.
+        </div>
+        <p>
+          We have encountered an error running your job.
+          If you believe this is an internal error, please contact us using
+          the button below.
+        </p>
+        <p>
+          Description: <code>{{error_description}}</code>
+        </p>
+        {{#if stack_trace}}
+          <p>
+            <pre><code>{{stack_trace}}</code></pre>
+          </p>
+        {{/if}}
+        <p>
+          {{{contactTeoText}}}
+        </p>
+      </div>
+    {{/if}}
+  {{/with}}
+
+  {{#if compare getJob.status "waiting"}}
+
+  {{/if}}
+
+  {{#if compare getJob.status "waiting"}}
+
+  {{/if}}
+</template>

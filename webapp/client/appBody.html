@@ -35,7 +35,8 @@
             Tools
           {{/breadcrumbItem}}
 
-          {{#if isActiveRoute "listLimmaGSEA"}}
+          {{#if or (isActiveRoute "listLimmaGSEA")
+              (isActiveRoute "limmaGSEAJob")}}
             {{#breadcrumbItem isActive=true}}
               Limma <i class="right arrow icon"></i> GSEA
             {{/breadcrumbItem}}

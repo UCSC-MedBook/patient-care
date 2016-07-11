@@ -167,6 +167,21 @@ Meteor.publish("patientAndSampleLabels", function() {
   }, { fields: { patient_label: 1, "samples.sample_label": 1 } });
 });
 
+// tools/LimmaGSEA
+
+Meteor.publish("limmaGSEAJob", function (jobId) {
+  check(jobId, String);
+
+  let user = MedBook.ensureUser(this.userId);
+  let job = Jobs.findOne({
+    _id: jobId,
+    name: "RunLimmaGSEA",
+  });
+  user.ensureAccess(job);
+
+  return Jobs.find({ _id: jobId });
+});
+
 // tools/OutlierAnalysis
 
 Meteor.publish("upDownGenesJob", function (jobId) {
