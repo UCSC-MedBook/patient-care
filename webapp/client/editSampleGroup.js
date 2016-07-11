@@ -361,6 +361,12 @@ Template.formValuesFilter.onCreated(function(){
   });
 });
 
+
+Template.formValuesFilterMenu.onRendered(function(){
+  let instance = this;
+  instance.$(".ui.dropdown").dropdown();
+});
+
 Template.formValuesFilter.helpers({
   getAvailableFilterForms: function() {
     return Template.instance().available_filter_forms.get();
@@ -393,7 +399,12 @@ Template.formValuesFilter.events({
         }
       );
     } 
+
+  // Only show one querybuilder div at a time
+  $(".querybuilder").hide()
+
   let queryBuilderDivId = "#" + whichFormId + "_querybuilder";
+  $(queryBuilderDivId).show()
   $(queryBuilderDivId).queryBuilder({
     filters: queryFilters,
     });

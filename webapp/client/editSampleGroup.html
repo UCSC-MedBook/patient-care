@@ -147,22 +147,25 @@
   </div>
 </template>
 
+<!-- Menu for selecting the form to filter on form values -->
+<template name="formValuesFilterMenu">
+  <div class="ui dropdown fluid search selection">
+    <i class="dropdown icon"></i>
+    <div class="default text">Select a form...</div>
+    <div class="menu">
+      {{#each getAvailableFilterForms}}
+      <div class="item chosen-form-filter"  id={{this.urlencodedId}} >{{this.name}}</div>
+      {{/each}}
+    </div>
+  </div>
+</template>
+
+<!--  Filter on a form using querybuilder -->
 <template name="formValuesFilter">
   {{title}}:
   {{#if getEditing}}
     {{#if length getAvailableFilterForms}}
-        <div>
-          Forms for this dataset: <i class="dropdown icon"></i>
-        </div>
-        <div class="ui flowing">
-          <div class="ui list">
-              {{#each getAvailableFilterForms}}
-                      <a class="item chosen-form-filter" id={{this.urlencodedId}}>
-                        [{{this.name}}]
-                      </a>
-               {{/each}}
-          </div>
-        </div>
+      {{> formValuesFilterMenu getAvailableFilterForms=getAvailableFilterForms}}
       <!-- Set up the potential queryBuilder divs to be attached in onRendered -->
       {{#each getAvailableFilterForms}}
         <div class="querybuilder" id="{{this.urlencodedId}}_querybuilder">
