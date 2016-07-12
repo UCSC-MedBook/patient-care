@@ -66,6 +66,8 @@ Meteor.methods({
   },
 
   getSamplesFromFormFilter: function(data_set_id, query, sampleCrfId){
+    console.log("Applying form filter to retrieve samples..."); // XXX
+
     check(data_set_id, String);
     check(query, Object); // TODO: more stringent?
     check(sampleCrfId, String);
@@ -76,7 +78,7 @@ Meteor.methods({
     }
 
 
-    console.log("got query", query);
+    console.log("Query to be run:", query); // XXX 
 
     let dataset = DataSets.findOne(data_set_id);
     let samples = dataset.sample_labels;
@@ -85,21 +87,30 @@ Meteor.methods({
 
     let nameCRF = foundSampleCRF.CRF;
 
-    console.log("got namecrf", nameCRF);
+    console.log("Restricting query by CRF:", nameCRF); // XXX
 
     // run the provided query to get all
     // CRFs as follows :
     // samples are in the provided sample list
     // the query applies
-    // the CRF name is the passed crf name // TODO pass it
+    // the CRF name is the passed crf name
 
-    let foundSamples = _.pluck(CRFs.find({
-      "$and": [
+    let queryInCRF = {
+      "$and": [ 
         {'sampleID': {$in: samples}},
         {'CRF' : nameCRF},
         query,
       ]
-    }).fetch(), 'sampleID')
+    }
+
+    console.log("Query with CRF applied", queryInCRF); // XXX
+
+    let results = CRFs.find(queryInCRF).fetch();
+
+    console.log("Applied query. Results:", results); // XXX
+
+    let foundSamples = _.pluck(results, 'sampleID');
+    console.log("found sample IDs", foundSamples); // XXX 
 
     return foundSamples;
   },

@@ -89,13 +89,15 @@
     <i class="filter icon"></i> Add filter
   </div>
   <div class="ui flowing popup">
-    {{#if getNoActiveFormValuesFilter}}
+    <!-- if a form values filter is applied to this data set,
+    don't display the option to insert another one -->
+    {{#unless isAFormValuesFilterActive}}
       <div class="ui list" style="padding: 0px;">
         <a class="item add-form-values-filter">
           Filter by form values
         </a>
       </div>
-    {{/if}}
+    {{/unless}}
     <div class="ui list" style="padding: 0px;">
       <a class="item add-sample-label-list-filter">
         Include Specific samples
@@ -171,13 +173,18 @@
         <div class="querybuilder" id="{{this.urlencodedId}}_querybuilder">
         </div>
       {{/each}}
+      <div class="ui icon primary mini button done-editing">
+        <i class="check icon"></i>Done
+      </div>
     {{else}}
-      No forms found for this data set. Add a form in Fusion or use a different data set.
+      No forms are available for this data set.
+      <div class="ui mini buttons">
+        <button class="ui icon button remove-filter" type="button">
+          <i class="minus icon"></i> Remove filter
+        </button>
+      </div>  
     {{/if}}
-    <div class="ui icon primary mini button done-editing">
-      <i class="check icon"></i>Done
-    </div>
-  {{else}}
+ {{else}}
     <div class="ui mini buttons">
       <button class="ui icon mini button edit-filter" type="button">
         <i class="edit icon"></i> Edit filter

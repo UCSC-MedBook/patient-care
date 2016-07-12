@@ -123,26 +123,49 @@ Meteor.methods({
       let dataSet = DataSets.findOne(sampleGroupDataSet.data_set_id);
       user.ensureAccess(dataSet);
 
-      // start with all the samples and then filter down from there
+      // Apply the sample group's filters.
+      // We start with all the sample labels in a data set.
+      // Then, apply filters as follows.
+      // -  Filter by form values: Run the passed query in mongo and remove all samples
+      //    that are not included in the query results
+      // -  Include Specific Samples : remove all samples NOT on the include list
+      // -  Exclude Specific Samples : remove all samples on the exclude list
+      // -  Require data loaded : remove all non-loaded samples
+  
       let sample_labels = dataSet.sample_labels;
 
       _.each(sampleGroupDataSet.filters, (filter) => {
         let { options } = filter;
+  
+        if (filter.type === "form_values"){
 
-        if (filter.type === "sample_label_list") {
+          // Run the mongo_query
+          // Get the result sample labels synchronously
+          let result_sample_labels = Meteor.call('getSamplesFromFormFilter', 
+            sampleGroupDataSet.data_set_id,
+            options.mongo_query,
+            options.form_id
+          );
+          console.log("retrieved result sample labels", result_sample_labels); // XXX
+
+          sample_labels = _.intersection(sample_labels, result_sample_labels);
+
+          console.log("sample labels are now", sample_labels); // XXX
+        
+        } else if (filter.type === "sample_label_list") {
           if (_.difference(options.sample_labels,
               dataSet.sample_labels).length) {
             throw new Meteor.Error("invalid-sample-labels");
           }
-
           sample_labels = _.intersection(sample_labels, options.sample_labels);
+
         } else if (filter.type === "exclude_sample_label_list") {
           if (_.difference(options.sample_labels,
               dataSet.sample_labels).length) {
             throw new Meteor.Error("invalid-sample-labels");
           }
-
           sample_labels = _.difference(sample_labels, options.sample_labels);
+
         } else if (filter.type === "data_loaded") {
           if (options.gene_expression) {
             sample_labels = _.intersection(sample_labels,
@@ -192,8 +215,10 @@ Meteor.methods({
     // insert asynchronously -- thanks @ArnaudGallardo
     var future = new Future();
     SampleGroups.rawCollection().insert(sampleGroup, (err, insertedObj) => {
-      if (err) future.throw(err);
-
+      if (err) {
+       console.log("Creating sample group threw Future error:", err);
+       future.throw(err);
+      }
       future.return(newId);
     });
 

@@ -137,7 +137,6 @@ Template.addFilterButton.onCreated(function () {
     instance.data.sampleGroup.set(sampleGroup);
   }
   // Only allow one form values filter
-  instance.noActiveFormValuesFilter = new ReactiveVar(true);
 });
 
 Template.addFilterButton.onRendered(function () {
@@ -150,8 +149,14 @@ Template.addFilterButton.onRendered(function () {
 });
 
 Template.addFilterButton.helpers({
-  getNoActiveFormValuesFilter: function(){
-    return Template.instance().noActiveFormValuesFilter.get();
+  isAFormValuesFilterActive: function(){
+    let sampleGroup = Template.instance().data.sampleGroup.get();
+    let currentDataSet = sampleGroup.data_sets[Template.instance().data.dataSetIndex];
+    // No data sets -> no form values filters
+    if( typeof(currentDataSet) === "undefined"){ return false; }
+    let allFilters = currentDataSet.filters ;
+    let wasFilter = (_.pluck(allFilters, "type").indexOf("form_values") !== -1);
+    return wasFilter;
   },
 });
 
@@ -160,12 +165,10 @@ Template.addFilterButton.events({
     instance.addFilter({
       type: "form_values",
       options : {
-        sample_labels: []
+        form_id: "",
+        mongo_query: {},
       },
     });
-    instance.noActiveFormValuesFilter.set(false)
-    // TODO : if this filter is removed the only way to re-add is to
-    // remove and re-add the data set.
   },
   "click .add-sample-label-list-filter": function (event, instance) {
     instance.addFilter({
@@ -378,7 +381,6 @@ Template.formValuesFilter.helpers({
 
 Template.formValuesFilter.events({
   "click .chosen-form-filter": function(event, instance) {
-
     
     let whichFormId = event.target.id;
 
@@ -424,22 +426,17 @@ Template.formValuesFilter.events({
      let dataset_id = instance.data.data_set_id;
 
     instance.editing.set(false);
-    
-    // Call a MeteorMethod to return the list of samples that match.
-     Meteor.call("getSamplesFromFormFilter",  dataset_id, query, sampleCrfId, function(err, res){
-      if(err){
-        console.log("Error getting samples from form filter:", err);
-        throw err;
-      }else{ 
-        console.log("got sample list", res);
-      }
+   
+    // Populate the filter info
+    // TODO: refactor to use the ID from metadata of the overall CRF
+    // rather than, as here, the id of a random sample record within the CRF
+    instance.data.setOptions({
+      form_id: sampleCrfId,
+      mongo_query: query
     });
-
    },
   "click .edit-filter": function(event, instance){
     event.preventDefault();
     instance.editing.set(true);
   },
-
-
 });
