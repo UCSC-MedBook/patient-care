@@ -166,7 +166,7 @@ Template.addFilterButton.events({
       type: "form_values",
       options : {
         form_id: "",
-        mongo_query: {},
+        mongo_query: "",
       },
     });
   },
@@ -422,6 +422,7 @@ Template.formValuesFilter.events({
     let queryBuilderDivId = instance.active_querybuilder.get();
 
     let query = $(queryBuilderDivId).queryBuilder('getMongo');
+    let serialized_query = JSON.stringify(query);
     let sampleCrfId = decodeURI(instance.active_crf.get());
      let dataset_id = instance.data.data_set_id;
 
@@ -432,7 +433,7 @@ Template.formValuesFilter.events({
     // rather than, as here, the id of a random sample record within the CRF
     instance.data.setOptions({
       form_id: sampleCrfId,
-      mongo_query: query
+      mongo_query: serialized_query,
     });
    },
   "click .edit-filter": function(event, instance){

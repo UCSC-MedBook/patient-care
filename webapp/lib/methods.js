@@ -4,13 +4,21 @@
 CRFs = new Meteor.Collection("CRFs");
 
 Meteor.methods({
+    // Takes: data_set_id (string) -- ID of the target data set
+    // Returns: object with fields formFields, formsAndIds.
+    // Finds all CRFs that have a record for at least one sample in 
+    // the passed data set.
+    // formsAndIds: Array: [{name:, urlencodedId}]
+    //    name: Name of the CRF
+    //    urlencodedId: ID to an arbitrary CRFs record for that CRF,
+    //                  passed to encodeURI so it can be used as a
+    //                  div ID later.
+    //  
+    // formFields: Object: { id : { field1: [ ...] , field2: [...]}}
+    //    keys: each urlencodedId above.
+    //    for each ID: an object with keys: available fields in that CRF
+    //    and values: for each field, array of available field values.
   getFormsMatchingDataSet: function(data_set_id) {
-    // get all samples in data set
-    // find all forms that have at least one sample
-    // return the forms and whether they have all samples or just at least 1.
-
-    // for now, return a random form
-    // what is a form ?
 
     check(data_set_id, String);
 
@@ -66,12 +74,14 @@ Meteor.methods({
     });
     return { formFields: result, formIds: formsAndIds};
   },
-
-  getSamplesFromFormFilter: function(data_set_id, query, sampleCrfId){
-    console.log("Applying form filter to retrieve samples..."); // XXX
+  // Takes : data_set_id : data set to source samples from
+  //        serialized_query : stringifed JSON Mongo query
+  //        sampleCrfId: ID of a CRFs document whose CRF field is the desired form
+  //            (this document will refer to a specific sample, which is not relevant.)
+  getSamplesFromFormFilter: function(data_set_id, serialized_query, sampleCrfId){
 
     check(data_set_id, String);
-    check(query, Object); // TODO: more stringent?
+    check(serialized_query, String);
     check(sampleCrfId, String);
 
     // Don't run client-side.
@@ -79,8 +89,23 @@ Meteor.methods({
       return [];
     }
 
+    // Confirm permissions TODO
+    // User needs to have access to CRF, dataset
 
-    console.log("Query to be run:", query); // XXX 
+    console.log("Query to be run:", serialized_query); // XXX 
+
+    let query = {};
+
+    // Confirm the query parses
+    try { 
+      query = JSON.parse(serialized_query);
+    } catch (err) {
+      if (err instanceof SyntaxError) {
+        console.log("Couldn't parse JSON:", err.message);
+        console.log("Tried to parse", serialized_query);
+      }
+        throw err;
+    }
 
     let dataset = DataSets.findOne(data_set_id);
     let samples = dataset.sample_labels;
