@@ -146,11 +146,11 @@ Meteor.methods({
             options.mongo_query,
             options.form_id
           );
-          console.log("retrieved result sample labels", result_sample_labels); // XXX
+
+          console.log("Query found", result_sample_labels.length, "sample labels.");
 
           sample_labels = _.intersection(sample_labels, result_sample_labels);
 
-          console.log("sample labels are now", sample_labels); // XXX
         
         } else if (filter.type === "sample_label_list") {
           if (_.difference(options.sample_labels,

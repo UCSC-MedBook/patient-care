@@ -8,7 +8,7 @@ Meteor.methods({
     // Returns: object with fields formFields, formsAndIds.
     // Finds all CRFs that have a record for at least one sample in 
     // the passed data set.
-    // formsAndIds: Array: [{name:, urlencodedId}]
+    // formsAndIds: Array: [{name: String, urlencodedId: String}]
     //    name: Name of the CRF
     //    urlencodedId: ID to an arbitrary CRFs record for that CRF,
     //                  passed to encodeURI so it can be used as a
@@ -22,6 +22,20 @@ Meteor.methods({
 
     check(data_set_id, String);
 
+    // Client-side stub:
+    if( Meteor.isClient) {
+      let stub = {
+        formFields: { "Loading forms..." : {} },
+        formsAndIds: [{
+          name: "Loading forms...",
+          urlencodedId: "placeholder_loading_form_div_id", 
+          }],
+      };
+      return stub;
+    }
+    
+
+
     // TODO -- user verification    
     // only check forms that are visible to the user
     let dataset = DataSets.findOne(data_set_id);
@@ -31,28 +45,32 @@ Meteor.methods({
     // so find all CRFs where the sampleID is in the list of samples
     // and get the union of fields for those CRFs 
 
-    let result = {} ;
+    let formsWithFields = {} ;
     let formsAndIds = []; // Used for identifying divs
     // Format: [ { name: CRFname, urlencodedId: crfSampleID},... ]
     //  it's not the CRF ID but the _id of an arbitrary sample in that CRF
    // let fieldsToSkip = ["_id", "sampleID"]; //FIXME use this format for clinv3
     let fieldsToSkip = ["_id", "Sample_ID"];
     let seenCRFs = [] // form names we have already encountered
- 
+
+    // For each sample, find all CRFs documents for that sample
+    // and add their fields & potential values to the output
     CRFs.find({"Sample_ID":
     //CRFs.find({"sampleID": //FIXME clinv3
        { $in: samples }},
       ).forEach((doc) => {  
 
       let CRFname = doc.CRF;
-      let CRFencodedId = encodeURI(doc._id); //remove spaces etc for use as dom id
+      let CRFencodedId = "" ; // Will either be ID of doc or ID of previous doc with this CRF
 
-      // Upon encountering a new CRF name
+      // If this is a new CRF
       // Use its fields as a template for this CRF
-      // also add it to formsAndIds
+      // Add its _id + name to formsAndIds mapping
       if( seenCRFs.indexOf(CRFname) === -1) {
+
+        CRFencodedId = encodeURI(doc._id);
         seenCRFs.push(CRFname);
-        result[CRFencodedId] = {};
+        formsWithFields[CRFencodedId] = {};
 
         formsAndIds.push(
           {name: CRFname,
@@ -61,18 +79,27 @@ Meteor.methods({
 
         for(field in doc){
           if(fieldsToSkip.indexOf(field) === -1){ 
-            result[CRFencodedId][field] = [];
+            formsWithFields[CRFencodedId][field] = [];
           } 
         }
+      } else {
+        // For a CRF whose name we've already seen,
+        // get the correct CRFencodedId via formsWithFields.
+        let foundName =  _.find(formsAndIds, function(item){ return item.name === CRFname})
+        if(foundName){ // Should always find one...
+          CRFencodedId = foundName.urlencodedId;
+        }
       }
+
       // Then add unique values from that CRF to the field
-      for(field in result[CRFencodedId]){
+      for(field in formsWithFields[CRFencodedId]){
         if(fieldsToSkip.indexOf(field) === -1){ 
-          result[CRFencodedId][field] = _.union([doc[field]], result[CRFencodedId][field]);
+          formsWithFields[CRFencodedId][field] = _.union([doc[field]], formsWithFields[CRFencodedId][field]);
         }
       }
     });
-    return { formFields: result, formIds: formsAndIds};
+   
+    return  { formFields: formsWithFields, formIds: formsAndIds};
   },
   // Takes : data_set_id : data set to source samples from
   //        serialized_query : stringifed JSON Mongo query
@@ -110,11 +137,8 @@ Meteor.methods({
     let dataset = DataSets.findOne(data_set_id);
     let samples = dataset.sample_labels;
     let foundSampleCRF = CRFs.findOne({_id: sampleCrfId});
-    console.log("foundSample", foundSampleCRF);
-
     let nameCRF = foundSampleCRF.CRF;
 
-    console.log("Restricting query by CRF:", nameCRF); // XXX
 
     // run the provided query to get all
     // CRFs as follows :
@@ -131,15 +155,9 @@ Meteor.methods({
       ]
     }
 
-    console.log("Query with CRF applied", queryInCRF); // XXX
-
     let results = CRFs.find(queryInCRF).fetch();
-
-    console.log("Applied query. Results:", results); // XXX
-
     let foundSamples = _.pluck(results, 'Sample_ID');
     //let foundSamples = _.pluck(results, 'sampleID'); // FIXME clinv3
-    console.log("found sample IDs", foundSamples); // XXX 
 
     return foundSamples;
   },
