@@ -27,10 +27,12 @@ Meteor.methods({
     let formsAndIds = []; // Used for identifying divs
     // Format: [ { name: CRFname, urlencodedId: crfSampleID},... ]
     //  it's not the CRF ID but the _id of an arbitrary sample in that CRF
-    let fieldsToSkip = ["_id", "sampleID"];
+   // let fieldsToSkip = ["_id", "sampleID"]; //FIXME use this format for clinv3
+    let fieldsToSkip = ["_id", "Sample_ID"];
     let seenCRFs = [] // form names we have already encountered
  
-    CRFs.find({"sampleID":
+    CRFs.find({"Sample_ID":
+    //CRFs.find({"sampleID": //FIXME clinv3
        { $in: samples }},
       ).forEach((doc) => {  
 
@@ -97,7 +99,8 @@ Meteor.methods({
 
     let queryInCRF = {
       "$and": [ 
-        {'sampleID': {$in: samples}},
+        //{'sampleID': {$in: samples}}, //FIXME clinv3
+        {'Sample_ID': {$in: samples}},
         {'CRF' : nameCRF},
         query,
       ]
@@ -109,7 +112,8 @@ Meteor.methods({
 
     console.log("Applied query. Results:", results); // XXX
 
-    let foundSamples = _.pluck(results, 'sampleID');
+    let foundSamples = _.pluck(results, 'Sample_ID');
+    //let foundSamples = _.pluck(results, 'sampleID'); // FIXME clinv3
     console.log("found sample IDs", foundSamples); // XXX 
 
     return foundSamples;

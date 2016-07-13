@@ -215,11 +215,14 @@ Meteor.methods({
     // insert asynchronously -- thanks @ArnaudGallardo
     var future = new Future();
     SampleGroups.rawCollection().insert(sampleGroup, (err, insertedObj) => {
+      // Need to either throw err, or return ID, but NOT BOTH 
+      // or will crash with "Future resolved more than once" error 
       if (err) {
        console.log("Creating sample group threw Future error:", err);
        future.throw(err);
-      }
+      } else {
       future.return(newId);
+      }
     });
 
     return future.wait();
