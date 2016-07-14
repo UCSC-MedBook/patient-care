@@ -33,12 +33,17 @@ Meteor.methods({
       };
       return stub;
     }
-    
 
-
-    // TODO -- user verification    
-    // only check forms that are visible to the user
+    // Permissions
     let dataset = DataSets.findOne(data_set_id);
+    let user = MedBook.ensureUser(Meteor.userId());
+    user.ensureAccess(dataset);
+
+    // TODO FIXME
+    // CRFs have no permissions yet.
+    // Once implemented, only search within CRFs for which
+    // user has access
+
     let samples = dataset.sample_labels;
 
     // each CRF has a sampleID --
@@ -49,14 +54,12 @@ Meteor.methods({
     let formsAndIds = []; // Used for identifying divs
     // Format: [ { name: CRFname, urlencodedId: crfSampleID},... ]
     //  it's not the CRF ID but the _id of an arbitrary sample in that CRF
-   // let fieldsToSkip = ["_id", "sampleID"]; //FIXME use this format for clinv3
     let fieldsToSkip = ["_id", "Sample_ID"];
     let seenCRFs = [] // form names we have already encountered
 
     // For each sample, find all CRFs documents for that sample
     // and add their fields & potential values to the output
     CRFs.find({"Sample_ID":
-    //CRFs.find({"sampleID": //FIXME clinv3
        { $in: samples }},
       ).forEach((doc) => {  
 
@@ -116,13 +119,16 @@ Meteor.methods({
       return [];
     }
 
-    // Confirm permissions TODO
-    // User needs to have access to CRF, dataset
+    // Confirm permissions
+    let user = MedBook.ensureUser(Meteor.userId());
+    user.ensureAccess(DataSets.findOne(data_set_id));
+    // TODO FIXME: CRFs docs have no access permissions at all
+    // Once permissions are implemented, confirm that the user
+    // has access to the chosen CRF
+  
 
     console.log("Query to be run:", serialized_query); // XXX 
-
     let query = {};
-
     // Confirm the query parses
     try { 
       query = JSON.parse(serialized_query);
@@ -148,7 +154,6 @@ Meteor.methods({
 
     let queryInCRF = {
       "$and": [ 
-        //{'sampleID': {$in: samples}}, //FIXME clinv3
         {'Sample_ID': {$in: samples}},
         {'CRF' : nameCRF},
         query,
@@ -157,7 +162,6 @@ Meteor.methods({
 
     let results = CRFs.find(queryInCRF).fetch();
     let foundSamples = _.pluck(results, 'Sample_ID');
-    //let foundSamples = _.pluck(results, 'sampleID'); // FIXME clinv3
 
     return foundSamples;
   },
