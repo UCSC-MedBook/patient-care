@@ -23,6 +23,16 @@
     </div>
     <div class="content">
       <div class="description">
+        {{#unless sessionPopulated}}
+          <h1>You forgot to set the session variables!</h1>
+          <p>
+            <code>editCollaborationsCollection</code>
+          </p>
+          <p>
+            <code>editCollaborationsMongoId</code>
+          </p>
+        {{/unless}}
+
         <div class="ui header">
           These collaborations can see and edit this object.
         </div>

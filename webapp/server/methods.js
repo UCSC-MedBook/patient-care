@@ -23,7 +23,7 @@ Meteor.methods({
 
     // if we need to create a new sample group, do so
     if (formValues.sample_group_id === "creating") {
-      this.unblock()
+      this.unblock();
 
       let creatingError;
       Meteor.call("createSampleGroup", customSampleGroup, (err, ret) => {
@@ -115,43 +115,58 @@ Meteor.methods({
       throw new Meteor.Error("non-unique-data-sets");
     }
 
-    // filter through each data sets
-    // - make sure they have access
-    // - filter the samples
+    // filter through each data set
     sampleGroup.data_sets = _.map(sampleGroup.data_sets,
         (sampleGroupDataSet) => {
+      // ensure access
       let dataSet = DataSets.findOne(sampleGroupDataSet.data_set_id);
       user.ensureAccess(dataSet);
 
+      // make sure they're all the same type
+      if (!sampleGroup.value_type) {
+        // infer from the data sets for now
+        sampleGroup.value_type = dataSet.value_type;
+      }
+
+      if (dataSet.value_type !== sampleGroup.value_type) {
+        throw new Meteor.Error("mixed-value-types", "Mixed value types",
+            "You can only create a sample group with data sets " +
+            "of a single value type.");
+      }
+
+      // don't trust the client's name or unfiltered count
+      sampleGroupDataSet.data_set_name = dataSet.name;
+      sampleGroupDataSet.unfiltered_sample_count = dataSet.sample_labels.length;
+
       // start with all the samples and then filter down from there
-      let sample_labels = dataSet.sample_labels;
+      let allSamples = dataSet.sample_labels;
+      let sample_labels = allSamples; // need a copy of this
 
       _.each(sampleGroupDataSet.filters, (filter) => {
         let { options } = filter;
 
-        if (filter.type === "sample_label_list") {
-          if (_.difference(options.sample_labels,
-              dataSet.sample_labels).length) {
+        if (filter.type === "include_sample_list") {
+          if (_.difference(options.sample_labels, allSamples).length) {
             throw new Meteor.Error("invalid-sample-labels");
           }
 
           sample_labels = _.intersection(sample_labels, options.sample_labels);
-        } else if (filter.type === "exclude_sample_label_list") {
-          if (_.difference(options.sample_labels,
-              dataSet.sample_labels).length) {
+        } else if (filter.type === "exclude_sample_list") {
+          if (_.difference(options.sample_labels, allSamples).length) {
             throw new Meteor.Error("invalid-sample-labels");
           }
 
           sample_labels = _.difference(sample_labels, options.sample_labels);
-        } else if (filter.type === "data_loaded") {
-          if (options.gene_expression) {
-            sample_labels = _.intersection(sample_labels,
-                dataSet.gene_expression);
-          }
-        }else {
+        } else {
           throw new Meteor.Error("invalid-filter-type");
         }
       });
+
+      if (sample_labels.length === 0) {
+        throw new Meteor.Error("data-set-empty", "Data set empty",
+            `The ${dataSet.name} data set is empty. ` +
+            "Remove filters or remove the data set to continue.");
+      }
 
       sampleGroupDataSet.sample_labels = sample_labels;
 
@@ -167,8 +182,14 @@ Meteor.methods({
     _.each(sampleGroup.data_sets, (dataSet) => {
       check(dataSet.sample_labels, [String]);
 
-      dataSet.sample_labels_count = dataSet.sample_labels.length;
-      check(dataSet.sample_labels_count, Number);
+      dataSet.sample_count = dataSet.sample_labels.length;
+      check(dataSet.sample_count, Number);
+
+      _.each(dataSet.filters, (filter) => {
+        check(filter.options.sample_labels, [String]);
+
+        filter.options.sample_count = filter.options.sample_labels.length;
+      });
     });
 
     // clone object to be checked for the schema
@@ -176,12 +197,15 @@ Meteor.methods({
     _.each(clonedSampleGroup.data_sets, (dataSet) => {
       // SimpleSchema can't handle large arrays, so set this to one
       dataSet.sample_labels = [ "yop" ];
-      dataSet.sample_labels_count = 1;
+      dataSet.sample_count = 1;
     });
 
     let validationContext = SampleGroups.simpleSchema().newContext();
     var isValid = validationContext.validate(clonedSampleGroup);
     if (!isValid) {
+      console.log("clonedSampleGroup:", clonedSampleGroup);
+      console.log("validationContext.invalidKeys():",
+          validationContext.invalidKeys());
       throw new Meteor.Error("invalid-sample-group");
     }
 
@@ -199,9 +223,4 @@ Meteor.methods({
 
     return future.wait();
   },
-});
-
-Moko.ensureIndex(GeneExpression, {
-  gene_label: 1,
-  data_set_id: 1,
 });

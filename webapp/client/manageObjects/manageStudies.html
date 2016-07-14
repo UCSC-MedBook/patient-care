@@ -1,0 +1,85 @@
+<template name="createStudy">
+  <h3>Create new data set</h3>
+
+  {{#autoForm id="insertStudy" schema=nameAndDescription
+      type="method" meteormethod="insertStudy"}}
+    {{> afQuickField name="name" type="text"
+        placeholder="What do you want to call your study?"}}
+    {{> afQuickField name="description" type="textarea" rows="3"
+        placeholder="What is the study for? Has it been published?"}}
+
+    <button type="submit" class="ui primary button">Create!</button>
+  {{/autoForm}}
+</template>
+
+<template name="showStudy">
+  {{#if Template.subscriptionsReady}}
+    <p>
+      {{description}}
+    </p>
+
+    <h4>Samples</h4>
+    {{#if length sample_labels}}
+      {{#if firstGreater 500 (length sample_labels)}}
+        <ul class="ui list">
+          {{#each sample_labels}}
+            <li>{{this}}</li>
+          {{/each}}
+        </ul>
+      {{else}}
+        <div class="ui message">
+          <div class="header">
+            Too many samples
+          </div>
+          <p>
+            For studies containing more than 500 samples, this list
+            cannot be shown.
+          </p>
+          <p>
+            To create a feature request: {{> contactTeoButton}}
+          </p>
+        </div>
+      {{/if}}
+    {{else}}
+      <div class="ui message">
+        <div class="header">
+          No samples
+        </div>
+        <p>
+          Add samples using the form below.
+        </p>
+      </div>
+    {{/if}}
+
+    <h4>Add a sample</h4>
+
+    <div class="ui warning message">
+      <div class="header">
+        Adding a sample cannot be undone.
+      </div>
+      Once you add a sample to a study it cannot be removed.
+    </div>
+
+    {{#autoForm id="newSampleLabel" schema=newSampleSchema
+        type="method" meteormethod="newSampleLabel"}}
+      {{> afQuickField name="uq_sample_label" type="text"
+          placeholder=newSamplePlaceholder}}
+
+      {{> afQuickField name="study_label" type="hidden" value=../study_label}}
+
+      <button type="submit" class="ui primary button">Add sample</button>
+    {{/autoForm}}
+
+    <div class="ui info message">
+      <div class="header">
+        Bulk insert
+      </div>
+      <p>
+        To add many samples to a study, upload a sample definition file to
+        <a href="https://medbook.io/wrangler">Wrangler</a>.
+      </p>
+    </div>
+  {{else}}
+    {{> dataLoading}}
+  {{/if}}
+</template>

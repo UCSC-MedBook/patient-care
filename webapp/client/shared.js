@@ -60,6 +60,8 @@ Template.editCollaborationsModal.onCreated(function() {
     if (MedBook.findUser(Meteor.userId()) &&
         Session.get("editCollaborationsMongoId")) {
       Meteor.call("getSharableCollaborations", (error, result) => {
+        if (error) throw error;
+
         instance.collabs.set(result);
       });
     }
@@ -96,6 +98,10 @@ Template.editCollaborationsModal.onRendered(function() {
 });
 
 Template.editCollaborationsModal.helpers({
+  sessionPopulated() {
+    return Session.get("editCollaborationsCollection") &&
+        Session.get("editCollaborationsMongoId");
+  },
   isPersonalCollaboration() { return this.indexOf("@") !== -1; },
   getObject() {
     let collectionName = Session.get("editCollaborationsCollection");

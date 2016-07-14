@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "temp": {
+      "version": "0.8.1",
+      "dependencies": {
+        "rimraf": {
+          "version": "2.2.8"
+        }
+      }
+    }
+  }
+}

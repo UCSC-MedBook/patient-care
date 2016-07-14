@@ -440,6 +440,8 @@ Meteor.methods({
       "Jobs",
       "DataSets",
       "SampleGroups",
+      "Forms",
+      "GeneSetCollections",
     ];
     if (removeAllowedCollections.indexOf(collectionName) === -1) {
       throw new Meteor.Error("permission-denied");
@@ -476,7 +478,12 @@ Meteor.methods({
 
   // manage data sets
   insertDataSet(newDataSet) {
-    check(newDataSet, DataSets.simpleSchema().pick(["name", "description"]));
+    check(newDataSet, DataSets.simpleSchema().pick([
+      "name",
+      "description",
+      "value_type",
+      "metadata",
+    ]));
 
     var user = MedBook.ensureUser(Meteor.userId());
 
@@ -485,16 +492,23 @@ Meteor.methods({
   },
   newSampleLabel(sampleDefinition) {
     check(sampleDefinition, new SimpleSchema({
-      data_set_id: { type: String },
-      sample_label: { type: String },
+      study_label: { type: String },
+      uq_sample_label: { type: String },
     }));
 
-    let user = MedBook.findUser(Meteor.userId());
-    user.ensureAccess(DataSets.findOne(sampleDefinition.data_set_id));
+    let { uq_sample_label, study_label } = sampleDefinition;
 
-    DataSets.update(sampleDefinition.data_set_id, {
-      $push: {
-        sample_labels: sampleDefinition.sample_label
+    let user = MedBook.findUser(Meteor.userId());
+    user.ensureAccess(Studies.findOne({ study_label }));
+
+    let sample_label = study_label + "/" + uq_sample_label;
+    if (!sample_label.match(MedBook.sampleLabelRegex)) {
+      throw new Meteor.Error("invalid-sample-label");
+    }
+
+    Studies.update({ study_label }, {
+      $addToSet: {
+        sample_labels: sample_label
       }
     });
   },

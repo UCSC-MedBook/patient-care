@@ -112,21 +112,16 @@
     <i class="filter icon"></i>
     <div class="content" style="width: 100%;">
       {{#with getFilter}}
-        {{#if compare type "sample_label_list"}}
+        {{#if compare type "include_sample_list"}}
           {{> sampleLabelListFilter options=getFilter.options
               setOptions=setOptions data_set_id=data_set_id
               title="Include specific samples"}}
         {{/if}}
 
-        {{#if compare type "exclude_sample_label_list"}}
+        {{#if compare type "exclude_sample_list"}}
           {{> sampleLabelListFilter options=getFilter.options
               setOptions=setOptions data_set_id=data_set_id
               title="Exclude specific samples"}}
-        {{/if}}
-
-        {{#if compare type "data_loaded"}}
-          {{> dataLoadedFilter data_set_id=data_set_id
-              options=getFilter.options setOptions=setOptions}}
         {{/if}}
       {{/with}}
     </div>
@@ -161,10 +156,10 @@
       <i class="check icon"></i> Done
     </button>
   {{else}}
-    {{#if length options.sample_labels}}
-      {{#each options.sample_labels}}
+    {{#if length options.samples}}
+      {{#each options.samples}}
         <div class="ui label">
-          {{this}}
+          {{sample_label}}
         </div>
       {{/each}}
     {{else}}
@@ -181,16 +176,4 @@
       </button>
     </div>
   {{/if}}
-</template>
-
-<template name="dataLoadedFilter">
-  Require the following data:
-  <div class="ui grid" style="margin-left: 0px; margin-top: -4px;">
-    <div class="row">
-      <div class="ui checkbox gene-expression">
-        <input type="checkbox" name="example">
-        <label>Gene expression</label>
-      </div>
-    </div>
-  </div>
 </template>

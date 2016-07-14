@@ -8,8 +8,86 @@
   {{> editCollaborationsModal}}
 
   <div class="ui container">
-    <div style="margin-bottom: 15px;">
-      <div class="ui breadcrumb large">
+
+    <div class="ui menu">
+      <a href={{pathFor "home"}} class="header item">
+        Patient Care
+      </a>
+
+      <div class="ui simple dropdown item">
+        Tools
+        <div class="menu">
+          <a href={{pathFor "listLimmaGSEA"}} class="item">
+            Limma <i class="right arrow icon"></i> GSEA
+          </a>
+          <!-- <a href={{pathFor "listTumorMap"}} class="item">
+            Tumor Map
+          </a> -->
+          <a href={{pathFor "listUpDownGenes"}} class="item">
+            Outlier Analysis
+          </a>
+        </div>
+      </div>
+
+      <div class="ui simple dropdown item">
+        Data types
+        <div class="menu">
+          <a href={{pathFor "manageCollaborations"}}
+              class="item">
+            Collaborations
+          </a>
+          <a href={{pathFor "manageObjects" collectionSlug="data-sets"}}
+              class="item">
+            Data Sets
+          </a>
+          <a href={{pathFor "manageObjects" collectionSlug="sample-groups"}}
+              class="item">
+            Sample Groups
+          </a>
+          <a href={{pathFor "manageObjects" collectionSlug="gene-sets"}}
+              class="item">
+            Gene Sets
+          </a>
+          <a href={{pathFor "manageObjects" collectionSlug="studies"}}
+              class="item">
+            Studies
+          </a>
+          <a href={{pathFor "manageObjects" collectionSlug="clinical-forms"}}
+              class="item">
+            Clinical Forms
+          </a>
+        </div>
+      </div>
+
+      <div class="right menu">
+        <div class="ui simple dropdown icon item">
+          <i class="grid layout icon"></i>
+          <div class="menu">
+            <a href={{pathFor "home"}} class="item">
+              Patient Care
+            </a>
+            <a href="https://medbook.io/wrangler" class="item">
+              Wrangler
+            </a>
+          </div>
+        </div>
+        <div class="ui simple dropdown icon item">
+          <i class="alarm icon"></i>
+          <!-- <div class="floating ui red label">3</div> -->
+          <div class="menu">
+            <div class="item">
+              No notifications
+            </div>
+          </div>
+        </div>
+        <div class="item">
+          {{> loginButtons}}
+        </div>
+      </div>
+    </div>
+
+    <!-- <div style="margin-bottom: 15px;">
+      <div class="ui breadcrumb">
         {{#breadcrumbItem isActive=(isActiveRoute "home")
             href=(pathFor 'home')}}
           MedBook Patient Care
@@ -29,37 +107,30 @@
           {{/if}}
         {{/if}}
 
-        {{#if activeRouteIsInTools}}
-          {{#breadcrumbItem isActive=(isActiveRoute "listTools")
-              href=(pathFor "listTools")}}
-            Tools
+        {{#if isActiveRoute "listLimmaGSEA"}}
+          {{#breadcrumbItem isActive=true}}
+            Limma <i class="right arrow icon"></i> GSEA
           {{/breadcrumbItem}}
+        {{/if}}
 
-          {{#if isActiveRoute "listLimmaGSEA"}}
-            {{#breadcrumbItem isActive=true}}
-              Limma <i class="right arrow icon"></i> GSEA
-            {{/breadcrumbItem}}
-          {{/if}}
+        {{#if isActiveRoute "listTumorMap"}}
+          {{#breadcrumbItem isActive=true}}
+            Tumor Map
+          {{/breadcrumbItem}}
+        {{/if}}
 
-          {{#if isActiveRoute "listTumorMap"}}
-            {{#breadcrumbItem isActive=true}}
-              Tumor Map
-            {{/breadcrumbItem}}
-          {{/if}}
+        {{#if or (isActiveRoute "listUpDownGenes")
+            (isActiveRoute "upDownGenesJob")}}
+          {{#breadcrumbItem isActive=(isActiveRoute "listUpDownGenes")
+              href=(pathFor "listUpDownGenes")}}
+            Outlier Analysis
+          {{/breadcrumbItem}}
+        {{/if}}
 
-          {{#if or (isActiveRoute "listUpDownGenes")
-              (isActiveRoute "upDownGenesJob")}}
-            {{#breadcrumbItem isActive=(isActiveRoute "listUpDownGenes")
-                href=(pathFor "listUpDownGenes")}}
-              Outlier Analysis
-            {{/breadcrumbItem}}
-          {{/if}}
-
-          {{#if isActiveRoute "upDownGenesJob"}}
-            {{#breadcrumbItem isActive=true}}
-              Result
-            {{/breadcrumbItem}}
-          {{/if}}
+        {{#if isActiveRoute "upDownGenesJob"}}
+          {{#breadcrumbItem isActive=true}}
+            Result
+          {{/breadcrumbItem}}
         {{/if}}
 
         {{#if threeOr (isActiveRoute "manageCollaborations")
@@ -70,32 +141,10 @@
           {{/breadcrumbItem}}
         {{/if}}
 
-        {{#if or (isActiveRoute "manageDataSets")
-            (isActiveRoute "createDataSet")}}
+        {{#if isActiveRoute "manageObjects"}}
           {{#breadcrumbItem isActive=true}}
-            Data Sets
+            Manage
           {{/breadcrumbItem}}
-        {{/if}}
-
-        {{#if or (isActiveRoute "manageSampleGroups")
-            (isActiveRoute "createSampleGroup")}}
-          {{#breadcrumbItem isActive=true}}
-            Sample Groups
-          {{/breadcrumbItem}}
-        {{/if}}
-
-        {{! Experimental}}
-
-        {{#if isActiveRoute "createRecord"}}
-          {{#breadcrumbItem isActive=true}}Create record{{/breadcrumbItem}}
-        {{/if}}
-
-        {{#if isActiveRoute "createForm"}}
-          {{#breadcrumbItem isActive=true}}Create form{{/breadcrumbItem}}
-        {{/if}}
-
-        {{#if isActiveRoute "editRecords"}}
-          {{#breadcrumbItem isActive=true}}Edit records{{/breadcrumbItem}}
         {{/if}}
 
         {{! Utility}}
@@ -108,7 +157,7 @@
       <div style="float: right;">
         {{> loginButtons}}
       </div>
-    </div>
+    </div> -->
 
     {{#if loggingIn}}
       {{> loggingInMessage}}

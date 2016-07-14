@@ -150,17 +150,17 @@ Template.addFilterButton.onRendered(function () {
 Template.addFilterButton.events({
   "click .add-sample-label-list-filter": function (event, instance) {
     instance.addFilter({
-      type: "sample_label_list",
+      type: "include_sample_list",
       options: {
-        sample_labels: []
+        samples: []
       },
     });
   },
   "click .add-exclude-sample-label-list-filter": function (event, instance) {
     instance.addFilter({
-      type: "exclude_sample_label_list",
+      type: "exclude_include_sample_list",
       options: {
-        sample_labels: []
+        samples: []
       },
     });
   },
@@ -173,7 +173,6 @@ Template.addFilterButton.events({
     });
   },
 });
-
 
 
 
@@ -238,10 +237,9 @@ Template.sampleLabelListFilter.onCreated(function () {
 
 Template.sampleLabelListFilter.helpers({
   sampleLabelsToText: function () {
-    return this.options.sample_labels.join("\n");
+    return _.pluck(this.options.samples, "sample_label").join("\n");
   },
   getInvalidSampleLabels: function () {
-    console.log("Template.instance().invalidSampleLabels.get():", Template.instance().invalidSampleLabels.get());
     return Template.instance().invalidSampleLabels.get();
   },
   getEditing: function () {
@@ -256,25 +254,40 @@ Template.sampleLabelListFilter.events({
     // clear errors
     instance.invalidSampleLabels.set(null);
 
+    // FIXME: only allow data sets that have one study for now
+    let dataSet = DataSets.findOne(instance.data.data_set_id);
+    let uniqueStudies = _.uniq(_.pluck(dataSet.samples, "study_label"));
+
+    if (uniqueStudies.length !== 1) {
+      alert("multiple study data sets not supported... yet!");
+      return;
+    }
+
+    let study_label = uniqueStudies[0];
+
     // let's gooo (split by whitespace characters, get rid of spaces)
     let textareaSampleLabels = instance.$("textarea").val().split(/[\s,;]+/);
-    let sample_labels = _.chain(textareaSampleLabels)
+    let samples = _.chain(textareaSampleLabels)
       .filter((value) => { return value; }) // remove falsey
       .uniq() // uniques only
+      .map((sample_label) => { return { study_label, sample_label } })
       .value();
 
     // make sure we don't have any bad values
-    let dataSet = DataSets.findOne(instance.data.data_set_id);
-    let badValues = _.difference(sample_labels, dataSet.sample_labels);
+    let badValues = _.filter(samples, function (sample) {
+      let genomicExpIndex =
+          dataSet.samples_index[study_label][sample.sample_label];
+      return genomicExpIndex === undefined;
+    });
 
     if (badValues.length) {
-      instance.invalidSampleLabels.set(badValues);
+      instance.invalidSampleLabels.set(_.pluck(badValues, "sample_label"));
       return;
     }
 
     // nicely done! set the options and return to non-editing
     instance.data.setOptions({
-      sample_labels
+      samples
     });
     instance.editing.set(false);
   },
@@ -287,28 +300,4 @@ Template.sampleLabelListFilter.events({
   "click .close-sample-error-message": function (event, instance) {
     instance.invalidSampleLabels.set(null);
   },
-});
-
-
-
-// Template.dataLoadedFilter
-
-Template.dataLoadedFilter.onRendered(function () {
-  let instance = this;
-
-  $geneExpression = instance.$(".gene-expression.checkbox");
-
-  $geneExpression.checkbox({
-    onChecked: () => {
-      instance.data.setOptions({ gene_expression: true });
-    },
-    onUnchecked: () => {
-      instance.data.setOptions({ gene_expression: false });
-    },
-  });
-
-  // check if it's checked
-  if (instance.data.options.gene_expression) {
-    $geneExpression.checkbox("check");
-  }
 });

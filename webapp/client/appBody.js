@@ -12,6 +12,12 @@ Template.appBody.onCreated(function () {
   });
 });
 
+Template.appBody.onRendered(function () {
+  let instance = this;
+
+  // instance.$(".ui.dropdown").dropdown();
+});
+
 Template.appBody.helpers({
   getPatientLabel: function () {
     let patient = Patients.findOne(this.params().patient_id);

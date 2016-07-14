@@ -1,0 +1,142 @@
+<template name="introSampleGroups">
+  <p>
+    A sample group is a collection of samples' data.
+    Sample groups cannot be changed once they are created,
+    even if samples are added to their data sets.
+  </p>
+</template>
+
+<template name="createSampleGroup">
+  <h2>Create new sample group</h2>
+
+  {{> editSampleGroup sampleGroup=newSampleGroup}}
+
+  {{> showErrorMessage error}}
+
+  <button class="ui primary button create-sample-group">Create!</button>
+</template>
+
+<template name="showSampleGroup">
+  <table class="ui celled striped table">
+    <thead>
+      <tr>
+        <th colspan="2">
+          Metadata
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Date created</td>
+        <td>{{date_created}}</td>
+      </tr>
+      <tr>
+        <td>Version</td>
+        <td>{{version}}</td>
+      </tr>
+      <tr>
+        <td>Value type</td>
+        <td>{{slugToString value_type}}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>
+    Contents
+
+    <a href={{downloadUrl}} class="ui tiny primary button"
+        target="_blank">
+      Download as .tsv
+    </a>
+  </h3>
+
+  <div class="ui list">
+    {{#each data_sets}}
+      <div class="item">
+        <div class="content">
+          <div class="header">{{data_set_name}}</div>
+          {{#if length filters}}
+            Filtered to {{sample_count}}
+            {{> optionalS word="sample" count=sample_count}}
+            from
+            {{unfiltered_sample_count}}.
+          {{else}}
+            All {{unfiltered_sample_count}} samples included without filtering.
+          {{/if}}
+        </div>
+
+        {{#if length filters}}
+          <div class="ui ordered list">
+            {{#each filters}}
+              <div class="item">
+                {{#if compare type "include_sample_list"}}
+                  Included only {{options.sample_count}}
+                  {{> optionalS word="sample" count=options.sample_count}}.
+                  {{> listSamplesButton options.sample_labels}}
+                {{/if}}
+
+                {{#if compare type "exclude_sample_list"}}
+                  Excluded {{options.sample_count}}
+                  {{> optionalS word="sample" count=options.sample_count}}.
+                  {{> listSamplesButton options.sample_labels}}
+                {{/if}}
+              </div>
+            {{/each}}
+          </div>
+        {{/if}}
+      </div>
+    {{/each}}
+  </div>
+</template>
+
+<template name="optionalS">
+  {{word}}{{#if firstGreater count 1}}s{{/if}}
+</template>
+
+<template name="listSamplesButton">
+  <div class="ui mini button show-list" style="display: inline;">
+    {{#if showList}}Hide{{else}}Show{{/if}} list
+  </div>
+
+  {{#if showList}}
+    <ul>
+      {{#each this}}
+        <li>{{this}}</li>
+      {{/each}}
+    </ul>
+  {{/if}}
+</template>
+
+<template name="waitAndThenPermissionDenied">
+  {{! I don't really care to explain }}
+
+  {{#if getInstanceReactive "waitForTheServer"}}
+    {{> dataLoading}}
+
+    <div class="ui message">
+      <p>
+        This can take up to 15 seconds if you just created the sample group.
+      </p>
+      <p>
+        If you didn't just create a sample group,
+        <button class="ui tiny secondary button skip-wait">click here</button>.
+      </p>
+    </div>
+  {{else}}
+    <div class="ui error message">
+      <div class="header">
+        Permission denied
+      </div>
+      <p>
+        The sample group either doesn't exist or you don't
+        have access to it. You likely got this URL from
+        someone who has access to the sample group, in which
+        case you should ask them to share the sample group with you.
+      </p>
+      <p>
+        If you believe you are seeing this message in error,
+        please {{> contactTeoButton}}
+      </p>
+    </div>
+  {{/if}}
+</template>

@@ -1,0 +1,131 @@
+<template name="manageObjects">
+  <div class="ui secondary pointing menu">
+    {{#each managableTypes}}
+      <a href={{pathFor "manageObjects" collectionSlug=collectionSlug}}
+          class="item {{#if tabActive}}active{{/if}}">
+        {{humanName}}
+      </a>
+    {{/each}}
+  </div>
+
+  {{#with selectedType}}
+    <h1>{{humanName}}</h1>
+
+    {{! show a short description of the data type}}
+    {{#if introTemplate}}
+      {{> Template.dynamic template=introTemplate}}
+    {{/if}}
+
+    {{> manageObjectsGrid}}
+  {{/with}}
+
+  {{#unless selectedType}}
+    <div class="ui icon message">
+      <i class="info circle icon"></i>
+      <div class="content">
+        <div class="header">
+          No data type selected
+        </div>
+        <p>
+          Please select a data type to manage.
+        </p>
+      </div>
+    </div>
+  {{/unless}}
+</template>
+
+<template name="manageObjectsGrid">
+  <div class="ui grid">
+    <div class="six wide column">
+      <div class="ui vertical fluid tabular menu">
+        <a href={{pathFor "manageObjects" collectionSlug=../collectionSlug
+                  selected="create"}}
+            class="{{#if compare (param "selected") "create"}}active{{/if}}
+                item">
+          Create new
+          <i class="plus icon"></i>
+        </a>
+
+        {{#each getObjects}}
+          <a href={{pathFor "manageObjects" collectionSlug=../collectionSlug
+                    selected=_id}}
+              class="{{#if managingObject}}active{{/if}} item">
+            {{name}}
+          </a>
+        {{/each}}
+      </div>
+    </div>
+    <div class="ten wide stretched column">
+      {{! some things look funky if we remove this wrapper div}}
+      <div>
+        {{#if compare (param "selected") "create"}}
+          {{> Template.dynamic template=createTemplate}}
+        {{else}}
+          {{> manageObject}}
+        {{/if}}
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="manageObject">
+  {{#if getObject}}
+    <h2>
+      {{getObject.name}}
+
+      {{#if Template.subscriptionsReady}}
+        {{> shareAndDeleteButtons object=getObject
+            collectionName=collectionName onDelete=onDelete
+            extraButtonsClass="right floated"}}
+      {{/if}}
+    </h2>
+
+    {{#if Template.subscriptionsReady}}
+      {{> Template.dynamic template=showTemplate data=getObject}}
+    {{else}}
+      {{> dataLoading}}
+    {{/if}}
+  {{else}}
+    {{#if Template.subscriptionsReady}}
+      {{#if param "selected"}}
+        {{#if permissionDeniedTemplate}}
+          {{> Template.dynamic template=permissionDeniedTemplate}}
+        {{else}}
+          <div class="ui error message">
+            <div class="header">
+              Permission denied
+            </div>
+            <p>
+              The {{singularName}} either doesn't exist or you don't
+              have access to it. You likely got this URL from
+              someone who has access to the data, in which
+              case you should ask them to share the data with you.
+            </p>
+            <p>
+              If you believe you are seeing this message in error,
+              please {{> contactTeoButton}}
+            </p>
+          </div>
+        {{/if}}
+      {{else}}
+        {{#if length getObjects}}
+          <h2>Nothing selected</h2>
+          <p>
+            Select a {{singularName}} on the left panel to
+            view more information about it.
+          </p>
+        {{else}}
+          <h2>You do not have access to any data... yet!</h2>
+          <p>
+            <a href={{pathFor "manageObjects" collectionSlug=collectionSlug
+                      selected="create"}}>
+              Click here to create a new {{singularName}}.
+            </a>
+          </p>
+        {{/if}}
+      {{/if}}
+    {{else}}
+      {{> dataLoading}}
+    {{/if}}
+  {{/if}}
+</template>

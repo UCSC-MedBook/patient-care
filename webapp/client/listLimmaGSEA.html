@@ -10,6 +10,12 @@
 
   <h2>Run a new analysis</h2>
 
+  <!-- TODO:
+  HMM -metric <Metric>
+    Class seperation metric - gene markers are ranked using this metric to produce the gene list
+    Default: Signal2Noise
+    Hints  : Signal2Noise,tTest,Cosine,Euclidean,Manhatten,Pearson,Ratio_of_Classes,Diff_of_Classes,log2_Ratio_of_Classes -->
+
   <!-- {{! surround in a segment so that we make sure the user doesn't change stuff
       while we're going to the server, etc.}}
   <div class="ui segment {{#if creatingJob}}loading{{/if}}"> -->
@@ -100,8 +106,8 @@
       <table class="ui single line table">
         <thead>
           <tr>
-            <th>Group A</th>
-            <th>Group B</th>
+            <th>Reference group</th>
+            <th>Experimental group</th>
             <th>Top genes count for Limma</th>
             <th>Gene sets</th>
             <th>Status</th>
