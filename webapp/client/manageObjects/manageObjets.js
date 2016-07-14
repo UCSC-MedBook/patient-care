@@ -49,6 +49,17 @@ var managableTypes = [
   },
 ];
 
+Template.manageObjects.onRendered(function () {
+  let instance = this;
+
+  // instance.autorun(() => {
+  //   FlowRouter.getParam("collectionSlug");
+  // });
+  instance.$(".help.circle.icon").popup({
+    position: "bottom left",
+  });
+});
+
 Template.manageObjects.helpers({
   managableTypes: managableTypes,
   tabActive() {

@@ -3,7 +3,7 @@ path = Npm.require('path');
 spawn = Npm.require('child_process').spawn;
 ntemp = Meteor.npmRequire('temp').track();
 
-Picker.route("/patient-care/download/:userId/:loginToken/" +
+Picker.route("/download/:userId/:loginToken/" +
     "job-blob/:jobId/:file_name",
     function(params, req, res, next) {
   // security
@@ -54,7 +54,7 @@ function permissionDenied (res) {
 
 // this will send down a .tsv containing genomic information in
 // a data set or a sample group
-Picker.route("/patient-care/download/:userId/:loginToken/" +
+Picker.route("/download/:userId/:loginToken/" +
     "data-collection/:collectionName/:mongoId/",
     function(params, req, res, next) {
 
@@ -94,6 +94,11 @@ Picker.route("/patient-care/download/:userId/:loginToken/" +
   let stderrStream = fs.createWriteStream(logfilePath, {flags: "a"});
 
   // spawn the python exporter and pipe the output to the user
+  console.log("Meteor.settings.genomic_expression_export,:", Meteor.settings.genomic_expression_export,);
+  console.log("cwd:", cwd);
+  console.log("exportFirstArg:", exportFirstArg);
+  console.log("mongoId:", mongoId);
+
   let child = spawn(Meteor.settings.genomic_expression_export, [
     exportFirstArg, mongoId
   ], { cwd: cwd });

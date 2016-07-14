@@ -9,12 +9,15 @@
   </div>
 
   {{#with selectedType}}
-    <h1>{{humanName}}</h1>
+    <h1>
+      {{humanName}}
 
-    {{! show a short description of the data type}}
-    {{#if introTemplate}}
-      {{> Template.dynamic template=introTemplate}}
-    {{/if}}
+      <i class="help circle icon"></i>
+      <div class="ui popup">
+
+        {{> Template.dynamic template=introTemplate}}
+      </div>
+    </h1>
 
     {{> manageObjectsGrid}}
   {{/with}}
@@ -42,7 +45,7 @@
                   selected="create"}}
             class="{{#if compare (param "selected") "create"}}active{{/if}}
                 item">
-          Create new
+          <b>Create new</b>
           <i class="plus icon"></i>
         </a>
 

@@ -315,7 +315,7 @@ Meteor.methods({
       let subject = requestorName + " is requesting access to the " +
           collab.name + " collaboration in MedBook";
 
-      let url = "https://medbook.io/patient-care/collaborations" +
+      let url = "https://medbook.io/collaborations" +
           "?collaboration_id=" + collab._id;
       let html = "You can view pending requests for access " +
           "<a href=" + url + ">here</a>. <br><br>Email " + requestorName +
