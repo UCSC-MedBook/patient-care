@@ -442,6 +442,7 @@ Meteor.methods({
       "SampleGroups",
       "Forms",
       "GeneSetCollections",
+      "Studies",
     ];
     if (removeAllowedCollections.indexOf(collectionName) === -1) {
       throw new Meteor.Error("permission-denied");
@@ -511,5 +512,29 @@ Meteor.methods({
         sample_labels: sample_label
       }
     });
+  },
+
+  studyLabelAvailable(study_label) {
+    let user = MedBook.findUser(Meteor.userId());
+
+    return !!Studies.findOne({ study_label });
+  },
+  insertStudy(newStudy) {
+    check(newStudy, Studies.simpleSchema().pick([
+      "name",
+      "description",
+      "study_label",
+    ]));
+
+    let user = MedBook.findUser(Meteor.userId());
+
+    newStudy.collaborations = [ user.personalCollaboration() ];
+
+    // must be unique
+    if (!studyLabelAvailable.call(newStudy.study_label)) {
+      throw new Meteor.Error("study-label-not-unique");
+    }
+
+    return Studies.insert(newStudy);
   },
 });

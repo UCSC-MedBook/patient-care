@@ -7,8 +7,27 @@ AutoForm.addHooks("insertStudy", {
 });
 
 Template.createStudy.helpers({
-  nameAndDescription() {
-    return Studies.simpleSchema().pick(["name", "description"]);
+  newStudySchema() {
+    var schema = Studies.simpleSchema().pick([
+      "name",
+      "description",
+      "study_label",
+    ]).schema();
+
+    let instance = Template.instance();
+
+    schema.study_label.custom = () => {
+      Meteor.call("accountsIsUsernameAvailable", this.value, function (error, result) {
+        if (!result) {
+          schema.namedContext("insertStudy").addInvalidKeys([
+            {name: "study_label", type: "studyLabelNotUnique"}
+          ]);
+        }
+      });
+    };
+
+    schema = new SimpleSchema(schema);
+    return schema;
   },
 });
 

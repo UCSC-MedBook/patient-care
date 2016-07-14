@@ -57,7 +57,17 @@
         </td>
       </tr>
       <tr>
-        <td>Feature count</td>
+        <td>Sample</td>
+        <td>
+          {{#if sample_labels}}
+            {{length sample_labels}}
+          {{else}}
+            no data loaded
+          {{/if}}
+        </td>
+      </tr>
+      <tr>
+        <td>Features</td>
         <td>
           {{#if feature_labels}}
             {{length feature_labels}}

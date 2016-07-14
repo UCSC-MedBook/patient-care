@@ -1,12 +1,30 @@
 <template name="createStudy">
   <h3>Create new data set</h3>
 
-  {{#autoForm id="insertStudy" schema=nameAndDescription
+  {{#autoForm id="insertStudy" schema=newStudySchema
       type="method" meteormethod="insertStudy"}}
     {{> afQuickField name="name" type="text"
         placeholder="What do you want to call your study?"}}
     {{> afQuickField name="description" type="textarea" rows="3"
         placeholder="What is the study for? Has it been published?"}}
+
+    {{> afQuickField name="study_label" type="text"
+        placeholder="What is the study label?"}}
+
+    <div class="ui info message">
+      <div class="header">
+        What is a study label?
+      </div>
+      <p>
+        A study label is a string that will be prepended to each sample in the
+        study to make that sample unique across studies. For example, if the
+        study label is <code>beltron_2011</code> and the sample name is
+        <code>A01</code>, the sample will be called <code>beltron_2011/A01</code>.
+      </p>
+      <p>
+        Study labels can only contain letters, numbers, dashes, and underscores.
+      </p>
+    </div>
 
     <button type="submit" class="ui primary button">Create!</button>
   {{/autoForm}}
@@ -18,28 +36,35 @@
       {{description}}
     </p>
 
-    <h4>Samples</h4>
+    <table class="ui celled striped table">
+      <thead>
+        <tr>
+          <th colspan="2">
+            Metadata
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Study label</td>
+          <td><code>{{study_label}}</code></td>
+        </tr>
+        <tr>
+          <td>Samples</td>
+          <td>
+            {{#if sample_labels}}
+              {{length sample_labels}}
+            {{else}}
+              no data loaded
+            {{/if}}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
     {{#if length sample_labels}}
-      {{#if firstGreater 500 (length sample_labels)}}
-        <ul class="ui list">
-          {{#each sample_labels}}
-            <li>{{this}}</li>
-          {{/each}}
-        </ul>
-      {{else}}
-        <div class="ui message">
-          <div class="header">
-            Too many samples
-          </div>
-          <p>
-            For studies containing more than 500 samples, this list
-            cannot be shown.
-          </p>
-          <p>
-            To create a feature request: {{> contactTeoButton}}
-          </p>
-        </div>
-      {{/if}}
+      <h4>Samples</h4>
+      {{> listSamplesButton sample_labels}}
     {{else}}
       <div class="ui message">
         <div class="header">

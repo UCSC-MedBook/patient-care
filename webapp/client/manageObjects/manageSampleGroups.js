@@ -47,12 +47,6 @@ Template.createSampleGroup.events({
 
 // Template.showSampleGroup
 
-Template.showSampleGroup.onCreated(function () {
-  let instance = this;
-
-
-});
-
 Template.showSampleGroup.helpers({
   slugToString: MedBook.utility.slugToString,
   downloadUrl() {
@@ -61,6 +55,11 @@ Template.showSampleGroup.helpers({
 
     return `/download/${userId}/${loginToken}/data-collection/` +
         `SampleGroups/${this._id}`;
+  },
+  totalSampleCount() {
+    return _.reduce(this.data_sets, (memo, sgDataSet) => {
+      return memo + sgDataSet.sample_count;
+    }, 0);
   },
 });
 
