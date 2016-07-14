@@ -43,10 +43,24 @@ Template.createStudy.helpers({
 
 Template.showStudy.helpers({
   newSampleSchema() {
-    return new SimpleSchema({
+    let schema = new SimpleSchema({
       study_label: { type: String },
-      uq_sample_label: { type: String, label: "Sample name" },
+      uq_sample_label: {
+        type: String,
+        label: "Sample name",
+
+        // works for now
+        regEx: MedBook.studyLabelRegex,
+      },
     });
+
+    // change the regex message to something informative
+    schema.messages({
+      regEx: "Sample labels can only contain letters, numbers, dashes, " +
+          "and underscores",
+    });
+
+    return schema;
   },
   newSamplePlaceholder() {
     return `Name of sample (excluding "${this.study_label}/")`;
