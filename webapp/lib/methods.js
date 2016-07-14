@@ -514,7 +514,9 @@ Meteor.methods({
     });
   },
 
-  studyLabelAvailable(study_label) {
+  studyLabelTaken(study_label) {
+    check(study_label, String);
+
     let user = MedBook.findUser(Meteor.userId());
 
     return !!Studies.findOne({ study_label });
@@ -531,7 +533,8 @@ Meteor.methods({
     newStudy.collaborations = [ user.personalCollaboration() ];
 
     // must be unique
-    if (!studyLabelAvailable.call(newStudy.study_label)) {
+    if (Meteor.call("studyLabelTaken", newStudy.study_label)) {
+      console.log("throw it out");
       throw new Meteor.Error("study-label-not-unique");
     }
 

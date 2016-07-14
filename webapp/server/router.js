@@ -94,7 +94,7 @@ Picker.route("/patient-care/download/:userId/:loginToken/" +
   let stderrStream = fs.createWriteStream(logfilePath, {flags: "a"});
 
   // spawn the python exporter and pipe the output to the user
-  let child = spawn(Meteor.settings.gene_expression_export, [
+  let child = spawn(Meteor.settings.genomic_expression_export, [
     exportFirstArg, mongoId
   ], { cwd: cwd });
 

@@ -164,14 +164,6 @@ Template.addFilterButton.events({
       },
     });
   },
-  "click .add-data-loaded-filter": function (event, instance) {
-    instance.addFilter({
-      type: "data_loaded",
-      options: {
-        gene_expression: false,
-      },
-    });
-  },
 });
 
 

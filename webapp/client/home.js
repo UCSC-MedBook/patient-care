@@ -6,8 +6,8 @@ Template.homeWelcome.helpers({
 
     if (!user ||
         !user.profile ||
-        !user.profile.patient_care ||
-        !user.profile.patient_care.dismissedHomeWelcome) {
+        !user.profile.patientCare ||
+        !user.profile.patientCare.dismissedHomeWelcome) {
       return true;
     }
   },
@@ -15,15 +15,38 @@ Template.homeWelcome.helpers({
 
 Template.homeWelcome.events({
   "click .never-show-again": function (event, instance) {
+    // we can update user.profile on the client: yoohoo weird Meteor exceptions
     Meteor.users.update(Meteor.userId(), {
       $set: {
-        "profile.patient_care.dismissedHomeWelcome": true
+        "profile.patientCare.dismissedHomeWelcome": true
       }
     });
   }
 });
 
+// Template.wranglerExplanation
 
+Template.wranglerExplanation.helpers({
+  directWranglerLink() {
+    const user = Meteor.user();
+
+    if (!user ||
+        !user.profile ||
+        !user.profile.patientCare ||
+        !user.profile.patientCare.dismissedWranglerExplanation) {
+      return "";
+    }
+
+    return "https://medbook.io/wrangler";
+  },
+});
+
+Template.wranglerExplanation.events({
+  "click .explain-wrangler"(event, instance) {
+    // TODO: be able to not show again
+    $(".ui.modal.explain-wrangler").modal("show");
+  },
+});
 
 // // Template.listPatients
 //

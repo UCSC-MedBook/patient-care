@@ -101,6 +101,11 @@
       </div>
     </a>
   </div>
+
+  <h2>Other</h2>
+  <div class="ui cards">
+    {{> wranglerExplanation}}
+  </div>
 </template>
 
 <template name="homeWelcome">
@@ -127,6 +132,47 @@
       </div>
     </div>
   {{/if}}
+</template>
+
+<template name="wranglerExplanation">
+  {{! Link directly to wrangler if they've dismissed the modal.
+      Otherwise show them a modal explaining what it is.}}
+  <a href={{directWranglerLink}}
+      class="ui card {{#unless directWranglerLink}}explain-wrangler{{/unless}}">
+    <div class="content">
+      <div class="header">Import files</div>
+      <div class="description">
+        Import <b>genomic data</b>, <b>clinical forms</b>, and <b>.gmt</b>s.
+      </div>
+    </div>
+  </a>
+
+  <div class="ui modal explain-wrangler">
+    <i class="close icon"></i>
+    <div class="header">
+      Importing files with Wrangler
+    </div>
+    <div class="content">
+      <div class="description">
+        <div class="ui header">What is Wrangler?</div>
+        <p>
+          Wrangler is a seperate app in MedBook, but all apps share
+          the same data. For example, when you load a file into Wrangler,
+          you will be able to use the data in Patient Care.
+        </p>
+      </div>
+    </div>
+    <div class="actions">
+      <div class="ui secondary cancel button">
+        Close
+      </div>
+      <a href="https://medbook.io/wrangler"
+          class="ui primary right labeled icon ok button">
+        Take me there
+        <i class="right arrow icon"></i>
+      </a>
+    </div>
+  </div>
 </template>
 
 <template name="listPatients">

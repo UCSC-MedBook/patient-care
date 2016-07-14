@@ -16,9 +16,9 @@ Template.createStudy.helpers({
 
     let instance = Template.instance();
 
-    schema.study_label.custom = () => {
-      Meteor.call("accountsIsUsernameAvailable", this.value, function (error, result) {
-        if (!result) {
+    schema.study_label.custom = function () {
+      Meteor.call("studyLabelTaken", this.value, function (error, result) {
+        if (result) {
           schema.namedContext("insertStudy").addInvalidKeys([
             {name: "study_label", type: "studyLabelNotUnique"}
           ]);
@@ -26,7 +26,15 @@ Template.createStudy.helpers({
       });
     };
 
+    // make it a SimpleSchema
     schema = new SimpleSchema(schema);
+
+    // change the regex message to something informative
+    schema.messages({
+      regEx: "Study labels can only contain letters, numbers, dashes, " +
+          "and underscores",
+    });
+
     return schema;
   },
 });

@@ -58,10 +58,14 @@
     <div class="ten wide stretched column">
       {{! some things look funky if we remove this wrapper div}}
       <div>
-        {{#if compare (param "selected") "create"}}
-          {{> Template.dynamic template=createTemplate}}
+        {{#if Template.subscriptionsReady}}
+          {{#if compare (param "selected") "create"}}
+            {{> Template.dynamic template=createTemplate}}
+          {{else}}
+            {{> manageObject}}
+          {{/if}}
         {{else}}
-          {{> manageObject}}
+          {{> dataLoading}}
         {{/if}}
       </div>
     </div>

@@ -108,7 +108,9 @@ function getObjects () {
   let slug = FlowRouter.getParam("collectionSlug");
   let managing = _.findWhere(managableTypes, { collectionSlug: slug });
 
-  return MedBook.collections[managing.collectionName].find();
+  return MedBook.collections[managing.collectionName].find({}, {
+    sort: { name: 1 },
+  });
 }
 
 Template.manageObjectsGrid.helpers({
