@@ -42,53 +42,90 @@ Meteor.methods({
 
     let samples = dataset.sample_labels;
 
+    console.log("samples are", samples);
+
     let formsWithFields = [] ;
 
-    // For each user-accessible form
+    // For each user-accessible form, find records that match our samples
+    // if we found any, include the form as an option to pick
     Forms.find().forEach(function(form){
       if (! user.hasAccess(form)) { return; }
+
+      console.log("trying form", form); // XXX 
 
       // Populate the form field table with its fields
       let encoded_form_id = encodeURI(form._id);
       let sample_label_field = form.sample_label_field ;
+
+      console.log("SLF", sample_label_field);
  
       // Set up the fields to be populated with potential values
       // Remove the sample_label_field from the fields because
       // we don't want to be able to query on every individual sample
-      let currentFormFields = _.without(form.fields, 
-        { "name": sample_label_field, "value_type" : "String"}
-        );
-     
-      // And add an array of available values. 
-      currentFormFields = _.map(currentFormFields, function(field){
-        field["values"] = [];
-        return field;
-      });
+      let currentFormFields = [];
+      for(field of form.fields){
+        if(field.name !== sample_label_field){
+          field.values = [];  // this is ok -- won't write back to DB
+          currentFormFields.push(field);
+        }
+      }
+
+      console.log("got CFFs", currentFormFields); // XXX 
       
       // Find all records in that form for our samples
       // and add its values to the values fields.
       // However, don't populate the unique ID fields. 
-      let fieldsToSkip = ["_id", sample_label_field];
-      Records.find({
-        $and : [
-          {sample_label_field : { $in: samples}},
+      let fieldsToSkip = ["_id", sample_label_field, "form_id"];
+      console.log("bout to find records");
+
+      // in order to use sample_label_field as dynamic key,
+      // need to construct query in pieces
+      let sampleLabelQuery = {};
+      sampleLabelQuery[sample_label_field] = {"$in": samples}
+
+      let fullQuery = { "$and": [
+          sampleLabelQuery,
           {"form_id" : form._id},
-        ]
-      }).forEach(function(record){
+         ]}
+
+      console.log("going to run query", fullQuery); // XXX 
+
+      let foundAnyRecords = false; // Did we find any for this form?
+
+      Records.find(fullQuery).forEach(function(record){
+        foundAnyRecords = true;
+
         for(field in record){
           if (fieldsToSkip.indexOf(field) === -1){ 
-            currentFormFields[field] = _.union([record[field]], currentFormFields[field] );
-            console.log("populating", field);
-            console.log("Added ", record[field], "and it's now", currentFormFields[field]);
+      
+            // Find the form field by index in currentFormFields to update the .values of
+            // would use _.findIndex , but our underscore.js isn't new enough :(
+            //let fieldIdx = _.findIndex(currentFormFields, function(f){ return f.name === field ; });
+            let fieldIdx = -1;
+            for(let idx = 0; idx < currentFormFields.length; idx++){
+              if(currentFormFields[idx].name === field){ 
+                fieldIdx = idx;
+                break;
+              }
+            }
+            // If the desired field exists in the form
+            if(fieldIdx >= 0){
+              currentFormFields[fieldIdx].values = _.union([record[field]], currentFormFields[fieldIdx].values );
+            }
+            // console.log("populating", field);
+            // console.log("Added ", record[field], "and it's now", currentFormFields);
           }
         }
       });
              
-      formsWithFields.push({
-        urlencodedId: encoded_form_id,
-        name: form.name,
-        fields: currentFormFields
+      // Only include the form if there are any associated records in this dataset
+      if(foundAnyRecords){
+        formsWithFields.push({
+          urlencodedId: encoded_form_id,
+          name: form.name,
+          fields: currentFormFields
         });
+      }
     }); 
 
     console.log("finished making fields, returning:", formsWithFields);

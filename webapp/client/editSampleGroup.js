@@ -336,7 +336,7 @@ Template.formValuesFilter.onCreated(function(){
 
   let dataset_id = instance.data.data_set_id ;
   instance.available_filter_forms = new ReactiveVar(); 
-  instance.available_filter_forms.set([]);
+  instance.available_filter_forms.set([{name: "Loading forms...", urlencodedId: "placeholder_loadingforms"}]);
   instance.filter_forms_options = new ReactiveVar();
   instance.filter_forms_options.set({});
 
@@ -346,7 +346,7 @@ Template.formValuesFilter.onCreated(function(){
   Meteor.call("getFormsMatchingDataSet", dataset_id, function(err, res){
     console.log("got matching forms...");
     if(err) {
-      instance.available_filter_forms.set([{name:'Error loading forms!', urlencodedId: 'Errorloadingforms!'}]);
+      instance.available_filter_forms.set([{name:'Error loading forms!', urlencodedId: 'Errorloadingforms'}]);
       console.log("Error getting forms for this data set", err);
       throw err; 
     } else {
@@ -385,7 +385,7 @@ Template.formValuesFilter.events({
     // then find it in filter_forms_options
     let forms = instance.available_filter_forms.get();
     console.log("got available forms", forms); // XXX
-    let chosenForm = _.find(forms, function(form){ return form.urlencodedID === whichFormId});
+    let chosenForm = _.find(forms, function(form){ return form.urlencodedId === whichFormId});
 
     console.log("we chose you,", chosenForm); // XXX
 
