@@ -1,23 +1,25 @@
-// Right now, getFormsMatchingDataSet uses CRFs
-// I'm guessing it will use something else soon
-// put the CRF stuff here
-CRFs = new Meteor.Collection("CRFs");
-
 Meteor.methods({
     // Takes: data_set_id (string) -- ID of the target data set
-    // Returns: object with fields formFields, formsAndIds.
-    // Finds all CRFs that have a record for at least one sample in 
+    // Finds all Forms that have a Record for at least one sample in
     // the passed data set.
-    // formsAndIds: Array: [{name: String, urlencodedId: String}]
-    //    name: Name of the CRF
-    //    urlencodedId: ID to an arbitrary CRFs record for that CRF,
-    //                  passed to encodeURI so it can be used as a
-    //                  div ID later.
-    //  
-    // formFields: Object: { id : { field1: [ ...] , field2: [...]}}
-    //    keys: each urlencodedId above.
-    //    for each ID: an object with keys: available fields in that CRF
-    //    and values: for each field, array of available field values.
+
+    // Return format
+    //     {
+    //        form_id_1 : {
+    //          form_name: name of my form
+    //          fields: [
+    //                {
+    //                  name: field name
+    //                  value_type: string etc
+    //                  values: [ "value1", "value2",...]
+    //                }, ...
+    //            ]
+    //
+    //          }
+    //        form_id_2 : { ... }
+    //        ...
+    //     }
+    //
   getFormsMatchingDataSet: function(data_set_id) {
 
     check(data_set_id, String);
@@ -25,11 +27,10 @@ Meteor.methods({
     // Client-side stub:
     if( Meteor.isClient) {
       let stub = {
-        formFields: { "Loading forms..." : {} },
-        formsAndIds: [{
-          name: "Loading forms...",
-          urlencodedId: "placeholder_loading_form_div_id", 
-          }],
+        "placeholder_loadingforms" : {
+          "form_name" : "Loading forms...",
+          "fields": [] 
+        }
       };
       return stub;
     }
@@ -39,70 +40,57 @@ Meteor.methods({
     let user = MedBook.ensureUser(Meteor.userId());
     user.ensureAccess(dataset);
 
-    // TODO FIXME
-    // CRFs have no permissions yet.
-    // Once implemented, only search within CRFs for which
-    // user has access
-
     let samples = dataset.sample_labels;
 
-    // each CRF has a sampleID --
-    // so find all CRFs where the sampleID is in the list of samples
-    // and get the union of fields for those CRFs 
-
     let formsWithFields = {} ;
-    let formsAndIds = []; // Used for identifying divs
-    // Format: [ { name: CRFname, urlencodedId: crfSampleID},... ]
-    //  it's not the CRF ID but the _id of an arbitrary sample in that CRF
-    let fieldsToSkip = ["_id", "Sample_ID"];
-    let seenCRFs = [] // form names we have already encountered
 
-    // For each sample, find all CRFs documents for that sample
-    // and add their fields & potential values to the output
-    CRFs.find({"Sample_ID":
-       { $in: samples }},
-      ).forEach((doc) => {  
+    // For each user-accessible form
+    Forms.find().forEach(function(form){
+      if (! user.hasAccess(form)) { return; }
 
-      let CRFname = doc.CRF;
-      let CRFencodedId = "" ; // Will either be ID of doc or ID of previous doc with this CRF
-
-      // If this is a new CRF
-      // Use its fields as a template for this CRF
-      // Add its _id + name to formsAndIds mapping
-      if( seenCRFs.indexOf(CRFname) === -1) {
-
-        CRFencodedId = encodeURI(doc._id);
-        seenCRFs.push(CRFname);
-        formsWithFields[CRFencodedId] = {};
-
-        formsAndIds.push(
-          {name: CRFname,
-           urlencodedId: CRFencodedId }
+      // Populate the form field table with its fields
+      let encoded_form_id = encodeURL(form._id);
+      let sample_label_field = form.sample_label_field ;
+ 
+      // Set up the fields to be populated with potential values
+      // Remove the sample_label_field from the fields because
+      // we don't want to be able to query on every individual sample
+      let currentFormFields = _.without(form.fields, 
+        { "name": sample_label_field, "value_type" : "String"}
         );
+     
+      // And add an array of available values. 
+      currentFormFields = _.map(current_form_fields, function(field){
+        field["values"] = [];
+        return field;
+      });
+      
+      // Find all records in that form for our samples
+      // and add its values to the values fields.
+      // However, don't populate the unique ID fields. 
+      let fieldsToSkip = ["_id", sample_label_field];
+      Records.find({
+        $and : [
+          {sample_label_field : { $in: samples}},
+          {"form_id" : form._id},
+        ]
+      }).forEach(function(record){
+        for(field in record){
+          if (fieldsToSkip.indexOf(field) === -1){ 
+            currentFormFields[field] = _.union([record[field]], currentFormFields[field] );
+            console.log("populating", field);
+            console.log("Added ", record[field], "and it's now", currentFormFields[field]);
+          }
+        }
+      });
+             
+      formsWithFields[encoded_form_id] = {form_name:form.name  , fields: currentFormFields};
 
-        for(field in doc){
-          if(fieldsToSkip.indexOf(field) === -1){ 
-            formsWithFields[CRFencodedId][field] = [];
-          } 
-        }
-      } else {
-        // For a CRF whose name we've already seen,
-        // get the correct CRFencodedId via formsWithFields.
-        let foundName =  _.find(formsAndIds, function(item){ return item.name === CRFname})
-        if(foundName){ // Should always find one...
-          CRFencodedId = foundName.urlencodedId;
-        }
-      }
+    }); 
 
-      // Then add unique values from that CRF to the field
-      for(field in formsWithFields[CRFencodedId]){
-        if(fieldsToSkip.indexOf(field) === -1){ 
-          formsWithFields[CRFencodedId][field] = _.union([doc[field]], formsWithFields[CRFencodedId][field]);
-        }
-      }
-    });
-   
-    return  { formFields: formsWithFields, formIds: formsAndIds};
+    console.log("finished making fields, returning:", formsWithFields);
+
+    return formsWithFields ;
   },
   // Takes : data_set_id : data set to source samples from
   //        serialized_query : stringifed JSON Mongo query
