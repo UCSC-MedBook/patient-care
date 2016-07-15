@@ -1,4 +1,171 @@
+// Right now, getFormsMatchingDataSet uses CRFs
+// I'm guessing it will use something else soon
+// put the CRF stuff here
+CRFs = new Meteor.Collection("CRFs");
+
 Meteor.methods({
+    // Takes: data_set_id (string) -- ID of the target data set
+    // Returns: object with fields formFields, formsAndIds.
+    // Finds all CRFs that have a record for at least one sample in 
+    // the passed data set.
+    // formsAndIds: Array: [{name: String, urlencodedId: String}]
+    //    name: Name of the CRF
+    //    urlencodedId: ID to an arbitrary CRFs record for that CRF,
+    //                  passed to encodeURI so it can be used as a
+    //                  div ID later.
+    //  
+    // formFields: Object: { id : { field1: [ ...] , field2: [...]}}
+    //    keys: each urlencodedId above.
+    //    for each ID: an object with keys: available fields in that CRF
+    //    and values: for each field, array of available field values.
+  getFormsMatchingDataSet: function(data_set_id) {
+
+    check(data_set_id, String);
+
+    // Client-side stub:
+    if( Meteor.isClient) {
+      let stub = {
+        formFields: { "Loading forms..." : {} },
+        formsAndIds: [{
+          name: "Loading forms...",
+          urlencodedId: "placeholder_loading_form_div_id", 
+          }],
+      };
+      return stub;
+    }
+
+    // Permissions
+    let dataset = DataSets.findOne(data_set_id);
+    let user = MedBook.ensureUser(Meteor.userId());
+    user.ensureAccess(dataset);
+
+    // TODO FIXME
+    // CRFs have no permissions yet.
+    // Once implemented, only search within CRFs for which
+    // user has access
+
+    let samples = dataset.sample_labels;
+
+    // each CRF has a sampleID --
+    // so find all CRFs where the sampleID is in the list of samples
+    // and get the union of fields for those CRFs 
+
+    let formsWithFields = {} ;
+    let formsAndIds = []; // Used for identifying divs
+    // Format: [ { name: CRFname, urlencodedId: crfSampleID},... ]
+    //  it's not the CRF ID but the _id of an arbitrary sample in that CRF
+    let fieldsToSkip = ["_id", "Sample_ID"];
+    let seenCRFs = [] // form names we have already encountered
+
+    // For each sample, find all CRFs documents for that sample
+    // and add their fields & potential values to the output
+    CRFs.find({"Sample_ID":
+       { $in: samples }},
+      ).forEach((doc) => {  
+
+      let CRFname = doc.CRF;
+      let CRFencodedId = "" ; // Will either be ID of doc or ID of previous doc with this CRF
+
+      // If this is a new CRF
+      // Use its fields as a template for this CRF
+      // Add its _id + name to formsAndIds mapping
+      if( seenCRFs.indexOf(CRFname) === -1) {
+
+        CRFencodedId = encodeURI(doc._id);
+        seenCRFs.push(CRFname);
+        formsWithFields[CRFencodedId] = {};
+
+        formsAndIds.push(
+          {name: CRFname,
+           urlencodedId: CRFencodedId }
+        );
+
+        for(field in doc){
+          if(fieldsToSkip.indexOf(field) === -1){ 
+            formsWithFields[CRFencodedId][field] = [];
+          } 
+        }
+      } else {
+        // For a CRF whose name we've already seen,
+        // get the correct CRFencodedId via formsWithFields.
+        let foundName =  _.find(formsAndIds, function(item){ return item.name === CRFname})
+        if(foundName){ // Should always find one...
+          CRFencodedId = foundName.urlencodedId;
+        }
+      }
+
+      // Then add unique values from that CRF to the field
+      for(field in formsWithFields[CRFencodedId]){
+        if(fieldsToSkip.indexOf(field) === -1){ 
+          formsWithFields[CRFencodedId][field] = _.union([doc[field]], formsWithFields[CRFencodedId][field]);
+        }
+      }
+    });
+   
+    return  { formFields: formsWithFields, formIds: formsAndIds};
+  },
+  // Takes : data_set_id : data set to source samples from
+  //        serialized_query : stringifed JSON Mongo query
+  //        sampleCrfId: ID of a CRFs document whose CRF field is the desired form
+  //            (this document will refer to a specific sample, which is not relevant.)
+  getSamplesFromFormFilter: function(data_set_id, serialized_query, sampleCrfId){
+
+    check(data_set_id, String);
+    check(serialized_query, String);
+    check(sampleCrfId, String);
+
+    // Don't run client-side.
+    if(Meteor.isClient){
+      return [];
+    }
+
+    // Confirm permissions
+    let user = MedBook.ensureUser(Meteor.userId());
+    user.ensureAccess(DataSets.findOne(data_set_id));
+    // TODO FIXME: CRFs docs have no access permissions at all
+    // Once permissions are implemented, confirm that the user
+    // has access to the chosen CRF
+  
+
+    console.log("Query to be run:", serialized_query); // XXX 
+    let query = {};
+    // Confirm the query parses
+    try { 
+      query = JSON.parse(serialized_query);
+    } catch (err) {
+      if (err instanceof SyntaxError) {
+        console.log("Couldn't parse JSON:", err.message);
+        console.log("Tried to parse", serialized_query);
+      }
+        throw err;
+    }
+
+    let dataset = DataSets.findOne(data_set_id);
+    let samples = dataset.sample_labels;
+    let foundSampleCRF = CRFs.findOne({_id: sampleCrfId});
+    let nameCRF = foundSampleCRF.CRF;
+
+
+    // run the provided query to get all
+    // CRFs as follows :
+    // samples are in the provided sample list
+    // the query applies
+    // the CRF name is the passed crf name
+
+    let queryInCRF = {
+      "$and": [ 
+        {'Sample_ID': {$in: samples}},
+        {'CRF' : nameCRF},
+        query,
+      ]
+    }
+
+    let results = CRFs.find(queryInCRF).fetch();
+    let foundSamples = _.pluck(results, 'Sample_ID');
+
+    return foundSamples;
+  },
+
   getSampleGroupVersion: function (name) {
     check(name, String);
 

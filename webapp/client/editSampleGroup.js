@@ -137,6 +137,7 @@ Template.addFilterButton.onCreated(function () {
     sampleGroup.data_sets[instance.data.dataSetIndex].filters.push(filterObject);
     instance.data.sampleGroup.set(sampleGroup);
   }
+  // Only allow one form values filter
 });
 
 Template.addFilterButton.onRendered(function () {
@@ -148,7 +149,28 @@ Template.addFilterButton.onRendered(function () {
   });
 });
 
+Template.addFilterButton.helpers({
+  isAFormValuesFilterActive: function(){
+    let sampleGroup = Template.instance().data.sampleGroup.get();
+    let currentDataSet = sampleGroup.data_sets[Template.instance().data.dataSetIndex];
+    // No data sets -> no form values filters
+    if( typeof(currentDataSet) === "undefined"){ return false; }
+    let allFilters = currentDataSet.filters ;
+    let wasFilter = (_.pluck(allFilters, "type").indexOf("form_values") !== -1);
+    return wasFilter;
+  },
+});
+
 Template.addFilterButton.events({
+  "click .add-form-values-filter": function (event, instance) {
+    instance.addFilter({
+      type: "form_values",
+      options : {
+        form_id: "",
+        mongo_query: "",
+      },
+    });
+  },
   "click .add-sample-label-list-filter": function (event, instance) {
     instance.addFilter({
       type: "include_sample_list",
@@ -302,5 +324,112 @@ Template.sampleLabelListFilter.events({
   },
   "click .close-sample-error-message": function (event, instance) {
     instance.invalidSampleLabels.set(null);
+  },
+});
+
+Template.formValuesFilter.onCreated(function(){
+  // Find forms that share samples with this data set
+  // let them be options for which form to filter on
+  let instance = this;
+
+  instance.editing = new ReactiveVar(false);
+
+  let dataset_id = instance.data.data_set_id ;
+  instance.available_filter_forms = new ReactiveVar(); 
+  instance.available_filter_forms.set([{name: 'Loading forms...', urlencodedId: 'Loadingforms...'}]);
+  instance.filter_forms_options = new ReactiveVar();
+  instance.filter_forms_options.set({});
+
+  instance.active_querybuilder = new ReactiveVar("");
+  instance.active_crf = new ReactiveVar("");
+
+  Meteor.call("getFormsMatchingDataSet", dataset_id, function(err, res){
+    if(err) {
+      instance.available_filter_forms.set([{name:'Error loading forms!', urlencodedId: 'Errorloadingforms!'}]);
+      console.log("Error getting forms for this data set", err);
+      throw err; 
+    } else {
+      // put the res in the available forms so that we can get it later
+      instance.filter_forms_options.set(res.formFields);
+      instance.available_filter_forms.set(res.formIds);
+    }
+  });
+});
+
+
+Template.formValuesFilterMenu.onRendered(function(){
+  let instance = this;
+  instance.$(".ui.dropdown").dropdown();
+});
+
+Template.formValuesFilter.helpers({
+  getAvailableFilterForms: function() {
+    return Template.instance().available_filter_forms.get();
+  },
+  getEditing: function(){
+    return Template.instance().editing.get();
+  },
+});
+
+Template.formValuesFilter.events({
+  "click .chosen-form-filter": function(event, instance) {
+    
+    let whichFormId = event.target.id;
+
+    // then find it in filter_forms_options
+    let formFields = instance.filter_forms_options.get()[whichFormId];
+
+    // Then build the filters for the querybuilder
+    let queryFilters = [];
+    for(field in formFields){
+      let fieldOptions = formFields[field];
+      queryFilters.push(
+        { id: field,
+          label: field,
+          type: "string",
+          input: "select",
+          values: fieldOptions,
+          operators: ['equal', 'not_equal', 'is_null', 'is_not_null'],
+        }
+      );
+    } 
+
+  // Only show one querybuilder div at a time
+  $(".querybuilder").hide()
+
+  let queryBuilderDivId = "#" + whichFormId + "_querybuilder";
+  $(queryBuilderDivId).show()
+  $(queryBuilderDivId).queryBuilder({
+    filters: queryFilters,
+    });
+
+  // And set it as active so we can find it later
+  instance.active_querybuilder.set(queryBuilderDivId);
+  instance.active_crf.set(whichFormId);
+  },
+
+  "click .done-editing": function(event, instance){
+    event.preventDefault();
+
+    let queryBuilderDivId = instance.active_querybuilder.get();
+
+    let query = $(queryBuilderDivId).queryBuilder('getMongo');
+    let serialized_query = JSON.stringify(query);
+    let sampleCrfId = decodeURI(instance.active_crf.get());
+     let dataset_id = instance.data.data_set_id;
+
+    instance.editing.set(false);
+   
+    // Populate the filter info
+    // TODO: refactor to use the ID from metadata of the overall CRF
+    // rather than, as here, the id of a random sample record within the CRF
+    instance.data.setOptions({
+      form_id: sampleCrfId,
+      mongo_query: serialized_query,
+    });
+   },
+  "click .edit-filter": function(event, instance){
+    event.preventDefault();
+    instance.editing.set(true);
   },
 });

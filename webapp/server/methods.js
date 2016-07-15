@@ -138,24 +138,42 @@ Meteor.methods({
       sampleGroupDataSet.data_set_name = dataSet.name;
       sampleGroupDataSet.unfiltered_sample_count = dataSet.sample_labels.length;
 
-      // start with all the samples and then filter down from there
+      // Apply the sample group's filters.
+      // We start with all the sample labels in a data set.
+      // Then, apply filters as follows.
+      // -  Filter by form values: Run the passed query in mongo and remove all samples
+      //    that are not included in the query results
+      // -  Include Specific Samples : remove all samples NOT on the include list
+      // -  Exclude Specific Samples : remove all samples on the exclude list
       let allSamples = dataSet.sample_labels;
       let sample_labels = allSamples; // need a copy of this
+  
 
       _.each(sampleGroupDataSet.filters, (filter) => {
         let { options } = filter;
+  
+        if (filter.type === "form_values"){
+          // Run the mongo_query
+          // Get the result sample labels synchronously
+          let result_sample_labels = Meteor.call('getSamplesFromFormFilter', 
+            sampleGroupDataSet.data_set_id,
+            options.mongo_query,
+            options.form_id
+          );
 
-        if (filter.type === "include_sample_list") {
+          console.log("Query found", result_sample_labels.length, "sample labels.");
+
+          sample_labels = _.intersection(sample_labels, result_sample_labels);
+
+        } else if (filter.type === "include_sample_list") {
           if (_.difference(options.sample_labels, allSamples).length) {
             throw new Meteor.Error("invalid-sample-labels");
           }
-
           sample_labels = _.intersection(sample_labels, options.sample_labels);
         } else if (filter.type === "exclude_sample_list") {
           if (_.difference(options.sample_labels, allSamples).length) {
             throw new Meteor.Error("invalid-sample-labels");
           }
-
           sample_labels = _.difference(sample_labels, options.sample_labels);
         } else {
           throw new Meteor.Error("invalid-filter-type");
@@ -216,9 +234,14 @@ Meteor.methods({
     // insert asynchronously -- thanks @ArnaudGallardo
     var future = new Future();
     SampleGroups.rawCollection().insert(sampleGroup, (err, insertedObj) => {
-      if (err) future.throw(err);
-
+      // Need to either throw err, or return ID, but NOT BOTH 
+      // or will crash with "Future resolved more than once" error 
+      if (err) {
+       console.log("Creating sample group threw Future error:", err);
+       future.throw(err);
+      } else {
       future.return(newId);
+      }
     });
 
     return future.wait();

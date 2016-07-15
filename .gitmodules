@@ -16,3 +16,6 @@
 [submodule "external-tools"]
 	path = external-tools
 	url = https://github.com/UCSC-MedBook/external-tools
+[submodule "webapp/packages/jquery-querybuilder"]
+	path = webapp/packages/jquery-querybuilder
+	url = https://github.com/bshamblen/jquery-querybuilder.git

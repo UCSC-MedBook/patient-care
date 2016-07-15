@@ -89,6 +89,15 @@
     <i class="filter icon"></i> Add filter
   </div>
   <div class="ui flowing popup">
+    <!-- if a form values filter is applied to this data set,
+    don't display the option to insert another one -->
+    {{#unless isAFormValuesFilterActive}}
+      <div class="ui list" style="padding: 0px;">
+        <a class="item add-form-values-filter">
+          Filter by form values
+        </a>
+      </div>
+    {{/unless}}
     <div class="ui list" style="padding: 0px;">
       <a class="item add-sample-label-list-filter">
         Include Specific samples
@@ -107,6 +116,12 @@
     <i class="filter icon"></i>
     <div class="content" style="width: 100%;">
       {{#with getFilter}}
+        {{#if compare type "form_values"}}
+          {{>formValuesFilter options=getFilter.options
+            setOptions=setOptions data_set_id=data_set_id
+            title="Filter by form values"
+          }}
+        {{/if}}
         {{#if compare type "include_sample_list"}}
           {{> sampleLabelListFilter options=getFilter.options
               setOptions=setOptions data_set_id=data_set_id
@@ -121,6 +136,53 @@
       {{/with}}
     </div>
   </div>
+</template>
+
+<!-- Menu for selecting the form to filter on form values -->
+<template name="formValuesFilterMenu">
+  <div class="ui dropdown fluid search selection">
+    <i class="dropdown icon"></i>
+    <div class="default text">Select a form...</div>
+    <div class="menu">
+      {{#each getAvailableFilterForms}}
+      <div class="item chosen-form-filter"  id={{this.urlencodedId}} >{{this.name}}</div>
+      {{/each}}
+    </div>
+  </div>
+</template>
+
+<!--  Filter on a form using querybuilder -->
+<template name="formValuesFilter">
+  {{title}}:
+  {{#if getEditing}}
+    {{#if length getAvailableFilterForms}}
+      {{> formValuesFilterMenu getAvailableFilterForms=getAvailableFilterForms}}
+      <!-- Set up the potential queryBuilder divs to be attached in onRendered -->
+      {{#each getAvailableFilterForms}}
+        <div class="querybuilder" id="{{this.urlencodedId}}_querybuilder">
+        </div>
+      {{/each}}
+      <div class="ui icon primary mini button done-editing">
+        <i class="check icon"></i>Done
+      </div>
+    {{else}}
+      No forms are available for this data set.
+      <div class="ui mini buttons">
+        <button class="ui icon button remove-filter" type="button">
+          <i class="minus icon"></i> Remove filter
+        </button>
+      </div>  
+    {{/if}}
+ {{else}}
+    <div class="ui mini buttons">
+      <button class="ui icon mini button edit-filter" type="button">
+        <i class="edit icon"></i> Edit filter
+      </button>
+      <button class="ui icon button remove-filter" type="button">
+        <i class="minus icon"></i> Remove filter
+      </button>
+    </div>
+  {{/if}}
 </template>
 
 <template name="sampleLabelListFilter">
