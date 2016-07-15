@@ -94,26 +94,27 @@ Meteor.methods({
   },
   // Takes : data_set_id : data set to source samples from
   //        serialized_query : stringifed JSON Mongo query
-  //        sampleCrfId: ID of a CRFs document whose CRF field is the desired form
-  //            (this document will refer to a specific sample, which is not relevant.)
-  getSamplesFromFormFilter: function(data_set_id, serialized_query, sampleCrfId){
+  //        form_id -- ID of the form whose fields we're querying on
+  getSamplesFromFormFilter: function(data_set_id, serialized_query, form_id){
 
     check(data_set_id, String);
     check(serialized_query, String);
-    check(sampleCrfId, String);
+    check(form_id, String);
 
     // Don't run client-side.
     if(Meteor.isClient){
       return [];
     }
 
+    let dataset = DataSets.findOne(data_set_id);
+    let form = Forms.findOne({_id: form_id});
+    let samples = dataset.sample_labels;
+    let sample_label_field = form.sample_label_field ;
+
     // Confirm permissions
     let user = MedBook.ensureUser(Meteor.userId());
-    user.ensureAccess(DataSets.findOne(data_set_id));
-    // TODO FIXME: CRFs docs have no access permissions at all
-    // Once permissions are implemented, confirm that the user
-    // has access to the chosen CRF
-  
+    user.ensureAccess(dataset);
+    user.ensureAccess(form);
 
     console.log("Query to be run:", serialized_query); // XXX 
     let query = {};
@@ -128,28 +129,18 @@ Meteor.methods({
         throw err;
     }
 
-    let dataset = DataSets.findOne(data_set_id);
-    let samples = dataset.sample_labels;
-    let foundSampleCRF = CRFs.findOne({_id: sampleCrfId});
-    let nameCRF = foundSampleCRF.CRF;
-
-
-    // run the provided query to get all
-    // CRFs as follows :
-    // samples are in the provided sample list
-    // the query applies
-    // the CRF name is the passed crf name
-
-    let queryInCRF = {
+    // Construct the query to reference only records for the chosen form
+    let querySpecificForm = {
       "$and": [ 
-        {'Sample_ID': {$in: samples}},
-        {'CRF' : nameCRF},
+        {sample_label_field: {$in: samples}},
+        {"form_id" : form._id},
         query,
       ]
     }
 
-    let results = CRFs.find(queryInCRF).fetch();
-    let foundSamples = _.pluck(results, 'Sample_ID');
+    // Run it, return sample IDs.
+    let results = Records.find(querySpecificForm).fetch();
+    let foundSamples = _.pluck(results, sample_label_field);
 
     return foundSamples;
   },
