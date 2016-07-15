@@ -44,9 +44,9 @@
               class="item">
             Sample Groups
           </a>
-          <a href={{pathFor "manageObjects" collectionSlug="gene-sets"}}
+          <a href={{pathFor "manageObjects" collectionSlug="gene-set-groups"}}
               class="item">
-            Gene Sets
+            Gene Set Groups
           </a>
           <a href={{pathFor "manageObjects" collectionSlug="studies"}}
               class="item">
@@ -60,6 +60,24 @@
       </div>
 
       <div class="right menu">
+        <div class="ui simple dropdown icon item">
+          <i class="alarm icon"></i>
+          <!-- <div class="floating ui red label">3</div> -->
+          <div class="menu">
+            <div class="item">
+              No notifications
+            </div>
+          </div>
+        </div>
+        <div class="ui simple dropdown icon item">
+          <i class="info icon"></i>
+          <div class="menu">
+            {{> chatWithUsOnSlack}}
+            <a href="mailto:ucscmedbook@gmail.com" class="item">
+              Send us an email
+            </a>
+          </div>
+        </div>
         <div class="ui simple dropdown icon item">
           <i class="grid layout icon"></i>
           <div class="menu">
@@ -109,15 +127,6 @@
                   <i class="right arrow icon"></i>
                 </a>
               </div>
-            </div>
-          </div>
-        </div>
-        <div class="ui simple dropdown icon item">
-          <i class="alarm icon"></i>
-          <!-- <div class="floating ui red label">3</div> -->
-          <div class="menu">
-            <div class="item">
-              No notifications
             </div>
           </div>
         </div>
@@ -225,6 +234,48 @@
         </div>
       {{/if}}
     {{/if}}
+  </div>
+</template>
+
+<template name="chatWithUsOnSlack">
+  <a href={{directSlackLink}}
+      class="item {{#unless directSlackLink}}explain-slack-button{{/unless}}">
+    Chat with us on Slack
+  </a>
+  <div class="ui modal explain-slack">
+    <i class="close icon"></i>
+    <div class="header">
+      Chatting with us with Slack
+    </div>
+    <div class="content">
+      <div class="description">
+        <div class="ui header">What is Slack?</div>
+        <p>
+          Slack is an instant messaging app that we here in the
+          MedBook team use to communicate.
+        </p>
+        <p>
+          You can reach us quickly and easily to request a
+          feature or to get help with a problem you're having.
+        </p>
+        <p>
+          <div class="ui checkbox dismiss-slack-explanation">
+            <input type="checkbox" name="example">
+            <label>Don't show me this again.</label>
+          </div>
+        </p>
+      </div>
+    </div>
+    <div class="actions">
+      <div class="ui secondary cancel button">
+        Close
+      </div>
+      <a href="https://medbook.slack.com"
+          class="ui primary right labeled icon ok button">
+        Take me there
+        <i class="right arrow icon"></i>
+      </a>
+    </div>
   </div>
 </template>
 

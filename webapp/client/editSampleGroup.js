@@ -153,7 +153,7 @@ Template.addFilterButton.events({
     instance.addFilter({
       type: "include_sample_list",
       options: {
-        samples: []
+        sample_labels: []
       },
     });
   },
@@ -161,7 +161,7 @@ Template.addFilterButton.events({
     instance.addFilter({
       type: "exclude_sample_list",
       options: {
-        samples: []
+        sample_labels: []
       },
     });
   },
@@ -230,7 +230,10 @@ Template.sampleLabelListFilter.onCreated(function () {
 
 Template.sampleLabelListFilter.helpers({
   sampleLabelsToText: function () {
-    return _.pluck(this.options.samples, "sample_label").join("\n");
+    let sampleObjs =
+        MedBook.utility.sampleArrStrToObj(this.options.sample_labels);
+
+    return _.pluck(sampleObjs, "uq_sample_label").join("\n");
   },
   getInvalidSampleLabels: function () {
     return Template.instance().invalidSampleLabels.get();
@@ -247,40 +250,47 @@ Template.sampleLabelListFilter.events({
     // clear errors
     instance.invalidSampleLabels.set(null);
 
-    // FIXME: only allow data sets that have one study for now
+    // TODO: for now only allow data sets that have one study
     let dataSet = DataSets.findOne(instance.data.data_set_id);
-    let uniqueStudies = _.uniq(_.pluck(dataSet.samples, "study_label"));
+    let sampleStudyObjs =
+        MedBook.utility.sampleArrStrToObj(dataSet.sample_labels);
+    let uniqueStudyLabels = _.uniq(_.pluck(sampleStudyObjs, "study_label"));
 
-    if (uniqueStudies.length !== 1) {
+    if (uniqueStudyLabels.length !== 1) {
       alert("multiple study data sets not supported... yet!");
+      instance.editing.set(false);
       return;
     }
 
-    let study_label = uniqueStudies[0];
+    let study_label = uniqueStudyLabels[0];
 
     // let's gooo (split by whitespace characters, get rid of spaces)
     let textareaSampleLabels = instance.$("textarea").val().split(/[\s,;]+/);
-    let samples = _.chain(textareaSampleLabels)
+    let sample_labels = _.chain(textareaSampleLabels)
       .filter((value) => { return value; }) // remove falsey
       .uniq() // uniques only
-      .map((sample_label) => { return { study_label, sample_label } })
+      .map((uq_sample_label) => {
+        // convert into sample_labels
+        return study_label + "/" + uq_sample_label;
+      })
       .value();
 
     // make sure we don't have any bad values
-    let badValues = _.filter(samples, function (sample) {
-      let genomicExpIndex =
-          dataSet.samples_index[study_label][sample.sample_label];
-      return genomicExpIndex === undefined;
+    let badValues = _.filter(sample_labels, function (sample_label) {
+      return dataSet.sample_label_index[sample_label] === undefined;
     });
 
+    // if we do, display them to the user
     if (badValues.length) {
-      instance.invalidSampleLabels.set(_.pluck(badValues, "sample_label"));
+      let sampleObjs = MedBook.utility.sampleArrStrToObj(badValues);
+
+      instance.invalidSampleLabels.set(_.pluck(sampleObjs, "uq_sample_label"));
       return;
     }
 
     // nicely done! set the options and return to non-editing
     instance.data.setOptions({
-      samples
+      sample_labels
     });
     instance.editing.set(false);
   },

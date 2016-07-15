@@ -41,9 +41,23 @@ Template.wranglerExplanation.helpers({
   },
 });
 
+Template.wranglerExplanation.onRendered(() => {
+  function setChecked(checkedStatus) {
+    Meteor.users.update(Meteor.userId(), {
+      $set: {
+        "profile.patientCare.dismissedWranglerExplanation": checkedStatus
+      }
+    });
+  }
+
+  $(".ui.checkbox.dismiss-wrangler-explanation").checkbox({
+    onChecked() { setChecked(true); },
+    onUnchecked() { setChecked(false); },
+  });
+});
+
 Template.wranglerExplanation.events({
-  "click .explain-wrangler"(event, instance) {
-    // TODO: be able to not show again
+  "click .explain-wrangler-button"(event, instance) {
     $(".ui.modal.explain-wrangler").modal("show");
   },
 });

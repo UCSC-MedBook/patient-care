@@ -71,7 +71,7 @@
       </div>
     </a>
 
-    <a href={{pathFor "manageObjects" collectionSlug="gene-sets"}}
+    <a href={{pathFor "manageObjects" collectionSlug="gene-set-groups"}}
         class="ui card">
       <div class="content">
         <div class="header">Gene Sets</div>
@@ -105,15 +105,6 @@
   <h2>Other</h2>
   <div class="ui cards">
     {{> wranglerExplanation}}
-
-    <a href="https://medbook.slack.com" class="ui card">
-      <div class="content">
-        <div class="header">Contact Us</div>
-        <div class="description">
-          Get help or report bugs in real-time with core MedBook staff.
-        </div>
-      </div>
-    </a>
   </div>
 </template>
 
@@ -147,7 +138,7 @@
   {{! Link directly to wrangler if they've dismissed the modal.
       Otherwise show them a modal explaining what it is.}}
   <a href={{directWranglerLink}}
-      class="ui card {{#unless directWranglerLink}}explain-wrangler{{/unless}}">
+      class="ui card {{#unless directWranglerLink}}explain-wrangler-button{{/unless}}">
     <div class="content">
       <div class="header">Import files</div>
       <div class="description">
@@ -168,6 +159,12 @@
           Wrangler is a seperate app in MedBook, but all apps share
           the same data. For example, when you load a file into Wrangler,
           you will be able to use the data in Patient Care.
+        </p>
+        <p>
+          <div class="ui checkbox dismiss-wrangler-explanation">
+            <input type="checkbox" name="example">
+            <label>Don't show me this again.</label>
+          </div>
         </p>
       </div>
     </div>

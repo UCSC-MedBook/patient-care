@@ -120,7 +120,9 @@ function getObjects () {
   let managing = _.findWhere(managableTypes, { collectionSlug: slug });
 
   return MedBook.collections[managing.collectionName].find({}, {
-    sort: { name: 1 },
+    // need to sort by _id also to break ties: if two things have the same
+    // name, clicking on one can cause the list to reorder itself
+    sort: { name: 1, _id: 1 },
   });
 }
 

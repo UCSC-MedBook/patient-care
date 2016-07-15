@@ -28,7 +28,7 @@ Template.listLimmaGSEA.onCreated(function () {
 Template.listLimmaGSEA.onRendered(function () {
   let instance = this;
 
-  instance.$(".dropdown.gene-sets-dropdown").dropdown();
+  instance.$(".dropdown.gene-set-groups-dropdown").dropdown();
 });
 
 Template.listLimmaGSEA.helpers({

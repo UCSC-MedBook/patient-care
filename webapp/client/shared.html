@@ -90,3 +90,17 @@
     </div>
   </div>
 </template>
+
+<template name="listSamplesButton">
+  <div class="ui mini button show-list" style="display: inline;">
+    {{#if showList}}Hide{{else}}Show{{/if}} list
+  </div>
+
+  {{#if showList}}
+    <ul>
+      {{#each this}}
+        <li>{{this}}</li>
+      {{/each}}
+    </ul>
+  {{/if}}
+</template>

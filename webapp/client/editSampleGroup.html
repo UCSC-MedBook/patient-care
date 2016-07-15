@@ -151,12 +151,8 @@
       <i class="check icon"></i> Done
     </button>
   {{else}}
-    {{#if length options.samples}}
-      {{#each options.samples}}
-        <div class="ui label">
-          {{sample_label}}
-        </div>
-      {{/each}}
+    {{#if length options.sample_labels}}
+      {{> listSamplesButton options.sample_labels}}
     {{else}}
       None
     {{/if}}

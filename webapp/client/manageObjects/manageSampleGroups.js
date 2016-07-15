@@ -63,25 +63,6 @@ Template.showSampleGroup.helpers({
   },
 });
 
-// Template.listSamplesButton
-
-Template.listSamplesButton.onCreated(function () {
-  let instance = this;
-
-  let showAtFirst = instance.data.length < 100;
-  instance.showList = new ReactiveVar(showAtFirst);
-});
-
-Template.listSamplesButton.helpers({
-  showList() { return Template.instance().showList.get(); },
-});
-
-Template.listSamplesButton.events({
-  "click .show-list"(event, instance) {
-    instance.showList.set(!instance.showList.get());
-  },
-});
-
 // Template.waitAndThenPermissionDenied
 
 Template.waitAndThenPermissionDenied.onCreated(function() {
