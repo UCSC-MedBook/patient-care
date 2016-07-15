@@ -85,8 +85,8 @@ Picker.route("/download/:userId/:loginToken/" +
 
   // they made it! now send them the file
   res.setHeader("Content-Type", "text/tab-separated-values");
-  res.setHeader("Content-Disposition: attachment; " +
-      `filename='${object.name}.tsv';`);
+  res.setHeader("Content-Disposition",
+      `attachment; filename="${object.name}.tsv"`);
   res.writeHead(200);
 
   let cwd = ntemp.mkdirSync("DownloadData");
