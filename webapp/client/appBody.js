@@ -37,3 +37,9 @@ Template.appBody.helpers({
     ].indexOf(FlowRouter.getRouteName()) !== -1;
   },
 });
+
+Template.appBody.events({
+  "click .entering-the-dark-ages"(event, instance) {
+    $(".ui.modal.telescope-warning").modal("show");
+  },
+});

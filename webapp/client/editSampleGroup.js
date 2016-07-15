@@ -19,6 +19,7 @@ Template.editSampleGroup.onCreated(function () {
   }
 
   // store this seperately so that we don't look for a version every time
+  // something that's not the name changes
   instance.name = new ReactiveVar("");
 
   // look up the name in the sample groups this person has access to
@@ -158,7 +159,7 @@ Template.addFilterButton.events({
   },
   "click .add-exclude-sample-label-list-filter": function (event, instance) {
     instance.addFilter({
-      type: "exclude_include_sample_list",
+      type: "exclude_sample_list",
       options: {
         samples: []
       },
