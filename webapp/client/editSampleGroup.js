@@ -336,7 +336,7 @@ Template.formValuesFilter.onCreated(function(){
 
   let dataset_id = instance.data.data_set_id ;
   instance.available_filter_forms = new ReactiveVar(); 
-  instance.available_filter_forms.set([{name: 'Loading forms...', urlencodedId: 'Loadingforms...'}]);
+  instance.available_filter_forms.set([]);
   instance.filter_forms_options = new ReactiveVar();
   instance.filter_forms_options.set({});
 
@@ -344,14 +344,16 @@ Template.formValuesFilter.onCreated(function(){
   instance.active_crf = new ReactiveVar("");
 
   Meteor.call("getFormsMatchingDataSet", dataset_id, function(err, res){
+    console.log("got matching forms...");
     if(err) {
       instance.available_filter_forms.set([{name:'Error loading forms!', urlencodedId: 'Errorloadingforms!'}]);
       console.log("Error getting forms for this data set", err);
       throw err; 
     } else {
+      console.log("got forms!", res);
       // put the res in the available forms so that we can get it later
       instance.filter_forms_options.set(res.formFields);
-      instance.available_filter_forms.set(res.formIds);
+      instance.available_filter_forms.set(res);
     }
   });
 });
@@ -363,6 +365,9 @@ Template.formValuesFilterMenu.onRendered(function(){
 });
 
 Template.formValuesFilter.helpers({
+  getFilterFormsOptions: function() {
+
+  },
   getAvailableFilterForms: function() {
     return Template.instance().available_filter_forms.get();
   },
@@ -375,20 +380,29 @@ Template.formValuesFilter.events({
   "click .chosen-form-filter": function(event, instance) {
     
     let whichFormId = event.target.id;
+    console.log("looking for ", whichFormId); // XXX
 
     // then find it in filter_forms_options
-    let formFields = instance.filter_forms_options.get()[whichFormId];
+    let forms = instance.available_filter_forms.get();
+    console.log("got available forms", forms); // XXX
+    let chosenForm = _.find(forms, function(form){ return form.urlencodedID === whichFormId});
 
+    console.log("we chose you,", chosenForm); // XXX
+
+    let formFields = chosenForm.fields ;
+    
     // Then build the filters for the querybuilder
     let queryFilters = [];
-    for(field in formFields){
-      let fieldOptions = formFields[field];
+    for(let field of formFields){
+      console.log("adding to querybuilder", field); // XXX 
+      // field will be object with keys
+      // name, value_type, values
       queryFilters.push(
-        { id: field,
-          label: field,
-          type: "string",
+        { id: field.name,
+          label: field.name,
+          type: "string", // TODO use value_type
           input: "select",
-          values: fieldOptions,
+          values: field.values,
           operators: ['equal', 'not_equal', 'is_null', 'is_not_null'],
         }
       );

@@ -4,34 +4,34 @@ Meteor.methods({
     // the passed data set.
 
     // Return format
-    //     {
-    //        form_id_1 : {
-    //          form_name: name of my form
-    //          fields: [
+    //     [
+    //        {
+    //        form_id: ID,
+    //        form_name: name of my form,
+    //        fields: [
     //                {
     //                  name: field name
     //                  value_type: string etc
     //                  values: [ "value1", "value2",...]
     //                }, ...
     //            ]
-    //
-    //          }
-    //        form_id_2 : { ... }
-    //        ...
-    //     }
+    //         }
+    //     ]
     //
   getFormsMatchingDataSet: function(data_set_id) {
+
+    console.log("getting forms for", data_set_id); // XXX 
 
     check(data_set_id, String);
 
     // Client-side stub:
     if( Meteor.isClient) {
-      let stub = {
-        "placeholder_loadingforms" : {
-          "form_name" : "Loading forms...",
-          "fields": [] 
-        }
-      };
+      let stub = [{
+          urlencodedId: "placeholder_loadingforms",
+          name: "Loading forms...",
+          fields: [],
+        }];
+      console.log("returning client side stub", stub);
       return stub;
     }
 
@@ -42,14 +42,14 @@ Meteor.methods({
 
     let samples = dataset.sample_labels;
 
-    let formsWithFields = {} ;
+    let formsWithFields = [] ;
 
     // For each user-accessible form
     Forms.find().forEach(function(form){
       if (! user.hasAccess(form)) { return; }
 
       // Populate the form field table with its fields
-      let encoded_form_id = encodeURL(form._id);
+      let encoded_form_id = encodeURI(form._id);
       let sample_label_field = form.sample_label_field ;
  
       // Set up the fields to be populated with potential values
@@ -60,7 +60,7 @@ Meteor.methods({
         );
      
       // And add an array of available values. 
-      currentFormFields = _.map(current_form_fields, function(field){
+      currentFormFields = _.map(currentFormFields, function(field){
         field["values"] = [];
         return field;
       });
@@ -84,8 +84,11 @@ Meteor.methods({
         }
       });
              
-      formsWithFields[encoded_form_id] = {form_name:form.name  , fields: currentFormFields};
-
+      formsWithFields.push({
+        urlencodedId: encoded_form_id,
+        name: form.name,
+        fields: currentFormFields
+        });
     }); 
 
     console.log("finished making fields, returning:", formsWithFields);
