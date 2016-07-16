@@ -20,7 +20,7 @@ Meteor.methods({
     //
   getFormsMatchingDataSet: function(data_set_id) {
 
-    //console.log("getting forms for", data_set_id); // XXX 
+    //console.log("getting forms for", data_set_id); // XXX
 
     check(data_set_id, String);
 
@@ -31,7 +31,6 @@ Meteor.methods({
           name: "Loading forms...",
           fields: [],
         }];
-      console.log("returning client side stub", stub);
       return stub;
     }
 
@@ -41,9 +40,6 @@ Meteor.methods({
     user.ensureAccess(dataset);
 
     let samples = dataset.sample_labels;
-
-    console.log("samples are", samples);
-
     let formsWithFields = [] ;
 
     // For each user-accessible form, find records that match our samples
@@ -68,7 +64,7 @@ Meteor.methods({
 
       // Find all records in that form for our samples
       // and add its values to the values fields.
-      // However, don't populate the unique ID fields. 
+      // However, don't populate the unique ID fields.
       let fieldsToSkip = ["_id", sample_label_field, "form_id"];
 
       // in order to use sample_label_field as dynamic key,
@@ -77,9 +73,9 @@ Meteor.methods({
       sampleLabelQuery[sample_label_field] = {"$in": samples}
 
       let fullQuery = { "$and": [
-          sampleLabelQuery,
-          {"form_id" : form._id},
-         ]}
+        sampleLabelQuery,
+        {"form_id" : form._id},
+      ]}
 
       let foundAnyRecords = false; // Did we find any for this form?
 
@@ -87,14 +83,14 @@ Meteor.methods({
         foundAnyRecords = true;
 
         for(field in record){
-          if (fieldsToSkip.indexOf(field) === -1){ 
-      
+          if (fieldsToSkip.indexOf(field) === -1){
+
             // Find the form field by index in currentFormFields to update the .values of
             // would use _.findIndex , but our underscore.js isn't new enough :(
             //let fieldIdx = _.findIndex(currentFormFields, function(f){ return f.name === field ; });
             let fieldIdx = -1;
             for(let idx = 0; idx < currentFormFields.length; idx++){
-              if(currentFormFields[idx].name === field){ 
+              if(currentFormFields[idx].name === field){
                 fieldIdx = idx;
                 break;
               }
@@ -108,7 +104,7 @@ Meteor.methods({
           }
         }
       });
-             
+
       // Only include the form if there are any associated records in this dataset
       if(foundAnyRecords){
         formsWithFields.push({
@@ -117,7 +113,7 @@ Meteor.methods({
           fields: currentFormFields
         });
       }
-    }); 
+    });
 
     return formsWithFields ;
   },
@@ -150,33 +146,31 @@ Meteor.methods({
     user.ensureAccess(dataset);
     user.ensureAccess(form);
 
-    //console.log("Query to be run:", serialized_query); // XXX 
+    //console.log("Query to be run:", serialized_query); // XXX
     let query = {};
     // Confirm the query parses
-    try { 
+    try {
       query = JSON.parse(serialized_query);
     } catch (err) {
       if (err instanceof SyntaxError) {
         console.log("Couldn't parse JSON:", err.message);
         console.log("Tried to parse", serialized_query);
       }
-        throw err;
+      throw err;
     }
 
     // Construct the query to reference only records for the chosen form
 
     let sampleLabelQuery = {};
     sampleLabelQuery[sample_label_field] = {"$in": samples}
-    
+
     let querySpecificForm = {
-      "$and": [ 
+      "$and": [
         sampleLabelQuery,
         {"form_id" : form._id},
         query,
       ]
     }
-    
-    console.log("Query in form", querySpecificForm);
 
     // Run it, return sample IDs.
     let results = Records.find(querySpecificForm).fetch();
