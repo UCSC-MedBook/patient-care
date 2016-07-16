@@ -20,7 +20,7 @@ Meteor.methods({
     //
   getFormsMatchingDataSet: function(data_set_id) {
 
-    console.log("getting forms for", data_set_id); // XXX 
+    //console.log("getting forms for", data_set_id); // XXX 
 
     check(data_set_id, String);
 
@@ -51,14 +51,10 @@ Meteor.methods({
     Forms.find().forEach(function(form){
       if (! user.hasAccess(form)) { return; }
 
-      console.log("trying form", form); // XXX 
-
       // Populate the form field table with its fields
       let encoded_form_id = encodeURI(form._id);
       let sample_label_field = form.sample_label_field ;
 
-      console.log("SLF", sample_label_field);
- 
       // Set up the fields to be populated with potential values
       // Remove the sample_label_field from the fields because
       // we don't want to be able to query on every individual sample
@@ -70,13 +66,10 @@ Meteor.methods({
         }
       }
 
-      console.log("got CFFs", currentFormFields); // XXX 
-      
       // Find all records in that form for our samples
       // and add its values to the values fields.
       // However, don't populate the unique ID fields. 
       let fieldsToSkip = ["_id", sample_label_field, "form_id"];
-      console.log("bout to find records");
 
       // in order to use sample_label_field as dynamic key,
       // need to construct query in pieces
@@ -87,8 +80,6 @@ Meteor.methods({
           sampleLabelQuery,
           {"form_id" : form._id},
          ]}
-
-      console.log("going to run query", fullQuery); // XXX 
 
       let foundAnyRecords = false; // Did we find any for this form?
 
@@ -128,8 +119,6 @@ Meteor.methods({
       }
     }); 
 
-    console.log("finished making fields, returning:", formsWithFields);
-
     return formsWithFields ;
   },
   // Takes : data_set_id : data set to source samples from
@@ -146,8 +135,13 @@ Meteor.methods({
       return [];
     }
 
+    // console.log("got form id", form_id);
+
     let dataset = DataSets.findOne(data_set_id);
     let form = Forms.findOne({_id: form_id});
+
+    // console.log("found form with id", form);
+
     let samples = dataset.sample_labels;
     let sample_label_field = form.sample_label_field ;
 
@@ -156,7 +150,7 @@ Meteor.methods({
     user.ensureAccess(dataset);
     user.ensureAccess(form);
 
-    console.log("Query to be run:", serialized_query); // XXX 
+    //console.log("Query to be run:", serialized_query); // XXX 
     let query = {};
     // Confirm the query parses
     try { 
@@ -170,13 +164,19 @@ Meteor.methods({
     }
 
     // Construct the query to reference only records for the chosen form
+
+    let sampleLabelQuery = {};
+    sampleLabelQuery[sample_label_field] = {"$in": samples}
+    
     let querySpecificForm = {
       "$and": [ 
-        {sample_label_field: {$in: samples}},
+        sampleLabelQuery,
         {"form_id" : form._id},
         query,
       ]
     }
+    
+    console.log("Query in form", querySpecificForm);
 
     // Run it, return sample IDs.
     let results = Records.find(querySpecificForm).fetch();

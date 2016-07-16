@@ -203,10 +203,12 @@ Meteor.methods({
       dataSet.sample_count = dataSet.sample_labels.length;
       check(dataSet.sample_count, Number);
 
+      // Confirm the filter options (include / exclude sample list only)
       _.each(dataSet.filters, (filter) => {
-        check(filter.options.sample_labels, [String]);
-
-        filter.options.sample_count = filter.options.sample_labels.length;
+        if((filter.type === "include_sample_list")||(filter.type === "exclude_sample_list")){
+          check(filter.options.sample_labels, [String]);
+          filter.options.sample_count = filter.options.sample_labels.length;
+        }
       });
     });
 

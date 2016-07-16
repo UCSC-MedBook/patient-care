@@ -379,28 +379,21 @@ Template.formValuesFilter.helpers({
 Template.formValuesFilter.events({
   "click .chosen-form-filter": function(event, instance) {
     
+    // Find the fields for the selected form 
     let whichFormId = event.target.id;
-    console.log("looking for ", whichFormId); // XXX
-
-    // then find it in filter_forms_options
     let forms = instance.available_filter_forms.get();
-    console.log("got available forms", forms); // XXX
     let chosenForm = _.find(forms, function(form){ return form.urlencodedId === whichFormId});
-
-    console.log("we chose you,", chosenForm); // XXX
-
     let formFields = chosenForm.fields ;
     
     // Then build the filters for the querybuilder
     let queryFilters = [];
     for(let field of formFields){
-      console.log("adding to querybuilder", field); // XXX 
       // field will be object with keys
       // name, value_type, values
       queryFilters.push(
         { id: field.name,
           label: field.name,
-          type: "string", // TODO use value_type
+          type: "string", // TODO use value_type & propagate this through
           input: "select",
           values: field.values,
           operators: ['equal', 'not_equal', 'is_null', 'is_not_null'],
