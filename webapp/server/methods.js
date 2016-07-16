@@ -71,7 +71,10 @@ Meteor.methods({
     // and if so, return that job's _id
     // NOTE: I believe there could be a race condition here, but
     // I don't think Meteor handles more than one Meteor method at once.
-    let duplicateJob = Jobs.findOne({ args });
+    let duplicateJob = Jobs.findOne({
+      args,
+      collaborations: user.getCollaborations()
+    });
     if (duplicateJob) {
       return duplicateJob._id;
     }

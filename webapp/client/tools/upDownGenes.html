@@ -2,7 +2,7 @@
   {{#if Template.subscriptionsReady}}
     {{#with getJob}}
       <h1 class="title ui">
-        Outlier Analysis Result
+        <a href={{pathFor "listUpDownGenes"}}>Outlier Analysis</a> Result
       </h1>
 
       {{#if compare status "done"}}
