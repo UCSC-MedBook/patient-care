@@ -34,7 +34,7 @@
         </div>
         <div class="description">
           UCSC's N-of-One analysis tool to find gene outliers in a sample
-          with a defined comparison cohort
+          with a comparison cohort.
         </div>
       </div>
     </a>
@@ -42,15 +42,6 @@
 
   <h2>View and Manage Data</h2>
   <div class="ui cards">
-    <a href={{pathFor "manageCollaborations"}} class="ui card">
-      <div class="content">
-        <div class="header">Collaborations</div>
-        <div class="description">
-          Simplify sharing by creating collaborations.
-        </div>
-      </div>
-    </a>
-
     <a href={{pathFor "manageObjects" collectionSlug="data-sets"}}
         class="ui card">
       <div class="content">
@@ -74,9 +65,9 @@
     <a href={{pathFor "manageObjects" collectionSlug="gene-set-groups"}}
         class="ui card">
       <div class="content">
-        <div class="header">Gene Sets</div>
+        <div class="header">Gene Set Groups</div>
         <div class="description">
-          View gene sets available for GSEA.
+          View gene set groups available for GSEA.
         </div>
       </div>
     </a>
@@ -86,7 +77,7 @@
       <div class="content">
         <div class="header">Studies</div>
         <div class="description">
-          Define new samples in a study.
+          Define samples in a study.
         </div>
       </div>
     </a>
@@ -104,6 +95,15 @@
 
   <h2>Other</h2>
   <div class="ui cards">
+    <a href={{pathFor "manageCollaborations"}} class="ui card">
+      <div class="content">
+        <div class="header">Collaborations</div>
+        <div class="description">
+          Simplify sharing by creating collaborations.
+        </div>
+      </div>
+    </a>
+
     {{> wranglerExplanation}}
   </div>
 </template>

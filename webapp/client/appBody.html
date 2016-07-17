@@ -11,10 +11,10 @@
 
     <div class="ui menu">
       <a href={{pathFor "home"}} class="header item">
-        Patient Care
+        MedBook Patient Care
       </a>
 
-      <div class="ui simple dropdown item">
+      <a href={{pathFor "home"}} class="ui simple dropdown item">
         Tools
         <div class="menu">
           <a href={{pathFor "listLimmaGSEA"}} class="item">
@@ -27,15 +27,11 @@
             Outlier Analysis
           </a>
         </div>
-      </div>
+      </a>
 
-      <div class="ui simple dropdown item">
-        Data types
+      <a href={{pathFor "home"}} class="ui simple dropdown item">
+        Data
         <div class="menu">
-          <a href={{pathFor "manageCollaborations"}}
-              class="item">
-            Collaborations
-          </a>
           <a href={{pathFor "manageObjects" collectionSlug="data-sets"}}
               class="item">
             Data Sets
@@ -57,7 +53,12 @@
             Clinical Forms
           </a>
         </div>
-      </div>
+      </a>
+
+      <a href={{pathFor "manageCollaborations"}}
+          class="item">
+        Collaborations
+      </a>
 
       <div class="right menu">
         <div class="ui simple dropdown icon item">
@@ -136,80 +137,9 @@
       </div>
     </div>
 
-
-
-    <!-- <div style="margin-bottom: 15px;">
-      <div class="ui breadcrumb">
-        {{#breadcrumbItem isActive=(isActiveRoute "home")
-            href=(pathFor 'home')}}
-          MedBook Patient Care
-        {{/breadcrumbItem}}
-
-        {{#if or (isActiveRoute "listPatients") (isActiveRoute "patient")}}
-          {{#breadcrumbItem isActive=(isActiveRoute "listPatients")
-              href=(pathFor "listPatients")}}
-            Patients
-          {{/breadcrumbItem}}
-
-          {{#if isActiveRoute "patient"}}
-            {{#breadcrumbItem isActive=true
-                href=(pathFor "patient" patient_id=params.patient_id)}}
-              {{getPatientLabel}}
-            {{/breadcrumbItem}}
-          {{/if}}
-        {{/if}}
-
-        {{#if isActiveRoute "listLimmaGSEA"}}
-          {{#breadcrumbItem isActive=true}}
-            Limma <i class="right arrow icon"></i> GSEA
-          {{/breadcrumbItem}}
-        {{/if}}
-
-        {{#if isActiveRoute "listTumorMap"}}
-          {{#breadcrumbItem isActive=true}}
-            Tumor Map
-          {{/breadcrumbItem}}
-        {{/if}}
-
-        {{#if or (isActiveRoute "listUpDownGenes")
-            (isActiveRoute "upDownGenesJob")}}
-          {{#breadcrumbItem isActive=(isActiveRoute "listUpDownGenes")
-              href=(pathFor "listUpDownGenes")}}
-            Outlier Analysis
-          {{/breadcrumbItem}}
-        {{/if}}
-
-        {{#if isActiveRoute "upDownGenesJob"}}
-          {{#breadcrumbItem isActive=true}}
-            Result
-          {{/breadcrumbItem}}
-        {{/if}}
-
-        {{#if threeOr (isActiveRoute "manageCollaborations")
-            (isActiveRoute "createCollaboration")
-            (isActiveRoute "browseCollaborations")}}
-          {{#breadcrumbItem isActive=true}}
-            Collaborations
-          {{/breadcrumbItem}}
-        {{/if}}
-
-        {{#if isActiveRoute "manageObjects"}}
-          {{#breadcrumbItem isActive=true}}
-            Manage
-          {{/breadcrumbItem}}
-        {{/if}}
-
-        {{! Utility}}
-
-        {{#if invalidUrl}}
-          {{#breadcrumbItem isActive=true}}Invalid URL{{/breadcrumbItem}}
-        {{/if}}
-      </div>
-
-      <div style="float: right;">
-        {{> loginButtons}}
-      </div>
-    </div> -->
+    {{#unless isActiveRoute "home"}}
+      {{> siteBreadcrumbs}}
+    {{/unless}}
 
     {{#if loggingIn}}
       {{> loggingInMessage}}
@@ -221,19 +151,101 @@
           {{> loggingInMessage}}
         {{/if}}
       {{else}}
-        <div class="ui massive icon message">
-          <i class="warning sign icon"></i>
-          <div class="content">
-            <div class="header">
-              Not logged in!
-            </div>
-            <p>
-              Please log in to continue
-            </p>
-          </div>
-        </div>
+        {{> notLoggedIn}}
       {{/if}}
     {{/if}}
+  </div>
+</template>
+
+<template name="siteBreadcrumbs">
+  <div class="ui big breadcrumb">
+    {{#breadcrumbItem isActive=(isActiveRoute "home")
+        href=(pathFor "home")}}
+      Home
+    {{/breadcrumbItem}}
+
+    <!-- {{#if or (isActiveRoute "listPatients") (isActiveRoute "patient")}}
+      {{#breadcrumbItem isActive=(isActiveRoute "listPatients")
+          href=(pathFor "listPatients")}}
+        Patients
+      {{/breadcrumbItem}}
+
+      {{#if isActiveRoute "patient"}}
+        {{#breadcrumbItem isActive=true
+            href=(pathFor "patient" patient_id=params.patient_id)}}
+          {{getPatientLabel}}
+        {{/breadcrumbItem}}
+      {{/if}}
+    {{/if}} -->
+
+    {{#if isActiveRoute "listLimmaGSEA"}}
+      {{#breadcrumbItem isActive=true}}
+        Limma <i class="right arrow icon"></i> GSEA
+      {{/breadcrumbItem}}
+    {{/if}}
+
+    <!-- {{#if isActiveRoute "listTumorMap"}}
+      {{#breadcrumbItem isActive=true}}
+        Tumor Map
+      {{/breadcrumbItem}}
+    {{/if}} -->
+
+    {{#if or (isActiveRoute "listUpDownGenes")
+        (isActiveRoute "upDownGenesJob")}}
+      {{#breadcrumbItem isActive=(isActiveRoute "listUpDownGenes")
+          href=(pathFor "listUpDownGenes")}}
+        Outlier Analysis
+      {{/breadcrumbItem}}
+    {{/if}}
+
+    {{#if isActiveRoute "upDownGenesJob"}}
+      {{#breadcrumbItem isActive=true}}
+        Result
+      {{/breadcrumbItem}}
+    {{/if}}
+
+    {{#if threeOr (isActiveRoute "manageCollaborations")
+        (isActiveRoute "createCollaboration")
+        (isActiveRoute "browseCollaborations")}}
+      {{#breadcrumbItem isActive=true}}
+        Collaborations
+      {{/breadcrumbItem}}
+    {{/if}}
+
+    {{#if isActiveRoute "manageObjects"}}
+      {{#breadcrumbItem isActive=true}}
+        Manage data
+      {{/breadcrumbItem}}
+    {{/if}}
+
+    {{! Utility}}
+
+    {{#if invalidUrl}}
+      {{#breadcrumbItem isActive=true}}Invalid URL{{/breadcrumbItem}}
+    {{/if}}
+  </div>
+</template>
+
+<template name="notLoggedIn">
+  <div class="ui massive message">
+    <!-- <i class="warning sign icon"></i> -->
+    <div class="content">
+      <div class="header">
+        Welcome to MedBook!
+      </div>
+      <p>
+        MedBook allows you to run your <b>favorite bioinformatic tools</b>
+        with the touch of a button.
+      </p>
+      <p>
+        MedBook enables you to quickly compare private patient information with
+        <b>publically available data sets</b> and then easily
+        <b>share findings with collaborators</b>.
+      </p>
+      <p>
+        MedBook is currently in public beta and is free to use.
+      </p>
+    </div>
   </div>
 </template>
 
