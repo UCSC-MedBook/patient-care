@@ -360,35 +360,35 @@ Meteor.methods({
 
     return _.union(usersPersonalCollabs, user.getCollaborations());
   },
-  insertRecord: function(values) {
-    check(values, Object);
-
-    let nonValueFields = [
-      "collaborations",
-      "data_set_id",
-      "form_id",
-      "patient_label",
-      "sample_label",
-    ];
-
-    // remove added fields so that values is just the values
-    let record = _.pick(values, nonValueFields);
-    record.values = _.omit(values, nonValueFields);
-
-    let user = MedBook.ensureUser(Meteor.userId());
-    user.ensureAccess(Forms.findOne(record.form_id));
-    user.ensureAccess(DataSets.findOne(record.data_set_id));
-    user.ensureAccess(record.collaborations);
-
-    Records.insert(record);
-  },
-  insertForm: function(newForm) {
-    check(newForm, Forms.simpleSchema());
-
-    let user = MedBook.ensureUser(Meteor.userId());
-    user.ensureAccess(newForm);
-    Forms.insert(newForm);
-  },
+  // insertRecord: function(values) {
+  //   check(values, Object);
+  //
+  //   let nonValueFields = [
+  //     "collaborations",
+  //     "data_set_id",
+  //     "form_id",
+  //     "patient_label",
+  //     "sample_label",
+  //   ];
+  //
+  //   // remove added fields so that values is just the values
+  //   let record = _.pick(values, nonValueFields);
+  //   record.values = _.omit(values, nonValueFields);
+  //
+  //   let user = MedBook.ensureUser(Meteor.userId());
+  //   user.ensureAccess(Forms.findOne(record.form_id));
+  //   user.ensureAccess(DataSets.findOne(record.data_set_id));
+  //   user.ensureAccess(record.collaborations);
+  //
+  //   Records.insert(record);
+  // },
+  // insertForm: function(newForm) {
+  //   check(newForm, Forms.simpleSchema());
+  //
+  //   let user = MedBook.ensureUser(Meteor.userId());
+  //   user.ensureAccess(newForm);
+  //   Forms.insert(newForm);
+  // },
   insertCollaboration(newCollaboration) {
     check(newCollaboration, Collaborations.simpleSchema());
 
@@ -470,7 +470,7 @@ Meteor.methods({
       this.unblock();
 
       function getEmails(collabNames) {
-        // NOTE: will be very slow if there are many names
+        // NOTE: will be slow if there are many names
         return _.uniq(_.flatten(_.map(collabNames, (name) => {
           let user = MedBook.findUser({
             "collaborations.personal": name
@@ -483,16 +483,20 @@ Meteor.methods({
           } else {
             let collab = Collaborations.findOne({ name });
 
-            return getEmails(collab.getAssociatedCollaborators());
+            // sometimes the collab doesn't exist because the user
+            // deleted their accont, logged into Telescope, or changed
+            // their personal collaboration (can't yet, but maybe soon!)
+            if (collab) {
+              return getEmails(collab.getAssociatedCollaborators());
+            }
           }
         })));
       }
 
       let to = getEmails(collab.administrators);
-      let cc = user.collaborations.email_address;
 
       let requestorName = user.profile.firstName + " " + user.profile.lastName;
-      let subject = requestorName + " is requesting access to the " +
+      let subject = requestorName + " has requested access to the " +
           collab.name + " collaboration in MedBook";
 
       let url = "https://medbook.io/collaborations" +
@@ -503,7 +507,7 @@ Meteor.methods({
 
       Email.send({
         from: "ucscmedbook@gmail.com",
-        to, cc, subject, html,
+        to, subject, html,
       });
     } else {
       Collaborations.update(collaborationId, {

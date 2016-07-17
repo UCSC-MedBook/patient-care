@@ -1,6 +1,6 @@
 <head>
-  <script src="https://docs.handsontable.com/pro/1.3.4/bower_components/handsontable-pro/dist/handsontable.full.min.js"></script>
-  <link rel="stylesheet" href="https://docs.handsontable.com/pro/1.3.4/bower_components/handsontable-pro/dist/handsontable.full.min.css">
+  <!-- <script src="https://docs.handsontable.com/pro/1.3.4/bower_components/handsontable-pro/dist/handsontable.full.min.js"></script> -->
+  <!-- <link rel="stylesheet" href="https://docs.handsontable.com/pro/1.3.4/bower_components/handsontable-pro/dist/handsontable.full.min.css"> -->
 </head>
 
 <template name="appBody">
@@ -8,7 +8,6 @@
   {{> editCollaborationsModal}}
 
   <div class="ui container">
-
     <div class="ui menu">
       <a href={{pathFor "home"}} class="header item">
         MedBook Patient Care
@@ -137,9 +136,13 @@
       </div>
     </div>
 
-    {{#unless isActiveRoute "home"}}
-      {{> siteBreadcrumbs}}
-    {{/unless}}
+    {{! don't show the breadcrumbs on the not signed in page or
+        on the home page}}
+    {{#if currentMedBookUser}}
+      {{#unless isActiveRoute "home"}}
+        {{> siteBreadcrumbs}}
+      {{/unless}}
+    {{/if}}
 
     {{#if loggingIn}}
       {{> loggingInMessage}}
