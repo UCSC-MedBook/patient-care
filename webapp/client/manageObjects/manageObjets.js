@@ -57,6 +57,7 @@ Template.manageObjects.onRendered(function () {
   // });
   instance.$(".help.circle.icon").popup({
     position: "bottom left",
+    hoverable: true,
   });
 });
 
