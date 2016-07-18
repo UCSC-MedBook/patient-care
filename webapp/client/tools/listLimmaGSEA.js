@@ -18,8 +18,8 @@ Template.listLimmaGSEA.onCreated(function () {
       }),
     }
   }
-  instance.groupA = makeDefaultGroup("Group A", "sampleGroupA");
-  instance.groupB = makeDefaultGroup("Group B", "sampleGroupB");
+  instance.groupA = makeDefaultGroup("Reference group", "sampleGroupA");
+  instance.groupB = makeDefaultGroup("Experimental group", "sampleGroupB");
 
   instance.error = new ReactiveVar(null); // null = don't show
   instance.creatingJob = new ReactiveVar(false); // spinner on submit button
@@ -28,7 +28,7 @@ Template.listLimmaGSEA.onCreated(function () {
 Template.listLimmaGSEA.onRendered(function () {
   let instance = this;
 
-  instance.$(".dropdown.gene-sets-dropdown").dropdown();
+  instance.$(".dropdown.gene-set-groups-dropdown").dropdown();
 });
 
 Template.listLimmaGSEA.helpers({
@@ -214,6 +214,9 @@ Template.previouslyRunLimmaGSEA.helpers({
     });
   },
   getJobResultUrl: function() {
-    return "/tools/limma-gsea/" + this._id + "/index.html";
+    let userId = Meteor.userId();
+    let loginToken = Accounts._storedLoginToken();
+
+    return `/download/${userId}/${loginToken}/job-blob/${this._id}/index.html`;
   },
 });

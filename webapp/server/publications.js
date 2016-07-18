@@ -1,74 +1,74 @@
-// appBody metadata
+// // appBody metadata
+//
+// Meteor.publish("patientLabel", function(patientId) {
+//   let user = MedBook.ensureUser(this.userId);
+//   let patient = Patients.findOne(patientId);
+//   user.ensureAccess(patient);
+//
+//   return Patients.find(patientId, { fields: { patient_label: 1 } });
+// });
 
-Meteor.publish("patientLabel", function(patientId) {
-  let user = MedBook.ensureUser(this.userId);
-  let patient = Patients.findOne(patientId);
-  user.ensureAccess(patient);
-
-  return Patients.find(patientId, { fields: { patient_label: 1 } });
-});
-
-// patients
-
-Meteor.publish("patients", function(searchString) {
-  check(searchString, String);
-
-  let user = MedBook.ensureUser(this.userId);
-
-  let query = { collaborations: { $in: user.getCollaborations() } };
-
-  // only use regex if there's something to search for
-  if (searchString) {
-    query.patient_label = {
-      $regex: new RegExp(searchString, "i")
-    };
-  }
-
-  return Patients.find(query, {
-    sort: { patient_label: 1 }
-  });
-});
-
-Meteor.publish("patient", function (patientId) {
-  check(patientId, String);
-
-  let user = MedBook.ensureUser(this.userId);
-  let patient = Patients.findOne(patientId);
-  user.ensureAccess(patient);
-
-  return Patients.find(patientId);
-});
-
-Meteor.publish("sampleLoadedData", function (patientId, sample_label) {
-  check(patientId, String);
-
-  let user = MedBook.ensureUser(this.userId);
-  let patient = Patients.findOne(patientId);
-  user.ensureAccess(patient);
-
-  let sample = _.findWhere(patient.samples, { sample_label });
-
-  return DataSets.find(sample.data_set_id, {
-    fields: {
-      ["gene_expression_index." + sample_label]: 1
-    }
-  });
-});
-
-Meteor.publish("upDownGenes", function (data_set_id, patient_label) {
-  check([data_set_id, patient_label], [String]);
-
-  let user = MedBook.ensureUser(this.userId);
-  let dataSet = DataSets.findOne(data_set_id);
-  user.ensureAccess(dataSet);
-
-  return Jobs.find({
-    name: "UpDownGenes",
-    status: { $ne: "creating" },
-    "args.data_set_id": data_set_id,
-    "args.patient_label": patient_label,
-  });
-});
+// // patients
+//
+// Meteor.publish("patients", function(searchString) {
+//   check(searchString, String);
+//
+//   let user = MedBook.ensureUser(this.userId);
+//
+//   let query = { collaborations: { $in: user.getCollaborations() } };
+//
+//   // only use regex if there's something to search for
+//   if (searchString) {
+//     query.patient_label = {
+//       $regex: new RegExp(searchString, "i")
+//     };
+//   }
+//
+//   return Patients.find(query, {
+//     sort: { patient_label: 1 }
+//   });
+// });
+//
+// Meteor.publish("patient", function (patientId) {
+//   check(patientId, String);
+//
+//   let user = MedBook.ensureUser(this.userId);
+//   let patient = Patients.findOne(patientId);
+//   user.ensureAccess(patient);
+//
+//   return Patients.find(patientId);
+// });
+//
+// Meteor.publish("sampleLoadedData", function (patientId, sample_label) {
+//   check(patientId, String);
+//
+//   let user = MedBook.ensureUser(this.userId);
+//   let patient = Patients.findOne(patientId);
+//   user.ensureAccess(patient);
+//
+//   let sample = _.findWhere(patient.samples, { sample_label });
+//
+//   return DataSets.find(sample.data_set_id, {
+//     fields: {
+//       ["gene_expression_index." + sample_label]: 1
+//     }
+//   });
+// });
+//
+// Meteor.publish("upDownGenes", function (data_set_id, patient_label) {
+//   check([data_set_id, patient_label], [String]);
+//
+//   let user = MedBook.ensureUser(this.userId);
+//   let dataSet = DataSets.findOne(data_set_id);
+//   user.ensureAccess(dataSet);
+//
+//   return Jobs.find({
+//     name: "UpDownGenes",
+//     status: { $ne: "creating" },
+//     "args.data_set_id": data_set_id,
+//     "args.patient_label": patient_label,
+//   });
+// });
 
 // collaborations
 
@@ -93,17 +93,21 @@ Meteor.publish("browseCollaborations", function() {
   });
 });
 
-// manage DataSets/SampleGroups/GeneSetCollections
+// manageObjects
 
 var allowedCollections = [
   "DataSets",
   "SampleGroups",
   "GeneSetCollections",
+  "Forms",
+  "Studies",
 ];
 
 Meteor.publish("allOfCollectionOnlyName", function(collectionName) {
   check(collectionName, String);
   let user = MedBook.ensureUser(this.userId);
+
+  if (allowedCollections.indexOf(collectionName) === -1) return [];
 
   return MedBook.collections[collectionName].find({
     collaborations: { $in: user.getCollaborations() },
@@ -113,6 +117,8 @@ Meteor.publish("allOfCollectionOnlyName", function(collectionName) {
 Meteor.publish("objectFromCollection", function(collectionName, objectId) {
   check([collectionName, objectId], [String]);
   let user = MedBook.ensureUser(this.userId);
+
+  if (allowedCollections.indexOf(collectionName)  === -1) return [];
 
   return MedBook.collections[collectionName].find({
     _id: objectId,
@@ -130,12 +136,12 @@ Meteor.publish("dataSets", function() {
   });
 });
 
-Meteor.publish("dataSetNamesAndGeneExpression", function() {
+Meteor.publish("dataSetNamesSamples", function() {
   var user = MedBook.ensureUser(this.userId);
 
   return DataSets.find({
     collaborations: {$in: user.getCollaborations() },
-  }, { fields: { name: 1, gene_expression: 1 } });
+  }, { fields: { name: 1, sample_labels: 1 } });
 });
 
 Meteor.publish("jobsOfType", function (name) {
@@ -159,13 +165,13 @@ Meteor.publish("jobsOfType", function (name) {
   });
 });
 
-Meteor.publish("patientAndSampleLabels", function() {
-  var user = MedBook.ensureUser(this.userId);
-
-  return Patients.find({
-    collaborations: {$in: user.getCollaborations() },
-  }, { fields: { patient_label: 1, "samples.sample_label": 1 } });
-});
+// Meteor.publish("patientAndSampleLabels", function() {
+//   var user = MedBook.ensureUser(this.userId);
+//
+//   return Patients.find({
+//     collaborations: {$in: user.getCollaborations() },
+//   }, { fields: { patient_label: 1, "samples.sample_label": 1 } });
+// });
 
 // tools/OutlierAnalysis
 
@@ -181,30 +187,6 @@ Meteor.publish("upDownGenesJob", function (jobId) {
   user.ensureAccess(dataSet);
 
   return Jobs.find({ _id: jobId });
-});
-
-// experimenal
-
-Meteor.publish("forms", function () {
-  let user = MedBook.ensureUser(this.userId);
-
-  return Forms.find({
-    collaborations: { $in: user.getCollaborations() },
-  });
-});
-
-Meteor.publish("records", function(form_id) {
-  let user = MedBook.ensureUser(this.userId);
-
-  let form = Forms.findOne(form_id);
-
-
-
-  return Records.find({
-    collaborations: { $in: user.getCollaborations() },
-    form_id,
-    data_set_id,
-  });
 });
 
 // general

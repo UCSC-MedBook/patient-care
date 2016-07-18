@@ -23,7 +23,7 @@ Meteor.methods({
 
     // if we need to create a new sample group, do so
     if (formValues.sample_group_id === "creating") {
-      this.unblock()
+      this.unblock();
 
       let creatingError;
       Meteor.call("createSampleGroup", customSampleGroup, (err, ret) => {
@@ -71,7 +71,10 @@ Meteor.methods({
     // and if so, return that job's _id
     // NOTE: I believe there could be a race condition here, but
     // I don't think Meteor handles more than one Meteor method at once.
-    let duplicateJob = Jobs.findOne({ args });
+    let duplicateJob = Jobs.findOne({
+      args,
+      collaborations: user.getCollaborations()
+    });
     if (duplicateJob) {
       return duplicateJob._id;
     }
@@ -115,43 +118,76 @@ Meteor.methods({
       throw new Meteor.Error("non-unique-data-sets");
     }
 
-    // filter through each data sets
-    // - make sure they have access
-    // - filter the samples
+    // filter through each data set
     sampleGroup.data_sets = _.map(sampleGroup.data_sets,
         (sampleGroupDataSet) => {
+      // ensure access
       let dataSet = DataSets.findOne(sampleGroupDataSet.data_set_id);
       user.ensureAccess(dataSet);
 
-      // start with all the samples and then filter down from there
-      let sample_labels = dataSet.sample_labels;
+      // make sure they're all the same type
+      if (!sampleGroup.value_type) {
+        // infer from the data sets for now
+        sampleGroup.value_type = dataSet.value_type;
+      }
+
+      if (dataSet.value_type !== sampleGroup.value_type) {
+        throw new Meteor.Error("mixed-value-types", "Mixed value types",
+            "You can only create a sample group with data sets " +
+            "of a single value type.");
+      }
+
+      // don't trust the client's name or unfiltered count
+      sampleGroupDataSet.data_set_name = dataSet.name;
+      sampleGroupDataSet.unfiltered_sample_count = dataSet.sample_labels.length;
+
+      // Apply the sample group's filters.
+      // We start with all the sample labels in a data set.
+      // Then, apply filters as follows.
+      // -  Filter by form values: Run the passed query in mongo and remove all samples
+      //    that are not included in the query results
+      // -  Include Specific Samples : remove all samples NOT on the include list
+      // -  Exclude Specific Samples : remove all samples on the exclude list
+      let allSamples = dataSet.sample_labels;
+      let sample_labels = allSamples; // need a copy of this
+  
 
       _.each(sampleGroupDataSet.filters, (filter) => {
         let { options } = filter;
+  
+        if (filter.type === "form_values"){
+          // Run the mongo_query
+          // Get the result sample labels synchronously
+          let result_sample_labels = Meteor.call('getSamplesFromFormFilter', 
+            sampleGroupDataSet.data_set_id,
+            options.mongo_query,
+            options.form_id
+          );
 
-        if (filter.type === "sample_label_list") {
-          if (_.difference(options.sample_labels,
-              dataSet.sample_labels).length) {
+          console.log("Query found", result_sample_labels.length, "sample labels.");
+
+          sample_labels = _.intersection(sample_labels, result_sample_labels);
+
+        } else if (filter.type === "include_sample_list") {
+          if (_.difference(options.sample_labels, allSamples).length) {
             throw new Meteor.Error("invalid-sample-labels");
           }
-
           sample_labels = _.intersection(sample_labels, options.sample_labels);
-        } else if (filter.type === "exclude_sample_label_list") {
-          if (_.difference(options.sample_labels,
-              dataSet.sample_labels).length) {
+        } else if (filter.type === "exclude_sample_list") {
+          if (_.difference(options.sample_labels, allSamples).length) {
             throw new Meteor.Error("invalid-sample-labels");
           }
-
           sample_labels = _.difference(sample_labels, options.sample_labels);
-        } else if (filter.type === "data_loaded") {
-          if (options.gene_expression) {
-            sample_labels = _.intersection(sample_labels,
-                dataSet.gene_expression);
-          }
-        }else {
+        } else {
           throw new Meteor.Error("invalid-filter-type");
         }
       });
+
+      if (sample_labels.length === 0) {
+        throw new Meteor.Error("data-set-empty", "Data set empty",
+            `The ${dataSet.name} data set is empty. ` +
+            "Remove filters or remove the data set to continue.");
+      }
 
       sampleGroupDataSet.sample_labels = sample_labels;
 
@@ -167,8 +203,16 @@ Meteor.methods({
     _.each(sampleGroup.data_sets, (dataSet) => {
       check(dataSet.sample_labels, [String]);
 
-      dataSet.sample_labels_count = dataSet.sample_labels.length;
-      check(dataSet.sample_labels_count, Number);
+      dataSet.sample_count = dataSet.sample_labels.length;
+      check(dataSet.sample_count, Number);
+
+      // Confirm the filter options (include / exclude sample list only)
+      _.each(dataSet.filters, (filter) => {
+        if((filter.type === "include_sample_list")||(filter.type === "exclude_sample_list")){
+          check(filter.options.sample_labels, [String]);
+          filter.options.sample_count = filter.options.sample_labels.length;
+        }
+      });
     });
 
     // clone object to be checked for the schema
@@ -176,12 +220,15 @@ Meteor.methods({
     _.each(clonedSampleGroup.data_sets, (dataSet) => {
       // SimpleSchema can't handle large arrays, so set this to one
       dataSet.sample_labels = [ "yop" ];
-      dataSet.sample_labels_count = 1;
+      dataSet.sample_count = 1;
     });
 
     let validationContext = SampleGroups.simpleSchema().newContext();
     var isValid = validationContext.validate(clonedSampleGroup);
     if (!isValid) {
+      console.log("clonedSampleGroup:", clonedSampleGroup);
+      console.log("validationContext.invalidKeys():",
+          validationContext.invalidKeys());
       throw new Meteor.Error("invalid-sample-group");
     }
 
@@ -192,16 +239,16 @@ Meteor.methods({
     // insert asynchronously -- thanks @ArnaudGallardo
     var future = new Future();
     SampleGroups.rawCollection().insert(sampleGroup, (err, insertedObj) => {
-      if (err) future.throw(err);
-
+      // Need to either throw err, or return ID, but NOT BOTH 
+      // or will crash with "Future resolved more than once" error 
+      if (err) {
+       console.log("Creating sample group threw Future error:", err);
+       future.throw(err);
+      } else {
       future.return(newId);
+      }
     });
 
     return future.wait();
   },
-});
-
-Moko.ensureIndex(GeneExpression, {
-  gene_label: 1,
-  data_set_id: 1,
 });

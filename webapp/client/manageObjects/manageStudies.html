@@ -1,0 +1,124 @@
+<template name="introStudies">
+  <p>
+    Studies are a namespacing element for samples.
+    Each study has a study label that is prepended to each sample in the study.
+    This allows there to be a sample called A01 in multiple studies.
+  </p>
+  <p>
+    Studies are different from data sets. Studies do not have data
+    directly associated with them, and sharing a study will not share any
+    genomic or clinical information. Data sets and clinical forms can contain
+    data spanning multiple studies.
+  </p>
+</template>
+
+<template name="createStudy">
+  <h3>Create a new study</h3>
+
+  {{#autoForm id="insertStudy" schema=newStudySchema
+      type="method" meteormethod="insertStudy"}}
+    {{> afQuickField name="name" type="text"
+        placeholder="What do you want to call your study?"}}
+    {{> afQuickField name="description" type="textarea" rows="3"
+        placeholder="What is the study for? Has it been published?"}}
+
+    {{> afQuickField name="study_label" type="text"
+        placeholder="What is the study label?"}}
+
+    <div class="ui info message">
+      <div class="header">
+        What is a study label?
+      </div>
+      <p>
+        A study label is a string that will be prepended to each sample in the
+        study to make that sample unique across studies. For example, if the
+        study label is <code>beltron_2011</code> and the sample name is
+        <code>A01</code>, the sample will be called <code>beltron_2011/A01</code>.
+      </p>
+      <p>
+        Study labels can only contain letters, numbers, dashes, and underscores.
+      </p>
+    </div>
+
+    <button type="submit" class="ui primary button">Create!</button>
+  {{/autoForm}}
+</template>
+
+<template name="showStudy">
+  {{#if Template.subscriptionsReady}}
+    <p>
+      {{description}}
+    </p>
+
+    <table class="ui celled striped table">
+      <thead>
+        <tr>
+          <th colspan="2">
+            Metadata
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Study label</td>
+          <td><code>{{study_label}}</code></td>
+        </tr>
+        <tr>
+          <td>Samples</td>
+          <td>
+            {{#if sample_labels}}
+              {{length sample_labels}}
+            {{else}}
+              no data loaded
+            {{/if}}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    {{#if length sample_labels}}
+      <h4>Samples</h4>
+      {{> listSamplesButton sample_labels}}
+    {{else}}
+      <div class="ui message">
+        <div class="header">
+          No samples
+        </div>
+        <p>
+          Add samples using the form below.
+        </p>
+      </div>
+    {{/if}}
+
+    <h4>Add a sample</h4>
+
+    <div class="ui warning message">
+      <div class="header">
+        Adding a sample cannot be undone.
+      </div>
+      Once you add a sample to a study it cannot be removed.
+    </div>
+
+    {{#autoForm id="newSampleLabel" schema=newSampleSchema
+        type="method" meteormethod="newSampleLabel"}}
+      {{> afQuickField name="uq_sample_label" type="text"
+          placeholder=newSamplePlaceholder}}
+
+      {{> afQuickField name="study_label" type="hidden" value=../study_label}}
+
+      <button type="submit" class="ui primary button">Add sample</button>
+    {{/autoForm}}
+
+    <div class="ui info message">
+      <div class="header">
+        Bulk insert
+      </div>
+      <p>
+        To add many samples to a study, upload a sample definition file to
+        <a href="https://medbook.io/wrangler">Wrangler</a>.
+      </p>
+    </div>
+  {{else}}
+    {{> dataLoading}}
+  {{/if}}
+</template>

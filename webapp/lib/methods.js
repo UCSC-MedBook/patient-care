@@ -1,4 +1,184 @@
 Meteor.methods({
+    // Takes: data_set_id (string) -- ID of the target data set
+    // Finds all Forms that have a Record for at least one sample in
+    // the passed data set.
+
+    // Return format
+    //     [
+    //        {
+    //        form_id: ID,
+    //        form_name: name of my form,
+    //        fields: [
+    //                {
+    //                  name: field name
+    //                  value_type: string etc
+    //                  values: [ "value1", "value2",...]
+    //                }, ...
+    //            ]
+    //         }
+    //     ]
+    //
+  getFormsMatchingDataSet: function(data_set_id) {
+
+    //console.log("getting forms for", data_set_id); // XXX
+
+    check(data_set_id, String);
+
+    // Client-side stub:
+    if( Meteor.isClient) {
+      let stub = [{
+          urlencodedId: "placeholder_loadingforms",
+          name: "Loading forms...",
+          fields: [],
+        }];
+      return stub;
+    }
+
+    // Permissions
+    let dataset = DataSets.findOne(data_set_id);
+    let user = MedBook.ensureUser(Meteor.userId());
+    user.ensureAccess(dataset);
+
+    let samples = dataset.sample_labels;
+    let formsWithFields = [] ;
+
+    // For each user-accessible form, find records that match our samples
+    // if we found any, include the form as an option to pick
+    Forms.find().forEach(function(form){
+      if (! user.hasAccess(form)) { return; }
+
+      // Populate the form field table with its fields
+      let encoded_form_id = encodeURI(form._id);
+      let sample_label_field = form.sample_label_field ;
+
+      // Set up the fields to be populated with potential values
+      // Remove the sample_label_field from the fields because
+      // we don't want to be able to query on every individual sample
+      let currentFormFields = [];
+      for(field of form.fields){
+        if(field.name !== sample_label_field){
+          field.values = [];  // this is ok -- won't write back to DB
+          currentFormFields.push(field);
+        }
+      }
+
+      // Find all records in that form for our samples
+      // and add its values to the values fields.
+      // However, don't populate the unique ID fields.
+      let fieldsToSkip = ["_id", sample_label_field, "form_id"];
+
+      // in order to use sample_label_field as dynamic key,
+      // need to construct query in pieces
+      let sampleLabelQuery = {};
+      sampleLabelQuery[sample_label_field] = {"$in": samples}
+
+      let fullQuery = { "$and": [
+        sampleLabelQuery,
+        {"form_id" : form._id},
+      ]}
+
+      let foundAnyRecords = false; // Did we find any for this form?
+
+      Records.find(fullQuery).forEach(function(record){
+        foundAnyRecords = true;
+
+        for(field in record){
+          if (fieldsToSkip.indexOf(field) === -1){
+
+            // Find the form field by index in currentFormFields to update the .values of
+            // would use _.findIndex , but our underscore.js isn't new enough :(
+            //let fieldIdx = _.findIndex(currentFormFields, function(f){ return f.name === field ; });
+            let fieldIdx = -1;
+            for(let idx = 0; idx < currentFormFields.length; idx++){
+              if(currentFormFields[idx].name === field){
+                fieldIdx = idx;
+                break;
+              }
+            }
+            // If the desired field exists in the form
+            if(fieldIdx >= 0){
+              currentFormFields[fieldIdx].values = _.union([record[field]], currentFormFields[fieldIdx].values );
+            }
+            // console.log("populating", field);
+            // console.log("Added ", record[field], "and it's now", currentFormFields);
+          }
+        }
+      });
+
+      // Only include the form if there are any associated records in this dataset
+      if(foundAnyRecords){
+        formsWithFields.push({
+          urlencodedId: encoded_form_id,
+          name: form.name,
+          fields: currentFormFields
+        });
+      }
+    });
+
+    return formsWithFields ;
+  },
+  // Takes : data_set_id : data set to source samples from
+  //        serialized_query : stringifed JSON Mongo query
+  //        form_id -- ID of the form whose fields we're querying on
+  getSamplesFromFormFilter: function(data_set_id, serialized_query, form_id){
+
+    check(data_set_id, String);
+    check(serialized_query, String);
+    check(form_id, String);
+
+    // Don't run client-side.
+    if(Meteor.isClient){
+      return [];
+    }
+
+    // console.log("got form id", form_id);
+
+    let dataset = DataSets.findOne(data_set_id);
+    let form = Forms.findOne({_id: form_id});
+
+    // console.log("found form with id", form);
+
+    let samples = dataset.sample_labels;
+    let sample_label_field = form.sample_label_field ;
+
+    // Confirm permissions
+    let user = MedBook.ensureUser(Meteor.userId());
+    user.ensureAccess(dataset);
+    user.ensureAccess(form);
+
+    //console.log("Query to be run:", serialized_query); // XXX
+    let query = {};
+    // Confirm the query parses
+    try {
+      query = JSON.parse(serialized_query);
+    } catch (err) {
+      if (err instanceof SyntaxError) {
+        console.log("Couldn't parse JSON:", err.message);
+        console.log("Tried to parse", serialized_query);
+      }
+      throw err;
+    }
+
+    // Construct the query to reference only records for the chosen form
+
+    let sampleLabelQuery = {};
+    sampleLabelQuery[sample_label_field] = {"$in": samples}
+
+    let querySpecificForm = {
+      "$and": [
+        sampleLabelQuery,
+        {"form_id" : form._id},
+        query,
+      ]
+    }
+
+    // Run it, return sample IDs.
+    let results = Records.find(querySpecificForm).fetch();
+    let foundSamples = _.pluck(results, sample_label_field);
+
+    return foundSamples;
+  },
+
   getSampleGroupVersion: function (name) {
     check(name, String);
 
@@ -180,35 +360,35 @@ Meteor.methods({
 
     return _.union(usersPersonalCollabs, user.getCollaborations());
   },
-  insertRecord: function(values) {
-    check(values, Object);
-
-    let nonValueFields = [
-      "collaborations",
-      "data_set_id",
-      "form_id",
-      "patient_label",
-      "sample_label",
-    ];
-
-    // remove added fields so that values is just the values
-    let record = _.pick(values, nonValueFields);
-    record.values = _.omit(values, nonValueFields);
-
-    let user = MedBook.ensureUser(Meteor.userId());
-    user.ensureAccess(Forms.findOne(record.form_id));
-    user.ensureAccess(DataSets.findOne(record.data_set_id));
-    user.ensureAccess(record.collaborations);
-
-    Records.insert(record);
-  },
-  insertForm: function(newForm) {
-    check(newForm, Forms.simpleSchema());
-
-    let user = MedBook.ensureUser(Meteor.userId());
-    user.ensureAccess(newForm);
-    Forms.insert(newForm);
-  },
+  // insertRecord: function(values) {
+  //   check(values, Object);
+  //
+  //   let nonValueFields = [
+  //     "collaborations",
+  //     "data_set_id",
+  //     "form_id",
+  //     "patient_label",
+  //     "sample_label",
+  //   ];
+  //
+  //   // remove added fields so that values is just the values
+  //   let record = _.pick(values, nonValueFields);
+  //   record.values = _.omit(values, nonValueFields);
+  //
+  //   let user = MedBook.ensureUser(Meteor.userId());
+  //   user.ensureAccess(Forms.findOne(record.form_id));
+  //   user.ensureAccess(DataSets.findOne(record.data_set_id));
+  //   user.ensureAccess(record.collaborations);
+  //
+  //   Records.insert(record);
+  // },
+  // insertForm: function(newForm) {
+  //   check(newForm, Forms.simpleSchema());
+  //
+  //   let user = MedBook.ensureUser(Meteor.userId());
+  //   user.ensureAccess(newForm);
+  //   Forms.insert(newForm);
+  // },
   insertCollaboration(newCollaboration) {
     check(newCollaboration, Collaborations.simpleSchema());
 
@@ -290,7 +470,7 @@ Meteor.methods({
       this.unblock();
 
       function getEmails(collabNames) {
-        // NOTE: will be very slow if there are many names
+        // NOTE: will be slow if there are many names
         return _.uniq(_.flatten(_.map(collabNames, (name) => {
           let user = MedBook.findUser({
             "collaborations.personal": name
@@ -303,19 +483,23 @@ Meteor.methods({
           } else {
             let collab = Collaborations.findOne({ name });
 
-            return getEmails(collab.getAssociatedCollaborators());
+            // sometimes the collab doesn't exist because the user
+            // deleted their accont, logged into Telescope, or changed
+            // their personal collaboration (can't yet, but maybe soon!)
+            if (collab) {
+              return getEmails(collab.getAssociatedCollaborators());
+            }
           }
         })));
       }
 
       let to = getEmails(collab.administrators);
-      let cc = user.collaborations.email_address;
 
       let requestorName = user.profile.firstName + " " + user.profile.lastName;
-      let subject = requestorName + " is requesting access to the " +
+      let subject = requestorName + " has requested access to the " +
           collab.name + " collaboration in MedBook";
 
-      let url = "https://medbook.io/patient-care/collaborations" +
+      let url = "https://medbook.io/collaborations" +
           "?collaboration_id=" + collab._id;
       let html = "You can view pending requests for access " +
           "<a href=" + url + ">here</a>. <br><br>Email " + requestorName +
@@ -323,7 +507,7 @@ Meteor.methods({
 
       Email.send({
         from: "ucscmedbook@gmail.com",
-        to, cc, subject, html,
+        to, subject, html,
       });
     } else {
       Collaborations.update(collaborationId, {
@@ -440,6 +624,9 @@ Meteor.methods({
       "Jobs",
       "DataSets",
       "SampleGroups",
+      "Forms",
+      "GeneSetCollections",
+      "Studies",
     ];
     if (removeAllowedCollections.indexOf(collectionName) === -1) {
       throw new Meteor.Error("permission-denied");
@@ -476,7 +663,12 @@ Meteor.methods({
 
   // manage data sets
   insertDataSet(newDataSet) {
-    check(newDataSet, DataSets.simpleSchema().pick(["name", "description"]));
+    check(newDataSet, DataSets.simpleSchema().pick([
+      "name",
+      "description",
+      "value_type",
+      "metadata",
+    ]));
 
     var user = MedBook.ensureUser(Meteor.userId());
 
@@ -485,17 +677,51 @@ Meteor.methods({
   },
   newSampleLabel(sampleDefinition) {
     check(sampleDefinition, new SimpleSchema({
-      data_set_id: { type: String },
-      sample_label: { type: String },
+      study_label: { type: String },
+      uq_sample_label: { type: String },
     }));
 
-    let user = MedBook.findUser(Meteor.userId());
-    user.ensureAccess(DataSets.findOne(sampleDefinition.data_set_id));
+    let { uq_sample_label, study_label } = sampleDefinition;
 
-    DataSets.update(sampleDefinition.data_set_id, {
-      $push: {
-        sample_labels: sampleDefinition.sample_label
+    let user = MedBook.findUser(Meteor.userId());
+    user.ensureAccess(Studies.findOne({ study_label }));
+
+    let sample_label = study_label + "/" + uq_sample_label;
+    if (!sample_label.match(MedBook.sampleLabelRegex)) {
+      throw new Meteor.Error("invalid-sample-label");
+    }
+
+    Studies.update({ study_label }, {
+      $addToSet: {
+        sample_labels: sample_label
       }
     });
+  },
+
+  studyLabelTaken(study_label) {
+    check(study_label, String);
+
+    let user = MedBook.findUser(Meteor.userId());
+
+    return !!Studies.findOne({ study_label });
+  },
+  insertStudy(newStudy) {
+    check(newStudy, Studies.simpleSchema().pick([
+      "name",
+      "description",
+      "study_label",
+    ]));
+
+    let user = MedBook.findUser(Meteor.userId());
+
+    newStudy.collaborations = [ user.personalCollaboration() ];
+
+    // must be unique
+    if (Meteor.call("studyLabelTaken", newStudy.study_label)) {
+      console.log("throw it out");
+      throw new Meteor.Error("study-label-not-unique");
+    }
+
+    return Studies.insert(newStudy);
   },
 });

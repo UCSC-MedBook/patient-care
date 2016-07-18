@@ -1,6 +1,6 @@
 <head>
-  <script src="https://docs.handsontable.com/pro/1.3.4/bower_components/handsontable-pro/dist/handsontable.full.min.js"></script>
-  <link rel="stylesheet" href="https://docs.handsontable.com/pro/1.3.4/bower_components/handsontable-pro/dist/handsontable.full.min.css">
+  <!-- <script src="https://docs.handsontable.com/pro/1.3.4/bower_components/handsontable-pro/dist/handsontable.full.min.js"></script> -->
+  <!-- <link rel="stylesheet" href="https://docs.handsontable.com/pro/1.3.4/bower_components/handsontable-pro/dist/handsontable.full.min.css"> -->
 </head>
 
 <template name="appBody">
@@ -8,107 +8,141 @@
   {{> editCollaborationsModal}}
 
   <div class="ui container">
-    <div style="margin-bottom: 15px;">
-      <div class="ui breadcrumb large">
-        {{#breadcrumbItem isActive=(isActiveRoute "home")
-            href=(pathFor 'home')}}
-          MedBook Patient Care
-        {{/breadcrumbItem}}
+    <div class="ui menu">
+      <a href={{pathFor "home"}} class="header item">
+        MedBook Patient Care
+      </a>
 
-        {{#if or (isActiveRoute "listPatients") (isActiveRoute "patient")}}
-          {{#breadcrumbItem isActive=(isActiveRoute "listPatients")
-              href=(pathFor "listPatients")}}
-            Patients
-          {{/breadcrumbItem}}
+      <a href={{pathFor "home"}} class="ui simple dropdown item">
+        Tools
+        <div class="menu">
+          <a href={{pathFor "listLimmaGSEA"}} class="item">
+            Limma <i class="right arrow icon"></i> GSEA
+          </a>
+          <!-- <a href={{pathFor "listTumorMap"}} class="item">
+            Tumor Map
+          </a> -->
+          <a href={{pathFor "listUpDownGenes"}} class="item">
+            Outlier Analysis
+          </a>
+        </div>
+      </a>
 
-          {{#if isActiveRoute "patient"}}
-            {{#breadcrumbItem isActive=true
-                href=(pathFor "patient" patient_id=params.patient_id)}}
-              {{getPatientLabel}}
-            {{/breadcrumbItem}}
-          {{/if}}
-        {{/if}}
-
-        {{#if activeRouteIsInTools}}
-          {{#breadcrumbItem isActive=(isActiveRoute "listTools")
-              href=(pathFor "listTools")}}
-            Tools
-          {{/breadcrumbItem}}
-
-          {{#if isActiveRoute "listLimmaGSEA"}}
-            {{#breadcrumbItem isActive=true}}
-              Limma <i class="right arrow icon"></i> GSEA
-            {{/breadcrumbItem}}
-          {{/if}}
-
-          {{#if isActiveRoute "listTumorMap"}}
-            {{#breadcrumbItem isActive=true}}
-              Tumor Map
-            {{/breadcrumbItem}}
-          {{/if}}
-
-          {{#if or (isActiveRoute "listUpDownGenes")
-              (isActiveRoute "upDownGenesJob")}}
-            {{#breadcrumbItem isActive=(isActiveRoute "listUpDownGenes")
-                href=(pathFor "listUpDownGenes")}}
-              Outlier Analysis
-            {{/breadcrumbItem}}
-          {{/if}}
-
-          {{#if isActiveRoute "upDownGenesJob"}}
-            {{#breadcrumbItem isActive=true}}
-              Result
-            {{/breadcrumbItem}}
-          {{/if}}
-        {{/if}}
-
-        {{#if threeOr (isActiveRoute "manageCollaborations")
-            (isActiveRoute "createCollaboration")
-            (isActiveRoute "browseCollaborations")}}
-          {{#breadcrumbItem isActive=true}}
-            Collaborations
-          {{/breadcrumbItem}}
-        {{/if}}
-
-        {{#if or (isActiveRoute "manageDataSets")
-            (isActiveRoute "createDataSet")}}
-          {{#breadcrumbItem isActive=true}}
+      <a href={{pathFor "manageObjects"}} class="ui simple dropdown item">
+        Data
+        <div class="menu">
+          <a href={{pathFor "manageObjects" collectionSlug="data-sets"}}
+              class="item">
             Data Sets
-          {{/breadcrumbItem}}
-        {{/if}}
-
-        {{#if or (isActiveRoute "manageSampleGroups")
-            (isActiveRoute "createSampleGroup")}}
-          {{#breadcrumbItem isActive=true}}
+          </a>
+          <a href={{pathFor "manageObjects" collectionSlug="sample-groups"}}
+              class="item">
             Sample Groups
-          {{/breadcrumbItem}}
-        {{/if}}
+          </a>
+          <a href={{pathFor "manageObjects" collectionSlug="gene-set-groups"}}
+              class="item">
+            Gene Set Groups
+          </a>
+          <a href={{pathFor "manageObjects" collectionSlug="studies"}}
+              class="item">
+            Studies
+          </a>
+          <a href={{pathFor "manageObjects" collectionSlug="clinical-forms"}}
+              class="item">
+            Clinical Forms
+          </a>
+        </div>
+      </a>
 
-        {{! Experimental}}
+      <a href={{pathFor "manageCollaborations"}}
+          class="item">
+        Collaborations
+      </a>
 
-        {{#if isActiveRoute "createRecord"}}
-          {{#breadcrumbItem isActive=true}}Create record{{/breadcrumbItem}}
-        {{/if}}
+      <div class="right menu">
+        <div class="ui simple dropdown icon item">
+          <i class="alarm icon"></i>
+          <!-- <div class="floating ui red label">3</div> -->
+          <div class="menu">
+            <div class="item">
+              No notifications
+            </div>
+          </div>
+        </div>
+        <div class="ui simple dropdown icon item">
+          <i class="info circle icon"></i>
+          <div class="menu">
+            {{> chatWithUsOnSlack}}
+            <a href="mailto:ucscmedbook@gmail.com" class="item">
+              Send us an email
+            </a>
+          </div>
+        </div>
+        <div class="ui simple dropdown icon item">
+          <i class="grid layout icon"></i>
+          <div class="menu">
+            <a href={{pathFor "home"}} class="item">
+              Patient Care
+            </a>
+            <a href="https://medbook.io/wrangler" class="item">
+              Wrangler
+            </a>
 
-        {{#if isActiveRoute "createForm"}}
-          {{#breadcrumbItem isActive=true}}Create form{{/breadcrumbItem}}
-        {{/if}}
-
-        {{#if isActiveRoute "editRecords"}}
-          {{#breadcrumbItem isActive=true}}Edit records{{/breadcrumbItem}}
-        {{/if}}
-
-        {{! Utility}}
-
-        {{#if invalidUrl}}
-          {{#breadcrumbItem isActive=true}}Invalid URL{{/breadcrumbItem}}
-        {{/if}}
-      </div>
-
-      <div style="float: right;">
-        {{> loginButtons}}
+            <a href="" class="item entering-the-dark-ages">
+              Old home page
+            </a>
+            <div class="ui modal telescope-warning">
+              <i class="close icon"></i>
+              <div class="header">
+                Are you sure?
+              </div>
+              <div class="content">
+                <div class="description">
+                  <div class="ui header">
+                    You are about to go to a deprecated app.
+                  </div>
+                  <p>
+                    You are about to be directed to Telescope, the app that
+                    used to be the front page of MedBook.
+                  </p>
+                  <p>
+                    Telescope uses an old database, and you may see
+                    <b>contradictory data</b> (specifically regarding which
+                    collaborations you're in).
+                  </p>
+                  <p>
+                    Opening Telescope is <b>known to cause problems</b> with
+                    the current apps and it is not recommended that
+                    you proceed.
+                  </p>
+                </div>
+              </div>
+              <div class="actions">
+                <div class="ui secondary cancel button">
+                  Go back
+                </div>
+                <a href="https://medbook.io/telescope"
+                    class="ui negative right labeled icon button">
+                  I understand the risks
+                  <i class="right arrow icon"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="item">
+          {{> loginButtons}}
+        </div>
       </div>
     </div>
+
+    {{! don't show the breadcrumbs on the not signed in page or
+        on the home page}}
+    {{#if currentMedBookUser}}
+      {{#unless isActiveRoute "home"}}
+        {{> siteBreadcrumbs}}
+      {{/unless}}
+    {{/if}}
 
     {{#if loggingIn}}
       {{> loggingInMessage}}
@@ -120,19 +154,143 @@
           {{> loggingInMessage}}
         {{/if}}
       {{else}}
-        <div class="ui massive icon message">
-          <i class="warning sign icon"></i>
-          <div class="content">
-            <div class="header">
-              Not logged in!
-            </div>
-            <p>
-              Please log in to continue
-            </p>
-          </div>
-        </div>
+        {{> notLoggedIn}}
       {{/if}}
     {{/if}}
+  </div>
+</template>
+
+<template name="siteBreadcrumbs">
+  <div class="ui big breadcrumb">
+    {{#breadcrumbItem isActive=(isActiveRoute "home")
+        href=(pathFor "home")}}
+      Home
+    {{/breadcrumbItem}}
+
+    <!-- {{#if or (isActiveRoute "listPatients") (isActiveRoute "patient")}}
+      {{#breadcrumbItem isActive=(isActiveRoute "listPatients")
+          href=(pathFor "listPatients")}}
+        Patients
+      {{/breadcrumbItem}}
+
+      {{#if isActiveRoute "patient"}}
+        {{#breadcrumbItem isActive=true
+            href=(pathFor "patient" patient_id=params.patient_id)}}
+          {{getPatientLabel}}
+        {{/breadcrumbItem}}
+      {{/if}}
+    {{/if}} -->
+
+    {{#if isActiveRoute "listLimmaGSEA"}}
+      {{#breadcrumbItem isActive=true}}
+        Limma <i class="right arrow icon"></i> GSEA
+      {{/breadcrumbItem}}
+    {{/if}}
+
+    <!-- {{#if isActiveRoute "listTumorMap"}}
+      {{#breadcrumbItem isActive=true}}
+        Tumor Map
+      {{/breadcrumbItem}}
+    {{/if}} -->
+
+    {{#if or (isActiveRoute "listUpDownGenes")
+        (isActiveRoute "upDownGenesJob")}}
+      {{#breadcrumbItem isActive=(isActiveRoute "listUpDownGenes")
+          href=(pathFor "listUpDownGenes")}}
+        Outlier Analysis
+      {{/breadcrumbItem}}
+    {{/if}}
+
+    {{#if isActiveRoute "upDownGenesJob"}}
+      {{#breadcrumbItem isActive=true}}
+        Result
+      {{/breadcrumbItem}}
+    {{/if}}
+
+    {{#if threeOr (isActiveRoute "manageCollaborations")
+        (isActiveRoute "createCollaboration")
+        (isActiveRoute "browseCollaborations")}}
+      {{#breadcrumbItem isActive=true}}
+        Collaborations
+      {{/breadcrumbItem}}
+    {{/if}}
+
+    {{#if isActiveRoute "manageObjects"}}
+      {{#breadcrumbItem isActive=true}}
+        Manage data
+      {{/breadcrumbItem}}
+    {{/if}}
+
+    {{! Utility}}
+
+    {{#if invalidUrl}}
+      {{#breadcrumbItem isActive=true}}Invalid URL{{/breadcrumbItem}}
+    {{/if}}
+  </div>
+</template>
+
+<template name="notLoggedIn">
+  <div class="ui massive message">
+    <!-- <i class="warning sign icon"></i> -->
+    <div class="content">
+      <div class="header">
+        Welcome to MedBook!
+      </div>
+      <p>
+        MedBook allows you to run your favorite <b>bioinformatic tools</b>
+        with the touch of a button.
+      </p>
+      <p>
+        MedBook enables you to quickly compare private patient information with
+        <b>publically available data sets</b> and then securely
+        <b>share findings with collaborators</b>.
+      </p>
+      <p>
+        MedBook is currently in public beta and is free to use.
+      </p>
+    </div>
+  </div>
+</template>
+
+<template name="chatWithUsOnSlack">
+  <a href={{directSlackLink}}
+      class="item {{#unless directSlackLink}}explain-slack-button{{/unless}}">
+    Chat with us on Slack
+  </a>
+  <div class="ui modal explain-slack">
+    <i class="close icon"></i>
+    <div class="header">
+      Chatting with us with Slack
+    </div>
+    <div class="content">
+      <div class="description">
+        <div class="ui header">What is Slack?</div>
+        <p>
+          Slack is an instant messaging app that we here in the
+          MedBook team use to communicate.
+        </p>
+        <p>
+          You can reach us quickly and easily to request a
+          feature or to get help with a problem you're having.
+        </p>
+        <p>
+          <div class="ui checkbox dismiss-slack-explanation">
+            <input type="checkbox" name="example">
+            <label>Don't show me this again.</label>
+          </div>
+        </p>
+      </div>
+    </div>
+    <div class="actions">
+      <div class="ui secondary cancel button">
+        Close
+      </div>
+      <a href="https://medbook.slack.com"
+          class="ui primary right labeled icon ok button">
+        Take me there
+        <i class="right arrow icon"></i>
+      </a>
+    </div>
   </div>
 </template>
 
@@ -163,18 +321,6 @@
   </div>
 </template>
 
-<template name="dataLoading">
-  <div class="ui icon message">
-    <i class="notched circle loading icon"></i>
-    <div class="content">
-      <div class="header">
-        One moment please...
-      </div>
-      <p>We're fetching that data for you.</p>
-    </div>
-  </div>
-</template>
-
 <template name="routeNotFound">
   <div class="ui message massive">
     <div class="header">Invalid URL</div>
@@ -192,12 +338,4 @@
       If you think you are seeing this message in error, please {{> contactUsButton}}
     </p>
   </div>
-</template>
-
-<template name="contactUsButton">
-  <a href="mailto:ucscmedbook@gmail.com?subject=MedBook%20Patient%20Care"
-      class="ui button teal">
-    <i class="bug icon"></i>
-    Contact MedBook Team
-  </a>
 </template>
