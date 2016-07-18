@@ -139,7 +139,9 @@
   {{! Link directly to wrangler if they've dismissed the modal.
       Otherwise show them a modal explaining what it is.}}
   <a href={{directWranglerLink}}
-      class="ui card {{#unless directWranglerLink}}explain-wrangler-button{{/unless}}">
+      target={{#if directWranglerLink}}"_self"{{/if}}
+      class="ui card
+          {{#unless directWranglerLink}}explain-wrangler-button{{/unless}}">
     <div class="content">
       <div class="header">Import files</div>
       <div class="description">
