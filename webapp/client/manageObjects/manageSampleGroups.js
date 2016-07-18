@@ -1,25 +1,4 @@
-// Template.manageSampleGroups
-
-Template.manageSampleGroups.onCreated(function () {
-  let instance = this;
-
-  instance.subscribe("allOfCollectionOnlyName", "SampleGroups");
-});
-
-Template.manageSampleGroups.helpers({
-  getSampleGroups() { return SampleGroups.find({}); },
-  getSampleGroup() {
-    return SampleGroups.findOne(FlowRouter.getQueryParam("selected_id"));
-  },
-});
-
 // Template.createSampleGroup
-
-AutoForm.addHooks("insertSampleGroup", {
-  onSuccess(submitType, selected_id) {
-    FlowRouter.go("manageSampleGroups", {}, { selected_id });
-  },
-});
 
 Template.createSampleGroup.onCreated(function() {
   let instance = this;
@@ -40,20 +19,27 @@ Template.createSampleGroup.events({
   "click .create-sample-group"(event, instance) {
     let sampleGroup = instance.newSampleGroup.get();
 
-    Meteor.call("createSampleGroup", sampleGroup, (error, selected_id) => {
+    Meteor.call("createSampleGroup", sampleGroup, (error, selected) => {
       if (error) {
         if (error.reason === "Match failed") {
           // there might be edge cases here which I haven't found yet so other
           // messages might have to be shown instead
           instance.error.set({ header: "Please correct errors above" });
+        } else if (!error.details) {
+          console.log("error:", error);
+          instance.error.set({
+            header: "Internal server error",
+            message: error.reason || "Error: " + error.error,
+          });
         } else {
+          console.log("error:", error);
           instance.error.set({
             header: error.reason,
             message: error.details
           });
         }
       } else {
-        FlowRouter.go("manageSampleGroups", {}, { selected_id });
+        FlowRouter.setParams({ selected });
       }
     });
   },
@@ -61,20 +47,19 @@ Template.createSampleGroup.events({
 
 // Template.showSampleGroup
 
-Template.showSampleGroup.onCreated(function() {
-  let instance = this;
-
-  instance.autorun(() => {
-    let selectedId = FlowRouter.getQueryParam("selected_id");
-    instance.subscribe("objectFromCollection", "SampleGroups", selectedId);
-  });
-});
-
 Template.showSampleGroup.helpers({
-  onDelete() {
-    return () => {
-      FlowRouter.setQueryParams({ selected_id: null });
-    };
+  slugToString: MedBook.utility.slugToString,
+  downloadUrl() {
+    let userId = Meteor.userId();
+    let loginToken = Accounts._storedLoginToken();
+
+    return `/download/${userId}/${loginToken}/data-collection/` +
+        `SampleGroups/${this._id}`;
+  },
+  totalSampleCount() {
+    return _.reduce(this.data_sets, (memo, sgDataSet) => {
+      return memo + sgDataSet.sample_count;
+    }, 0);
   },
 });
 
@@ -84,7 +69,16 @@ Template.waitAndThenPermissionDenied.onCreated(function() {
   let instance = this;
 
   instance.waitForTheServer = new ReactiveVar(true);
-  Meteor.setTimeout(() => {
+
+  instance.timeoutHandle = Meteor.setTimeout(() => {
     instance.waitForTheServer.set(false);
   }, 15 * 1000);
+});
+
+Template.waitAndThenPermissionDenied.events({
+  "click .skip-wait"(event, instance) {
+    Meteor.clearTimeout(instance.timeoutHandle);
+
+    instance.waitForTheServer.set(false);
+  },
 });

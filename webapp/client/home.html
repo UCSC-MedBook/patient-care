@@ -2,61 +2,110 @@
   {{> homeWelcome}}
 
   <h1>What would you like to do today?</h1>
+
+  <h2>Run Tools</h2>
   <div class="ui cards">
-    <a href={{pathFor "listTools"}} class="ui card">
+    <a href={{pathFor "listLimmaGSEA"}} class="ui card">
       <div class="content">
-        <div class="header">Tools</div>
+        <div class="header">
+          Limma <i class="right arrow icon"></i> GSEA
+        </div>
         <div class="description">
-          Run bioinformatic tools such as <b>Limma</b>, <b>GSEA</b>, and the
-          <b>UCSC Outlier Analysis</b>
+          Run Limma on a contrast and then run GSEA on the output.
         </div>
       </div>
     </a>
 
-    <a href={{pathFor "manageCollaborations"}} class="ui card">
+    <!-- <a href={{pathFor "listTumorMap"}} class="ui card">
       <div class="content">
-        <div class="header">Collaborations</div>
+        <div class="header">
+          Tumor Map
+        </div>
         <div class="description">
-          Create, join, and manage collaborations
+          Overlay single samples or groups of samples on UCSC Tumor Maps
         </div>
       </div>
-    </a>
+    </a> -->
 
-    <a href={{pathFor "manageDataSets"}} class="ui card">
+    <a href={{pathFor "listUpDownGenes"}} class="ui card">
       <div class="content">
-        <div class="header">Data sets</div>
-        <div class="description">
-          {{! TODO: change text}}
-          Create, share, and manage data sets
+        <div class="header">
+          Outlier Analysis
         </div>
-      </div>
-    </a>
-
-    <a href={{pathFor "manageSampleGroups"}} class="ui card">
-      <div class="content">
-        <div class="header">Sample groups</div>
         <div class="description">
-          {{! TODO: change text}}
-          Create, share, and manage sample groups
+          UCSC's N-of-One analysis tool to find gene outliers in a sample
+          with a comparison cohort.
         </div>
       </div>
     </a>
   </div>
 
-  <!-- <h1>Experimental</h1>
+  <h2>View and Manage Data</h2>
+  <div class="ui cards">
+    <a href={{pathFor "manageObjects" collectionSlug="data-sets"}}
+        class="ui card">
+      <div class="content">
+        <div class="header">Data Sets</div>
+        <div class="description">
+          Store numerical genomic data.
+        </div>
+      </div>
+    </a>
 
-  <a href={{pathFor "listPatients"}} class="ui button">Patients</a>
+    <a href={{pathFor "manageObjects" collectionSlug="sample-groups"}}
+        class="ui card">
+      <div class="content">
+        <div class="header">Sample Groups</div>
+        <div class="description">
+          Merge and filter data sets using clinical phenotypes.
+        </div>
+      </div>
+    </a>
 
-  <a href={{pathFor "createForm"}} class="ui button">
-    Create form
-  </a>
-  <a href={{pathFor "createRecord"}} class="ui button">
-    Create record
-  </a>
-  <a href={{pathFor "editRecords"}} class="ui button">
-    Edit records
-  </a> -->
+    <a href={{pathFor "manageObjects" collectionSlug="gene-set-groups"}}
+        class="ui card">
+      <div class="content">
+        <div class="header">Gene Set Groups</div>
+        <div class="description">
+          View gene set groups available for GSEA.
+        </div>
+      </div>
+    </a>
 
+    <a href={{pathFor "manageObjects" collectionSlug="studies"}}
+        class="ui card">
+      <div class="content">
+        <div class="header">Studies</div>
+        <div class="description">
+          Define samples in a study.
+        </div>
+      </div>
+    </a>
+
+    <a href={{pathFor "manageObjects" collectionSlug="clinical-forms"}}
+        class="ui card">
+      <div class="content">
+        <div class="header">Clinical Forms</div>
+        <div class="description">
+          Filter by features defined in clinical forms.
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <h2>Other</h2>
+  <div class="ui cards">
+    <a href={{pathFor "manageCollaborations"}} class="ui card">
+      <div class="content">
+        <div class="header">Collaborations</div>
+        <div class="description">
+          Simplify sharing by creating collaborations.
+        </div>
+      </div>
+    </a>
+
+    {{> wranglerExplanation}}
+  </div>
 </template>
 
 <template name="homeWelcome">
@@ -72,17 +121,65 @@
 
           <div class="content">
             <div class="ui header">
-              Welcome to PatientCare
+              Welcome to Patient Care
             </div>
             <p>
-              PatientCare helps doctors and researchers make
-              personalized treatment decisions for cancer patients.
+              Patient Care is a MedBook app that helps doctors and
+              researchers make personalized treatment decisions
+              for cancer patients.
             </p>
           </div>
         </div>
       </div>
     </div>
   {{/if}}
+</template>
+
+<template name="wranglerExplanation">
+  {{! Link directly to wrangler if they've dismissed the modal.
+      Otherwise show them a modal explaining what it is.}}
+  <a href={{directWranglerLink}}
+      class="ui card {{#unless directWranglerLink}}explain-wrangler-button{{/unless}}">
+    <div class="content">
+      <div class="header">Import files</div>
+      <div class="description">
+        Import <b>genomic data</b>, <b>clinical forms</b>, and <b>.gmt</b>s.
+      </div>
+    </div>
+  </a>
+
+  <div class="ui modal explain-wrangler">
+    <i class="close icon"></i>
+    <div class="header">
+      Importing files with Wrangler
+    </div>
+    <div class="content">
+      <div class="description">
+        <div class="ui header">What is Wrangler?</div>
+        <p>
+          Wrangler is a seperate app in MedBook, but all apps share
+          the same data. For example, when you load a file into Wrangler,
+          you will be able to use the data in Patient Care.
+        </p>
+        <p>
+          <div class="ui checkbox dismiss-wrangler-explanation">
+            <input type="checkbox" name="example">
+            <label>Don't show me this again.</label>
+          </div>
+        </p>
+      </div>
+    </div>
+    <div class="actions">
+      <div class="ui secondary cancel button">
+        Close
+      </div>
+      <a href="https://medbook.io/wrangler"
+          class="ui primary right labeled icon ok button">
+        Take me there
+        <i class="right arrow icon"></i>
+      </a>
+    </div>
+  </div>
 </template>
 
 <template name="listPatients">
@@ -141,46 +238,4 @@
   {{else}}
     {{> dataLoading}}
   {{/if}}
-</template>
-
-
-
-<template name="listTools">
-  <h1>Tools</h1>
-
-  <div class="ui cards">
-    <a href={{pathFor "listLimmaGSEA"}} class="ui card">
-      <div class="content">
-        <div class="header">
-          Limma <i class="right arrow icon"></i> GSEA
-        </div>
-        <div class="description">
-          Run Limma on a contrast and then run GSEA on the output.
-        </div>
-      </div>
-    </a>
-
-    <a href={{pathFor "listTumorMap"}} class="ui card">
-      <div class="content">
-        <div class="header">
-          Tumor Map
-        </div>
-        <div class="description">
-          Overlay single samples or groups of samples on UCSC Tumor Maps
-        </div>
-      </div>
-    </a>
-
-    <a href={{pathFor "listUpDownGenes"}} class="ui card">
-      <div class="content">
-        <div class="header">
-          Outlier Analysis
-        </div>
-        <div class="description">
-          UCSC's N-of-One analysis tool to find gene outliers in a sample
-          with a defined comparison cohort
-        </div>
-      </div>
-    </a>
-  </div>
 </template>

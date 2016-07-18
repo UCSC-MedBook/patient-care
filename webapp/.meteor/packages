@@ -11,7 +11,7 @@ medbook:primary-collections
 medbook:collaborations
 erasaur:meteor-lodash
 reactive-var
-sacha:spin
+reactive-dict
 mokolodi1:helpers
 aldeed:template-extension
 semantic:ui
@@ -49,3 +49,9 @@ audit-argument-checks
 meteorhacks:kadira
 okgrow:analytics
 medbook:blobs
+meteorhacks:npm
+
+
+npm-container
+
+bshamblen:jquery-querybuilder

@@ -23,6 +23,16 @@
     </div>
     <div class="content">
       <div class="description">
+        {{#unless sessionPopulated}}
+          <h1>You forgot to set the session variables!</h1>
+          <p>
+            <code>editCollaborationsCollection</code>
+          </p>
+          <p>
+            <code>editCollaborationsMongoId</code>
+          </p>
+        {{/unless}}
+
         <div class="ui header">
           These collaborations can see and edit this object.
         </div>
@@ -59,4 +69,38 @@
       {{{message}}}
     </div>
   {{/with}}
+</template>
+
+<template name="contactUsButton">
+  <a href="mailto:ucscmedbook@gmail.com?subject=MedBook%20Patient%20Care"
+      class="ui button teal">
+    <i class="bug icon"></i>
+    Contact MedBook Team
+  </a>
+</template>
+
+<template name="dataLoading">
+  <div class="ui icon message">
+    <i class="notched circle loading icon"></i>
+    <div class="content">
+      <div class="header">
+        One moment please...
+      </div>
+      <p>We're fetching that data for you.</p>
+    </div>
+  </div>
+</template>
+
+<template name="listSamplesButton">
+  <div class="ui mini button show-list" style="display: inline;">
+    {{#if showList}}Hide{{else}}Show{{/if}} list
+  </div>
+
+  {{#if showList}}
+    <ul>
+      {{#each this}}
+        <li>{{this}}</li>
+      {{/each}}
+    </ul>
+  {{/if}}
 </template>

@@ -3,8 +3,7 @@
 Template.listUpDownGenes.onCreated(function() {
   let instance = this;
 
-  instance.subscribe("dataSetNamesAndGeneExpression");
-  instance.subscribe("patientAndSampleLabels");
+  instance.subscribe("dataSetNamesSamples");
   instance.subscribe("sampleGroups");
 
   instance.customSampleGroup = new ReactiveVar();
@@ -27,16 +26,17 @@ Template.listUpDownGenes.helpers({
       items: DataSets.find({}).map((dataSet) => {
         return { value: "data_set-" + dataSet._id, label: dataSet.name };
       })
-    },
-    {
-      itemGroup: "Patients",
-      items: Patients.find({}).map((patient) => {
-        return {
-          value: "patient-" + patient._id,
-          label: patient.patient_label
-        };
-      })
     }];
+    //},
+    // {
+    //   itemGroup: "Patients",
+    //   items: Patients.find({}).map((patient) => {
+    //     return {
+    //       value: "patient-" + patient._id,
+    //       label: patient.patient_label
+    //     };
+    //   })
+    // }];
   },
   sampleOptions() {
     let fieldValue =
@@ -51,7 +51,7 @@ Template.listUpDownGenes.helpers({
     } else if (fieldValue.startsWith("data_set-")) {
       let _id = fieldValue.slice("data_set-".length);
 
-      return _.map(DataSets.findOne(_id).gene_expression, (label) => {
+      return _.map(DataSets.findOne(_id).sample_labels, (label) => {
         return { value: label, label };
       });
     }

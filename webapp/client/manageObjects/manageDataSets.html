@@ -1,0 +1,126 @@
+<template name="introDataSets">
+  <p>
+    A data set is a collection of numerical genomic data for one or
+    more samples.
+  </p>
+  <p>
+    Data sets can be loaded all at once or can be added to incrementally
+    as new data becomes available.
+  </p>
+</template>
+
+<template name="createDataSet">
+  <h3>Create new data set</h3>
+
+  {{#autoForm id="insertDataSet" schema=nonDataFields
+      type="method" meteormethod="insertDataSet"}}
+    {{> afQuickField name="name" type="text"
+        placeholder="What do you want to call your data set?"}}
+
+    {{> afQuickField name="description" type="textarea" rows="3"
+        placeholder="What data is going to be stored in this data set?"}}
+
+    {{> afQuickField name="value_type" options="allowed"}}
+
+    {{#if afFieldValueIs name="value_type" value=undefined}}
+      <div class="ui message">
+        Select a value type to continue
+      </div>
+    {{else}}
+      {{> afQuickField name="metadata"}}
+
+      <button type="submit" class="ui primary button">Create!</button>
+    {{/if}}
+  {{/autoForm}}
+</template>
+
+<template name="showDataSet">
+  <p>
+    {{description}}
+  </p>
+
+  {{! Hi future self!}}
+  {{#unless compare value_type "gene_expression"}}
+    <h1>You need to rewrite the table for other data types! :D</h1>
+    <h1>Also add a tag for the type somewhere</h1>
+  {{/unless}}
+
+  <table class="ui celled striped table">
+    <thead>
+      <tr>
+        <th colspan="2">
+          Metadata
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Value type</td>
+        <td>
+          gene expression
+        </td>
+      </tr>
+      <tr>
+        <td>Samples</td>
+        <td>
+          {{#if sample_labels}}
+            {{length sample_labels}}
+          {{else}}
+            no data loaded
+          {{/if}}
+        </td>
+      </tr>
+      <tr>
+        <td>Features</td>
+        <td>
+          {{#if feature_labels}}
+            {{length feature_labels}}
+          {{else}}
+            no data loaded
+          {{/if}}
+        </td>
+      </tr>
+      <tr>
+        <td>Normalization</td>
+        <td>{{slugToString metadata.normalization}}</td>
+      </tr>
+      <tr>
+        <td>Quantification method</td>
+        <td>{{slugToString metadata.quantification_method}}</td>
+      </tr>
+      <tr>
+        <td>Genome assembly</td>
+        <td>{{slugToString metadata.genome_assembly}}</td>
+      </tr>
+      <tr>
+        <td>Value scaling</td>
+        <td>{{slugToString metadata.value_scaling}}</td>
+      </tr>
+      <tr>
+        <td>Read strandedness</td>
+        <td>{{slugToString metadata.read_strandedness}}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  {{#if length sample_labels}}
+    <a href={{downloadUrl}} class="ui primary button"
+        target="_blank">
+      Download as .tsv
+    </a>
+
+    <h4>
+      Samples
+    </h4>
+    {{> listSamplesButton sample_labels}}
+  {{else}}
+    <div class="ui message">
+      <div class="header">
+        No data loaded
+      </div>
+      <p>
+        Load data using <a href="https://medbook.io/wrangler">Wrangler</a>
+      </p>
+    </div>
+  {{/if}}
+</template>
