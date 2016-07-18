@@ -613,11 +613,11 @@ Meteor.methods({
   },
 
   // shareAndDeleteButtons
-  removeObject(collectionName, mongoId) {
-    check([collectionName, mongoId], [String]);
+  removeObject(collection_name, mongo_id) {
+    check([collection_name, mongo_id], [String]);
 
     let user = MedBook.findUser(Meteor.userId());
-    let object = MedBook.collections[collectionName].findOne(mongoId);
+    let object = MedBook.collections[collection_name].findOne(mongo_id);
     user.ensureAccess(object);
 
     let removeAllowedCollections = [
@@ -628,12 +628,12 @@ Meteor.methods({
       "GeneSetCollections",
       "Studies",
     ];
-    if (removeAllowedCollections.indexOf(collectionName) === -1) {
+    if (removeAllowedCollections.indexOf(collection_name) === -1) {
       throw new Meteor.Error("permission-denied");
     }
 
     // do some collection-specific checking before actually removing the object
-    if (collectionName === "Jobs") {
+    if (collection_name === "Jobs") {
       let deleteableJobs = [
         "RunLimmaGSEA",
         "TumorMapOverlay",
@@ -645,7 +645,27 @@ Meteor.methods({
       }
     }
 
-    MedBook.collections[collectionName].remove(mongoId);
+    // remove original object
+    MedBook.collections[collection_name].remove(mongo_id);
+
+    // remove associated blobs
+    Blobs2.delete({
+      associated_object: { collection_name, mongo_id }
+    }, (err, out) => {
+      if (err) {
+        console.log("Error deleting blobs for:",
+            collection_name, mongo_id, err);
+      }
+    });
+
+    // remove other linked object types
+    if (collection_name === "DataSets") {
+      GenomicExpression.remove({ data_set_id: mongo_id });
+    } else if (collection_name === "Forms") {
+      Records.remove({ form_id: mongo_id });
+    } if (collection_name === "GeneSetCollections") {
+      GeneSets.remove({ gene_set_collection_id: mongo_id });
+    }
   },
   updateObjectCollaborations(collectionName, mongoId, collaborations) {
     check([collectionName, mongoId], [String]);
