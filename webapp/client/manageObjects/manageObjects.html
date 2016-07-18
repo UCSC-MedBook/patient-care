@@ -12,11 +12,7 @@
     <h1>
       {{humanName}}
 
-      <i class="help circle icon"></i>
-      <div class="ui popup">
-
-        {{> Template.dynamic template=introTemplate}}
-      </div>
+      {{> dataTypeInfoIcon}}
     </h1>
 
     {{> manageObjectsGrid}}
@@ -35,6 +31,13 @@
       </div>
     </div>
   {{/unless}}
+</template>
+
+<template name="dataTypeInfoIcon">
+  <i class="help circle icon"></i>
+  <div class="ui popup">
+    {{> Template.dynamic template=introTemplate}}
+  </div>
 </template>
 
 <template name="manageObjectsGrid">

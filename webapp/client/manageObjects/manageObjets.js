@@ -49,18 +49,6 @@ var managableTypes = [
   },
 ];
 
-Template.manageObjects.onRendered(function () {
-  let instance = this;
-
-  // instance.autorun(() => {
-  //   FlowRouter.getParam("collectionSlug");
-  // });
-  instance.$(".help.circle.icon").popup({
-    position: "bottom left",
-    hoverable: true,
-  });
-});
-
 Template.manageObjects.helpers({
   managableTypes: managableTypes,
   tabActive() {
@@ -71,6 +59,17 @@ Template.manageObjects.helpers({
 
     return _.findWhere(managableTypes, { collectionSlug: selected });
   },
+});
+
+// Template.dataTypeInfoIcon
+
+Template.dataTypeInfoIcon.onRendered(function () {
+  let instance = this;
+
+  instance.$(".help.circle.icon").popup({
+    position: "bottom left",
+    hoverable: true,
+  });
 });
 
 // Template.manageObjectsGrid
