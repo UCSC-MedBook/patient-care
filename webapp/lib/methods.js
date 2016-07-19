@@ -467,48 +467,50 @@ Meteor.methods({
       });
 
       // send an email to the admins so they know they need to approve people
-      this.unblock();
+      if (Meteor.isServer) {
+        this.unblock();
 
-      function getEmails(collabNames) {
-        // NOTE: will be slow if there are many names
-        return _.uniq(_.flatten(_.map(collabNames, (name) => {
-          let user = MedBook.findUser({
-            "collaborations.personal": name
-          });
+        function getEmails(collabNames) {
+          // NOTE: will be slow if there are many names
+          return _.uniq(_.flatten(_.map(collabNames, (name) => {
+            let user = MedBook.findUser({
+              "collaborations.personal": name
+            });
 
-          // if it's a user grab the email otherwise email all
-          // associated collaborators
-          if (user) {
-            return user.email();
-          } else {
-            let collab = Collaborations.findOne({ name });
+            // if it's a user grab the email otherwise email all
+            // associated collaborators
+            if (user) {
+              return user.email();
+            } else {
+              let collab = Collaborations.findOne({ name });
 
-            // sometimes the collab doesn't exist because the user
-            // deleted their accont, logged into Telescope, or changed
-            // their personal collaboration (can't yet, but maybe soon!)
-            if (collab) {
-              return getEmails(collab.getAssociatedCollaborators());
+              // sometimes the collab doesn't exist because the user
+              // deleted their accont, logged into Telescope, or changed
+              // their personal collaboration (can't yet, but maybe soon!)
+              if (collab) {
+                return getEmails(collab.getAssociatedCollaborators());
+              }
             }
-          }
-        })));
+          })));
+        }
+
+        let to = getEmails(collab.administrators);
+
+        let requestorName = user.profile.firstName + " " + user.profile.lastName;
+        let subject = requestorName + " has requested access to the " +
+            collab.name + " collaboration in MedBook";
+
+        let url = "https://medbook.io/collaborations" +
+            "?collaboration_id=" + collab._id;
+        let html = "You can view pending requests for access " +
+            "<a href=" + url + ">here</a>. <br><br>Email " + requestorName +
+            " at <a href=mailto:" + user.email() + ">" + user.email() + "</a>.";
+
+        Email.send({
+          from: "ucscmedbook@gmail.com",
+          to, subject, html,
+        });
       }
-
-      let to = getEmails(collab.administrators);
-
-      let requestorName = user.profile.firstName + " " + user.profile.lastName;
-      let subject = requestorName + " has requested access to the " +
-          collab.name + " collaboration in MedBook";
-
-      let url = "https://medbook.io/collaborations" +
-          "?collaboration_id=" + collab._id;
-      let html = "You can view pending requests for access " +
-          "<a href=" + url + ">here</a>. <br><br>Email " + requestorName +
-          " at <a href=mailto:" + user.email() + ">" + user.email() + "</a>.";
-
-      Email.send({
-        from: "ucscmedbook@gmail.com",
-        to, subject, html,
-      });
     } else {
       Collaborations.update(collaborationId, {
         $addToSet: {
@@ -579,37 +581,39 @@ Meteor.methods({
     Collaborations.update(collaborationId, modifier);
 
     // send the email telling them if they were accepted or rejected
-    this.unblock();
+    if (Meteor.isServer) {
+      this.unblock();
 
-    let addingUser = MedBook.findUser({
-      "collaborations.personal": personalCollaboration
-    });
-    let to = addingUser.email();
-    let subject;
-    let html;
+      let addingUser = MedBook.findUser({
+        "collaborations.personal": personalCollaboration
+      });
+      let to = addingUser.email();
+      let subject;
+      let html;
 
-    if (approvedIfTrue) {
-      subject = "Access to " + collab.name + " approved";
+      if (approvedIfTrue) {
+        subject = "Access to " + collab.name + " approved";
 
-      html = "Your request for access to the " + collab.name +
-          " collaboration in MedBook has been approved! " +
-          "<br><br>Access MedBook at " +
-          "<a href=https://medbook.io>medbook.io</a>.";
-    } else {
-      subject = "Access to " + collab.name + " rejected";
+        html = "Your request for access to the " + collab.name +
+            " collaboration in MedBook has been approved! " +
+            "<br><br>Access MedBook at " +
+            "<a href=https://medbook.io>medbook.io</a>.";
+      } else {
+        subject = "Access to " + collab.name + " rejected";
 
-      let rejectEmail = user.email();
-      html = "Your request for access to the " + collab.name +
-          " collaboration in MedBook has been rejected. <br><br>" +
-          "Please contact " +
-          "<a href=mailto:" + rejectEmail + ">" + rejectEmail +
-          "</a> for more information.";
+        let rejectEmail = user.email();
+        html = "Your request for access to the " + collab.name +
+            " collaboration in MedBook has been rejected. <br><br>" +
+            "Please contact " +
+            "<a href=mailto:" + rejectEmail + ">" + rejectEmail +
+            "</a> for more information.";
+      }
+
+      Email.send({
+        from: "ucscmedbook@gmail.com",
+        to, subject, html,
+      });
     }
-
-    Email.send({
-      from: "ucscmedbook@gmail.com",
-      to, subject, html,
-    });
   },
 
   // shareAndDeleteButtons
