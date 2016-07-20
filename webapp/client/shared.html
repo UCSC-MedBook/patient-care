@@ -75,7 +75,7 @@
   <a href="mailto:ucscmedbook@gmail.com?subject=MedBook%20Patient%20Care"
       class="ui button teal">
     <i class="bug icon"></i>
-    Contact MedBook Team
+    Contact the MedBook Team
   </a>
 </template>
 
@@ -102,5 +102,86 @@
         <li>{{this}}</li>
       {{/each}}
     </ul>
+  {{/if}}
+</template>
+
+<template name="viewJobButton">
+  <a href={{href}}
+      class="ui right labeled icon {{buttonClass}} button">
+    <i class="right arrow icon"></i>
+    {{#if compare job.status "done"}}
+      View
+    {{else}}
+      {{capitalize job.status}}
+    {{/if}}
+  </a>
+</template>
+
+<template name="jobStatusWrapper">
+  {{#if Template.subscriptionsReady}}
+    {{#with getJob}}
+      {{#if compare status "done"}}
+        {{> Template.contentBlock this}}
+      {{/if}}
+
+      {{#if compare status "waiting"}}
+        <div class="ui huge info message">
+          <div class="header">
+            Waiting...
+          </div>
+          Your job will be run soon.
+        </div>
+      {{/if}}
+
+      {{#if compare status "running"}}
+        <div class="ui huge info message">
+          <div class="header">
+            Running!
+          </div>
+          Your job is running.
+        </div>
+      {{/if}}
+
+      {{#if compare status "error"}}
+        <div class="ui huge error message">
+          <div class="header">
+            Error running job.
+          </div>
+          <p>
+            We have encountered an error running your job.
+            If you believe this is an internal error, please {{contactUsButton}}
+          </p>
+          <p>
+            Description: <code>{{error_description}}</code>
+          </p>
+          {{#if stack_trace}}
+            <p>
+              <pre><code>{{stack_trace}}</code></pre>
+            </p>
+          {{/if}}
+          <p>
+            {{{contactTeoText}}}
+          </p>
+        </div>
+      {{/if}}
+    {{/with}}
+
+    {{#unless getJob}}
+      <div class="ui icon message massive">
+        <i class="warning sign icon"></i>
+        <div class="content">
+          <div class="header">
+            Uh oh...
+          </div>
+          <p>We couldn't find that job.</p>
+          <p>
+            If you believe you are seeing this message in error, please
+            {{> contactUsButton}}
+          </p>
+        </div>
+      </div>
+    {{/unless}}
+  {{else}}
+    {{> dataLoading}}
   {{/if}}
 </template>

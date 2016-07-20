@@ -1,24 +1,3 @@
-// Tempalte.upDownGenesJob
-
-Template.upDownGenesJob.onCreated(function () {
-  const instance = this;
-
-  // subscribe and keep up to date
-  instance.autorun(function () {
-    let { job_id } = Template.currentData();
-
-    instance.subscribe("upDownGenesJob", job_id);
-  });
-});
-
-Template.upDownGenesJob.helpers({
-  getJob: function () {
-    return Jobs.findOne(Template.instance().data.job_id);
-  },
-});
-
-
-
 // Template.outlierAnalysis
 
 Template.outlierAnalysis.onCreated(function () {

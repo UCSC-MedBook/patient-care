@@ -175,18 +175,16 @@ Meteor.publish("jobsOfType", function (name) {
 
 // tools/OutlierAnalysis
 
-Meteor.publish("upDownGenesJob", function (jobId) {
+Meteor.publish("specificJob", function (jobId) {
   check(jobId, String);
 
   let user = MedBook.ensureUser(this.userId);
-  let job = Jobs.findOne({
-    _id: jobId,
-    name: "UpDownGenes",
-  });
-  let dataSet = DataSets.findOne(job.args.data_set_id);
-  user.ensureAccess(dataSet);
 
-  return Jobs.find({ _id: jobId });
+  return Jobs.find({
+    _id: jobId,
+    name: { $in: [ "UpDownGenes", "RunLimmaGSEA" ] },
+    collaborations: { $in: user.getCollaborations() },
+  });
 });
 
 // general
