@@ -12,13 +12,13 @@
 
   <!-- TODO:
   HMM -metric <Metric>
-    Class seperation metric - gene markers are ranked using this metric to produce the gene list
+    Class seperation metric -
+        gene markers are ranked using this metric to produce the gene list
     Default: Signal2Noise
-    Hints  : Signal2Noise,tTest,Cosine,Euclidean,Manhatten,Pearson,Ratio_of_Classes,Diff_of_Classes,log2_Ratio_of_Classes -->
+    Hints  : Signal2Noise,tTest,Cosine,Euclidean,Manhatten,
+              Pearson,Ratio_of_Classes,Diff_of_Classes,log2_Ratio_of_Classes
+   -->
 
-  <!-- {{! surround in a segment so that we make sure the user doesn't change stuff
-      while we're going to the server, etc.}}
-  <div class="ui segment {{#if creatingJob}}loading{{/if}}"> -->
   <div style="position: relative; margin-bottom: 14px">
     <div class="ui two column very relaxed stackable grid">
       <div class="column">
@@ -44,7 +44,8 @@
 
       <div class="six wide field">
         <label>Gene sets</label>
-        <div class="ui fluid search selection dropdown gene-set-groups-dropdown">
+        <div class="ui fluid search selection dropdown
+            gene-set-groups-dropdown">
           <input type="hidden" name="geneSetCollection">
           <i class="dropdown icon"></i>
           <div class="default text">Gene sets for GSEA</div>
@@ -61,7 +62,8 @@
       <div class="six wide field">
         <label>&nbsp;</label> {{! empty label}}
         <button type="submit"
-            class="ui fluid primary button {{#if creatingJob}}loading{{/if}}">
+            class="ui fluid primary button
+                {{#if creatingJob}}loading{{/if}}">
           Submit
         </button>
       </div>
@@ -69,6 +71,8 @@
   </form>
 
   {{> showErrorMessage error}}
+
+  <div class="ui divider"></div>
 
   {{> previouslyRunLimmaGSEA}}
 </template>
@@ -122,17 +126,12 @@
               <td>{{args.limma_top_genes_count}}</td>
               <td>{{args.gene_set_collection_name}}</td>
               <td>
-                {{#if compare status "done"}}
-                  <a href={{pathFor getJobResultUrl}} target="_blank"
-                      class="ui right labeled icon primary button">
-                    <i class="book icon"></i>
-                    View result
-                  </a>
-                {{else}}
-                  {{status}}
-                {{/if}}
+                {{> viewJobButton href=(pathFor "limmaGseaJob" job_id=_id)
+                    job=this}}
               </td>
-              <td>{{> shareAndDeleteButtons object=this collectionName="Jobs"}}</td>
+              <td>
+                {{> shareAndDeleteButtons object=this collectionName="Jobs"}}
+              </td>
             </tr>
           {{/each}}
         </tbody>

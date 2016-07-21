@@ -213,10 +213,4 @@ Template.previouslyRunLimmaGSEA.helpers({
       sort: { date_created: -1 }
     });
   },
-  getJobResultUrl: function() {
-    let userId = Meteor.userId();
-    let loginToken = Accounts._storedLoginToken();
-
-    return `/download/${userId}/${loginToken}/job-blob/${this._id}/index.html`;
-  },
 });

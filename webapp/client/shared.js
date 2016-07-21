@@ -155,3 +155,33 @@ Template.listSamplesButton.events({
     instance.showList.set(!instance.showList.get());
   },
 });
+
+// Template.viewJobButton
+
+Template.viewJobButton.helpers({
+  capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  },
+  buttonClass() {
+    if (this.job.status === "done") { return "primary"; }
+    else if (this.job.status === "error") { return "negative"; }
+    // else { return "" }
+  },
+});
+
+// Template.jobStatusWrapper
+
+Template.jobStatusWrapper.onCreated(function () {
+  let instance = this;
+
+  // subscribe and keep up to date
+  instance.autorun(function () {
+    instance.subscribe("specificJob", Template.currentData());
+  });
+});
+
+Template.jobStatusWrapper.helpers({
+  getJob: function () {
+    return Jobs.findOne(this.toString());
+  },
+});

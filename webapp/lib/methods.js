@@ -467,48 +467,50 @@ Meteor.methods({
       });
 
       // send an email to the admins so they know they need to approve people
-      this.unblock();
+      if (Meteor.isServer) {
+        this.unblock();
 
-      function getEmails(collabNames) {
-        // NOTE: will be slow if there are many names
-        return _.uniq(_.flatten(_.map(collabNames, (name) => {
-          let user = MedBook.findUser({
-            "collaborations.personal": name
-          });
+        function getEmails(collabNames) {
+          // NOTE: will be slow if there are many names
+          return _.uniq(_.flatten(_.map(collabNames, (name) => {
+            let user = MedBook.findUser({
+              "collaborations.personal": name
+            });
 
-          // if it's a user grab the email otherwise email all
-          // associated collaborators
-          if (user) {
-            return user.email();
-          } else {
-            let collab = Collaborations.findOne({ name });
+            // if it's a user grab the email otherwise email all
+            // associated collaborators
+            if (user) {
+              return user.email();
+            } else {
+              let collab = Collaborations.findOne({ name });
 
-            // sometimes the collab doesn't exist because the user
-            // deleted their accont, logged into Telescope, or changed
-            // their personal collaboration (can't yet, but maybe soon!)
-            if (collab) {
-              return getEmails(collab.getAssociatedCollaborators());
+              // sometimes the collab doesn't exist because the user
+              // deleted their accont, logged into Telescope, or changed
+              // their personal collaboration (can't yet, but maybe soon!)
+              if (collab) {
+                return getEmails(collab.getAssociatedCollaborators());
+              }
             }
-          }
-        })));
+          })));
+        }
+
+        let to = getEmails(collab.administrators);
+
+        let requestorName = user.profile.firstName + " " + user.profile.lastName;
+        let subject = requestorName + " has requested access to the " +
+            collab.name + " collaboration in MedBook";
+
+        let url = "https://medbook.io/collaborations" +
+            "?collaboration_id=" + collab._id;
+        let html = "You can view pending requests for access " +
+            "<a href=" + url + ">here</a>. <br><br>Email " + requestorName +
+            " at <a href=mailto:" + user.email() + ">" + user.email() + "</a>.";
+
+        Email.send({
+          from: "ucscmedbook@gmail.com",
+          to, subject, html,
+        });
       }
-
-      let to = getEmails(collab.administrators);
-
-      let requestorName = user.profile.firstName + " " + user.profile.lastName;
-      let subject = requestorName + " has requested access to the " +
-          collab.name + " collaboration in MedBook";
-
-      let url = "https://medbook.io/collaborations" +
-          "?collaboration_id=" + collab._id;
-      let html = "You can view pending requests for access " +
-          "<a href=" + url + ">here</a>. <br><br>Email " + requestorName +
-          " at <a href=mailto:" + user.email() + ">" + user.email() + "</a>.";
-
-      Email.send({
-        from: "ucscmedbook@gmail.com",
-        to, subject, html,
-      });
     } else {
       Collaborations.update(collaborationId, {
         $addToSet: {
@@ -579,45 +581,47 @@ Meteor.methods({
     Collaborations.update(collaborationId, modifier);
 
     // send the email telling them if they were accepted or rejected
-    this.unblock();
+    if (Meteor.isServer) {
+      this.unblock();
 
-    let addingUser = MedBook.findUser({
-      "collaborations.personal": personalCollaboration
-    });
-    let to = addingUser.email();
-    let subject;
-    let html;
+      let addingUser = MedBook.findUser({
+        "collaborations.personal": personalCollaboration
+      });
+      let to = addingUser.email();
+      let subject;
+      let html;
 
-    if (approvedIfTrue) {
-      subject = "Access to " + collab.name + " approved";
+      if (approvedIfTrue) {
+        subject = "Access to " + collab.name + " approved";
 
-      html = "Your request for access to the " + collab.name +
-          " collaboration in MedBook has been approved! " +
-          "<br><br>Access MedBook at " +
-          "<a href=https://medbook.io>medbook.io</a>.";
-    } else {
-      subject = "Access to " + collab.name + " rejected";
+        html = "Your request for access to the " + collab.name +
+            " collaboration in MedBook has been approved! " +
+            "<br><br>Access MedBook at " +
+            "<a href=https://medbook.io>medbook.io</a>.";
+      } else {
+        subject = "Access to " + collab.name + " rejected";
 
-      let rejectEmail = user.email();
-      html = "Your request for access to the " + collab.name +
-          " collaboration in MedBook has been rejected. <br><br>" +
-          "Please contact " +
-          "<a href=mailto:" + rejectEmail + ">" + rejectEmail +
-          "</a> for more information.";
+        let rejectEmail = user.email();
+        html = "Your request for access to the " + collab.name +
+            " collaboration in MedBook has been rejected. <br><br>" +
+            "Please contact " +
+            "<a href=mailto:" + rejectEmail + ">" + rejectEmail +
+            "</a> for more information.";
+      }
+
+      Email.send({
+        from: "ucscmedbook@gmail.com",
+        to, subject, html,
+      });
     }
-
-    Email.send({
-      from: "ucscmedbook@gmail.com",
-      to, subject, html,
-    });
   },
 
   // shareAndDeleteButtons
-  removeObject(collectionName, mongoId) {
-    check([collectionName, mongoId], [String]);
+  removeObject(collection_name, mongo_id) {
+    check([collection_name, mongo_id], [String]);
 
     let user = MedBook.findUser(Meteor.userId());
-    let object = MedBook.collections[collectionName].findOne(mongoId);
+    let object = MedBook.collections[collection_name].findOne(mongo_id);
     user.ensureAccess(object);
 
     let removeAllowedCollections = [
@@ -628,12 +632,12 @@ Meteor.methods({
       "GeneSetCollections",
       "Studies",
     ];
-    if (removeAllowedCollections.indexOf(collectionName) === -1) {
+    if (removeAllowedCollections.indexOf(collection_name) === -1) {
       throw new Meteor.Error("permission-denied");
     }
 
     // do some collection-specific checking before actually removing the object
-    if (collectionName === "Jobs") {
+    if (collection_name === "Jobs") {
       let deleteableJobs = [
         "RunLimmaGSEA",
         "TumorMapOverlay",
@@ -645,7 +649,27 @@ Meteor.methods({
       }
     }
 
-    MedBook.collections[collectionName].remove(mongoId);
+    // remove original object
+    MedBook.collections[collection_name].remove(mongo_id);
+
+    // remove associated blobs
+    Blobs2.delete({
+      associated_object: { collection_name, mongo_id }
+    }, (err, out) => {
+      if (err) {
+        console.log("Error deleting blobs for:",
+            collection_name, mongo_id, err);
+      }
+    });
+
+    // remove other linked object types
+    if (collection_name === "DataSets") {
+      GenomicExpression.remove({ data_set_id: mongo_id });
+    } else if (collection_name === "Forms") {
+      Records.remove({ form_id: mongo_id });
+    } if (collection_name === "GeneSetCollections") {
+      GeneSets.remove({ gene_set_collection_id: mongo_id });
+    }
   },
   updateObjectCollaborations(collectionName, mongoId, collaborations) {
     check([collectionName, mongoId], [String]);

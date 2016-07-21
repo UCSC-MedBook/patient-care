@@ -83,19 +83,8 @@
               <td>{{output.up_genes.length}}</td>
               <td>{{output.down_genes.length}}</td>
               <td>
-                {{#if compare status "done"}}
-                  <a href={{pathFor "upDownGenesJob" job_id=_id}}
-                      class="ui right labeled icon primary button">
-                    <i class="right arrow icon"></i>
-                    View
-                  </a>
-                {{else}}
-                  {{#if compare status "error"}}
-                    An error occurred... {{> contactUsButton}}
-                  {{else}}
-                    {{status}}
-                  {{/if}}
-                {{/if}}
+                {{> viewJobButton href=(pathFor "upDownGenesJob" job_id=_id)
+                    job=this}}
               </td>
               <td>{{> shareAndDeleteButtons object=this collectionName="Jobs"}}</td>
             </tr>

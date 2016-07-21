@@ -4,5 +4,5 @@
       "Google Analytics" : {"trackingId": "UA-77676037-2"}
     }
   },
-  "genomic_expression_export": "/Users/mokolodi1/work/medbook/next/patient-care/external-tools/exporters/genomic_expression_export.py"
+  "genomic_expression_export": "/Users/mokolodi1/work/medbook/medbook/patient-care/external-tools/exporters/genomic_expression_export.py"
 }

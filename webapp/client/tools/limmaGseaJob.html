@@ -1,0 +1,19 @@
+<template name="limmaGseaJob">
+  <h1>
+    Limma <i class="right arrow icon"></i> GSEA Result
+  </h1>
+
+  {{#jobStatusWrapper (param "job_id")}}
+    <h2>
+      GSEA Report
+
+      <div class="ui icon button gsea-iframe-new-tab" target="_blank">
+        <i class="external icon"></i>
+        Open in new tab
+      </div>
+    </h2>
+    <iframe id="gsea-report" src={{getJobResultUrl}}
+        style="height: 500px; width: 100%">
+    </iframe>
+  {{/jobStatusWrapper}}
+</template>

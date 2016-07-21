@@ -1,70 +1,9 @@
 <template name="upDownGenesJob">
-  {{#if Template.subscriptionsReady}}
-    {{#with getJob}}
-      <h1 class="title ui">
-        Outlier Analysis Result
-      </h1>
+  <h1>Outlier Analysis Result</h1>
 
-      {{#if compare status "done"}}
-        {{> outlierAnalysis getJob}}
-      {{/if}}
-
-      {{#if compare status "waiting"}}
-        <div class="ui info message">
-          <div class="header">
-            Waiting...
-          </div>
-          Your job will be run soon.
-        </div>
-      {{/if}}
-
-      {{#if compare status "running"}}
-        <div class="ui info message">
-          <div class="header">
-            Running!
-          </div>
-          Your job is running!
-        </div>
-      {{/if}}
-
-      {{#if compare status "error"}}
-        <div class="ui error message">
-          <div class="header">
-            Error running job.
-          </div>
-          <p>
-            We have encountered an error running your job.
-            If you believe this is an internal error, please {{contactUsButton}}
-          </p>
-          <p>
-            Description: <code>{{error_description}}</code>
-          </p>
-          {{#if stack_trace}}
-            <p>
-              <pre><code>{{stack_trace}}</code></pre>
-            </p>
-          {{/if}}
-          <p>
-            {{{contactTeoText}}}
-          </p>
-        </div>
-      {{/if}}
-    {{/with}}
-
-    {{#unless getJob}}
-      <div class="ui icon message massive">
-        <i class="warning sign icon"></i>
-        <div class="content">
-          <div class="header">
-            Uh oh...
-          </div>
-          <p>We couldn't find that job.</p>
-        </div>
-      </div>
-    {{/unless}}
-  {{else}}
-    {{> dataLoading}}
-  {{/if}}
+  {{#jobStatusWrapper (param "job_id")}}
+    {{> outlierAnalysis}}
+  {{/jobStatusWrapper}}
 </template>
 
 <template name="outlierAnalysis">
