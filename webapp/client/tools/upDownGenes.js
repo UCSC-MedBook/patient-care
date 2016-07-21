@@ -24,8 +24,7 @@ Template.outlierAnalysis.helpers({
       let userId = Meteor.userId();
       let loginToken = Accounts._storedLoginToken();
       let jobId = FlowRouter.getParam("job_id");
-      // TODO rename blob filename to something better
-      let blobFileName = "single_sample.head.sort"; //  foundBlobs2._id;
+      let blobFileName = "top_5_percent_most_highly_expressed_genes.tsv";
 
       return `/download/${userId}/${loginToken}/job-blob/${jobId}/${blobFileName}`;
     }
