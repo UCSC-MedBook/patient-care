@@ -12,7 +12,23 @@ Template.outlierAnalysis.onCreated(function () {
 
 Template.outlierAnalysis.helpers({
   getBlobUrl: function (blobId) {
-    return Blobs.findOne(blobId).url();
+    // polyfill for blobs or blobs2
+    // since existing outlier results might be using either
+    let isItABlob = Blobs.findOne(blobId);
+    if(isItABlob){
+      return isItABlob.url();
+    }else {
+      // construct the download URL route for the Blobs2 object
+      // TODO move this to a generally available function somewhere
+      // and also reference it in limmaGseaJob.js
+      let userId = Meteor.userId();
+      let loginToken = Accounts._storedLoginToken();
+      let jobId = FlowRouter.getParam("job_id");
+      // TODO rename blob filename to something better
+      let blobFileName = "single_sample.head.sort"; //  foundBlobs2._id;
+
+      return `/download/${userId}/${loginToken}/job-blob/${jobId}/${blobFileName}`;
+    }
   },
 });
 
