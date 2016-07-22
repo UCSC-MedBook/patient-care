@@ -17,14 +17,14 @@
 
   {{#if Template.subscriptionsReady}}
     {{> outlierGenesTable title="Upregulated genes" data=output.up_genes
-        url=(getBlobUrl output.up_blob_id)}}
+        url=(getBlobUrl output.up_blob_id "up_outlier_genes")}}
 
     {{> outlierGenesTable title="Downregulated genes" data=output.down_genes
-        url=(getBlobUrl output.down_blob_id)}}
+        url=(getBlobUrl output.down_blob_id "down_outlier_genes")}}
     <!-- confirm top5% is available; older analyses may not have this field-->
     {{#if output.top5percent_genes}}
       {{> outlierGenesTable title="Top 5% expressed genes" data=output.top5percent_genes
-          url=(getBlobUrl output.top5percent_blob_id) isTop5percent=true }}
+          url=(getBlobUrl output.top5percent_blob_id "top_5_percent_most_highly_expressed_genes.tsv") isTop5percent=true }}
     {{else}}
       <div>
         <h2 style="display: inline;">
@@ -41,7 +41,7 @@
   <div>
     <h2 style="display: inline;">
       {{title}}
-      <a href={{url}} class="ui labeled icon button" target="_blank">
+      <a href={{url}} class="ui labeled icon button" target="_blank" download>
         <i class="download icon"></i>
         Download
       </a>

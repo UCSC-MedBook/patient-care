@@ -3,6 +3,10 @@ path = Npm.require('path');
 spawn = Npm.require('child_process').spawn;
 ntemp = Meteor.npmRequire('temp').track();
 
+// Route for downloading blobs2 by job filename & blob filename
+// Used in Limma/GSEA results which output several HTML files
+// that contain relative links; indexing by only blob filename
+// allows seamless "online" navigation between these files.
 Picker.route("/download/:userId/:loginToken/" +
     "job-blob/:jobId/:file_name",
     function(params, req, res, next) {

@@ -11,21 +11,18 @@ Template.outlierAnalysis.onCreated(function () {
 });
 
 Template.outlierAnalysis.helpers({
-  getBlobUrl: function (blobId) {
+  getBlobUrl: function (blobId, blobFileName) {
     // polyfill for blobs or blobs2
     // since existing outlier results might be using either
+    // If it's an original blob, ignore the filename; otherwise
+    // use it and the job ID to get the blob2 route.
     let isItABlob = Blobs.findOne(blobId);
     if(isItABlob){
       return isItABlob.url();
     }else {
-      // construct the download URL route for the Blobs2 object
-      // TODO move this to a generally available function somewhere
-      // and also reference it in limmaGseaJob.js
       let userId = Meteor.userId();
       let loginToken = Accounts._storedLoginToken();
       let jobId = FlowRouter.getParam("job_id");
-      let blobFileName = "top_5_percent_most_highly_expressed_genes.tsv";
-
       return `/download/${userId}/${loginToken}/job-blob/${jobId}/${blobFileName}`;
     }
   },
