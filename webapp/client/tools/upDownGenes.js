@@ -11,8 +11,20 @@ Template.outlierAnalysis.onCreated(function () {
 });
 
 Template.outlierAnalysis.helpers({
-  getBlobUrl: function (blobId) {
-    return Blobs.findOne(blobId).url();
+  getBlobUrl: function (blobId, blobFileName) {
+    // polyfill for blobs or blobs2
+    // since existing outlier results might be using either
+    // If it's an original blob, ignore the filename; otherwise
+    // use it and the job ID to get the blob2 route.
+    let isItABlob = Blobs.findOne(blobId);
+    if(isItABlob){
+      return isItABlob.url();
+    }else {
+      let userId = Meteor.userId();
+      let loginToken = Accounts._storedLoginToken();
+      let jobId = FlowRouter.getParam("job_id");
+      return `/download/${userId}/${loginToken}/job-blob/${jobId}/${blobFileName}`;
+    }
   },
 });
 
