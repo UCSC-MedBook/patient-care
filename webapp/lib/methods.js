@@ -767,6 +767,11 @@ Meteor.methods({
     // construct new qualified sample label
     var newSampleLabel = study.study_label + "/" + newUQSampleLabel;
 
+    // make sure the new sample label doesn't already exist
+    if (study.sample_labels.indexOf(newSampleLabel) !== -1) {
+      throw new Meteor.Error("sample-already-exists");
+    }
+
     // Update the sample label in
     // - Studies
     // - DataSets
@@ -783,12 +788,18 @@ Meteor.methods({
       }
     });
 
-    DataSets.update({
-      sample_labels: oldSampleLabel
-    }, {
-      $set: {
-        "sample_labels.$": newSampleLabel
-      }
+    DataSets.find({ sample_labels: oldSampleLabel }).forEach((dataSet) => {
+      let oldIndex = dataSet.sample_label_index[oldSampleLabel];
+
+      DataSets.update(dataSet._id, {
+        $set: {
+          [`sample_labels.${oldIndex}`]: newSampleLabel,
+          [`sample_label_index.${newSampleLabel}`]: oldIndex
+        },
+        $unset: {
+          [`sample_label_index.${oldSampleLabel}`]: 1
+        },
+      });
     });
 
     // Can't update records/forms yet because we don't know the name of the
