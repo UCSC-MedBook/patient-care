@@ -151,27 +151,38 @@
       generate it if it hasn't yet been created. }}
 
   {{#if exprVarFilterApplied}}
-    The sample group has had the following filters applied to their genes
-    -- expression
-    -- variance
+      The following filters have been applied to this sample group:
+      {{>sampleGroupsExprVarFilterDesc}}
     <h3>
-      Filtered samples
+      Download filtered samples
       <a href="TODO" class="ui tiny primary button" target="_blank">
       Download as .tsv
       </a>
     </h3>  
   {{else}}
     {{#let currentJobStatus=exprVarFilterProcessing }}
-    {{#if currentJobStatus}}
-      <div class="ui active inline loader tiny"></div>
-      Your filters will be applied soon. The current status is: {{currentJobStatus}}.
-    {{else}}
-      The following filters are available to apply to this sample group.
-        -- expression
-        -- variance
-      Applying the filters will not affect the original samples
-      <a class="ui tiny primary button run-job" >
-        Apply filters
-      </a>
-  {{/if}}{{/let}}{{/if}}
+      {{#if currentJobStatus}}
+        <div class="ui active inline loader tiny"></div>
+        Your filters will be applied soon. The current status is: {{currentJobStatus}}.
+      {{else}}
+        <h3>Expression-level & Variance Filters</h3>
+        Filters have not been applied to this sample group. If applied, a filtered version
+        of the sample group will be created; the original samples will remain available.<br/>
+        The following filters will be applied:
+        {{>sampleGroupsExprVarFilterDesc}}
+              <a class="ui tiny primary button run-job" >
+          Apply filters
+        </a>
+      {{/if}}
+    {{/let}}
+  {{/if}}
+</template>
+<template name="sampleGroupsExprVarFilterDesc">
+<ul><li>
+        Expression level filter: Remove each gene that has an expression level of 0 in
+        80% or more of the samples in this sample group.
+      </li><li>
+        Variance filter: Ranks the remaining genes by variance and removes the 20% with the lowest
+        variances.
+      </li></ul>
 </template>
