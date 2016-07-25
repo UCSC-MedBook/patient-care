@@ -53,8 +53,10 @@
     </tbody>
   </table>
 
+  {{>sampleGroupExprVarFilters}}
+
   <h3>
-    Contents
+    Unfiltered samples (includes all genes)
 
     <a href={{downloadUrl}} class="ui tiny primary button"
         target="_blank">
@@ -141,4 +143,33 @@
       </p>
     </div>
   {{/if}}
+</template>
+
+<template name="sampleGroupExprVarFilters">
+  {{! UI for the expression & variance filters on sample groups.
+      Allows user to download filtered sample group data, or
+      generate it if it hasn't yet been created. }}
+
+  {{#if exprVarFilterApplied}}
+    The sample group has had the following filters applied to their genes
+    -- expression
+    -- variance
+    <h3>
+      Filtered samples
+      <a href="TODO" class="ui tiny primary button" target="_blank">
+      Download as .tsv
+      </a>
+    </h3>  
+  {{else}}{{# if exprVarFilterProcessing}}
+      Job is waiting or running to apply filters to this sample group
+  {{else}}
+    The following filters are available to apply to this sample group.
+      -- expression
+      -- variance
+    Applying the filters will not affect the original samples
+    <a href="TODO" class="ui tiny primary button" target="_blank">
+      Apply filters
+    </a>
+
+  {{/if}}{{/if}}
 </template>

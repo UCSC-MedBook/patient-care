@@ -63,6 +63,23 @@ Template.showSampleGroup.helpers({
   },
 });
 
+Template.sampleGroupExprVarFilters.helpers({
+  // Have the expression&variance filters been applied
+  // to this sample group?
+  exprVarFilterApplied(){
+    // ie, is there an associated blobs2
+    // with the appropriate name
+    // for this sample group
+    return false; // TODO
+  },
+
+  exprVarFilterProcessing(){
+    // are we currently running a job for this
+    return true; // TODO
+  },
+
+});
+
 // Template.waitAndThenPermissionDenied
 
 Template.waitAndThenPermissionDenied.onCreated(function() {

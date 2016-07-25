@@ -251,4 +251,29 @@ Meteor.methods({
 
     return future.wait();
   },
+  // Applies the expression and variance filters to a sample group
+  // returns the job id...
+  applyExprVarianceFilters: function(sampleGroupId){
+    // checks and permissions TODO
+
+
+    console.log("starting expr variance job with SGID,", sampleGroupId);
+
+    check(sampleGroupId, String);
+    let user = MedBook.ensureUser(Meteor.userId());
+
+
+
+  // do any setup we need TODO
+  // delete existing filter blob if there is one ?
+  args = {} // TODO
+    
+    return Jobs.insert({
+      name: "ApplyExprAndVarianceFilters",
+      status: "waiting",
+      user_id: user._id,
+      collaborations: [ user.personalCollaboration() ], // TODO is this appropriate
+      args
+    });
+  },
 });
