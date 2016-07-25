@@ -810,7 +810,7 @@ Meteor.methods({
 
           // NOTE: intentionally not updating the filters so that we
           // don't "rewrite history".
-          var asdf = SampleGroups.update(sampleGroup._id, {
+          SampleGroups.update(sampleGroup._id, {
             $set: {
               [attributeName]: newSampleLabel
             }
