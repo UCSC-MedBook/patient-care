@@ -160,16 +160,18 @@
       Download as .tsv
       </a>
     </h3>  
-  {{else}}{{# if exprVarFilterProcessing}}
-      Job is waiting or running to apply filters to this sample group
   {{else}}
-    The following filters are available to apply to this sample group.
-      -- expression
-      -- variance
-    Applying the filters will not affect the original samples
-    <a href="TODO" class="ui tiny primary button" target="_blank">
-      Apply filters
-    </a>
-
-  {{/if}}{{/if}}
+    {{#let currentJobStatus=exprVarFilterProcessing }}
+    {{#if currentJobStatus}}
+      <div class="ui active inline loader tiny"></div>
+      Your filters will be applied soon. The current status is: {{currentJobStatus}}.
+    {{else}}
+      The following filters are available to apply to this sample group.
+        -- expression
+        -- variance
+      Applying the filters will not affect the original samples
+      <a class="ui tiny primary button run-job" >
+        Apply filters
+      </a>
+  {{/if}}{{/let}}{{/if}}
 </template>

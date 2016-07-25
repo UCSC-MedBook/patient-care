@@ -63,6 +63,12 @@ Template.showSampleGroup.helpers({
   },
 });
 
+// Sample Group Expression Level & Variance Filters
+
+Template.sampleGroupExprVarFilters.onCreated(function(){
+  this.subscribe("jobsOfType", "ApplyExprAndVarianceFilters");
+});
+
 Template.sampleGroupExprVarFilters.helpers({
   // Have the expression&variance filters been applied
   // to this sample group?
@@ -73,11 +79,41 @@ Template.sampleGroupExprVarFilters.helpers({
     return false; // TODO
   },
 
+  // if there is a job currently processing or waiting, return its status;
+  // else return false
   exprVarFilterProcessing(){
-    // are we currently running a job for this
-    return true; // TODO
+    let self = this;
+
+    console.log("checking for jobs with", self._id); // XXX
+  
+    let currentJob = Jobs.findOne({
+      '$and': [
+        {name: "ApplyExprAndVarianceFilters"},
+        {status: {$in: ["creating", "waiting", "running"]}}, // TODO remove done
+        {'args.sample_group_id': self._id},
+      ],
+    },);
+    console.log("found job", currentJob); // XXX
+    if(currentJob){ return currentJob.status; } else { return false; }
   },
 
+});
+
+Template.sampleGroupExprVarFilters.events({
+  // initiate the expression & variance filter job 
+  "click .button.run-job": function(event, instance){
+    let sampleGroupId = instance.data._id ;
+    console.log("about to run the job for expr var filter", sampleGroupId); // XXX 
+    // TODO anything else before calling the method?
+    Meteor.call("applyExprVarianceFilters", sampleGroupId, (error, result) => {
+      if(error){
+        // TODO recover? throw?
+      } else {
+        console.log("called meteor method and got result", result); // XXX
+        // TODO handle result
+      }
+    });
+  }
 });
 
 // Template.waitAndThenPermissionDenied

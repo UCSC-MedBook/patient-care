@@ -262,11 +262,11 @@ Meteor.methods({
     check(sampleGroupId, String);
     let user = MedBook.ensureUser(Meteor.userId());
 
-
-
   // do any setup we need TODO
   // delete existing filter blob if there is one ?
-  args = {} // TODO
+  args = {
+    sample_group_id: sampleGroupId
+  } // TODO
     
     return Jobs.insert({
       name: "ApplyExprAndVarianceFilters",

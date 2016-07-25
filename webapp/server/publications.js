@@ -153,7 +153,8 @@ Meteor.publish("jobsOfType", function (name) {
   let allowedJobNames = [
     "RunLimmaGSEA",
     "UpDownGenes",
-    "TumorMapOverlay"
+    "TumorMapOverlay",
+    "ApplyExprAndVarianceFilters",
   ];
   if (allowedJobNames.indexOf(name) === -1) {
     return null;
