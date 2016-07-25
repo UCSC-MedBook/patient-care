@@ -748,4 +748,75 @@ Meteor.methods({
 
     return Studies.insert(newStudy);
   },
+
+  // Rename a sample: if a user has access to a study they can rename
+  // a sample (including in objects they don't have access to).
+  // See feature issue: https://github.com/UCSC-MedBook/patient-care/issues/57
+  renameSampleLabel(studyId, oldSampleLabel, newUQSampleLabel) {
+    check([studyId, oldSampleLabel, newUQSampleLabel], [String]);
+
+    let user = MedBook.findUser(Meteor.userId());
+    let study = Studies.findOne(studyId);
+    user.ensureAccess(study);
+
+    // make sure the sample exists in the study
+    if (study.sample_labels.indexOf(oldSampleLabel) === -1) {
+      throw new Meteor.Error("invalid-sample-label");
+    }
+
+    // construct new qualified sample label
+    var newSampleLabel = study.study_label + "/" + newUQSampleLabel;
+
+    // Update the sample label in
+    // - Studies
+    // - DataSets
+    // - Forms
+    // - Records
+    // - SampleGroups
+
+    Studies.update({
+      _id: studyId,
+      sample_labels: oldSampleLabel
+    }, {
+      $set: {
+        "sample_labels.$": newSampleLabel
+      }
+    });
+
+    DataSets.update({
+      sample_labels: oldSampleLabel
+    }, {
+      $set: {
+        "sample_labels.$": newSampleLabel
+      }
+    });
+
+    // Can't update records/forms yet because we don't know the name of the
+    // sample field in the records. We can address this better after
+    // adding `sample_labels` to forms (#46)
+
+    // We have to do a forEach here because it's not possible to update
+    // sample groups two array levels deep
+    var sampleGroupCursor = SampleGroups.find({
+      "data_sets.sample_labels": oldSampleLabel
+    });
+    sampleGroupCursor.forEach((sampleGroup) => {
+      _.each(sampleGroup.data_sets, (sgDataSet, sgDataSetIndex) => {
+        let sampleIndex = sgDataSet.sample_labels.indexOf(oldSampleLabel);
+
+        if (sampleIndex !== -1) {
+          let attributeName =
+              `data_sets.${sgDataSetIndex}.sample_labels.${sampleIndex}`;
+
+          // NOTE: intentionally not updating the filters so that we
+          // don't "rewrite history".
+          var asdf = SampleGroups.update(sampleGroup._id, {
+            $set: {
+              [attributeName]: newSampleLabel
+            }
+          });
+        }
+      });
+    });
+  },
 });
