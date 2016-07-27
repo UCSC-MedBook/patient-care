@@ -91,6 +91,8 @@ Picker.route("/download/:userId/:loginToken/" +
   
   // Provide the blob for download
   res.setHeader("Content-Type", blob.mime_type);
+  res.setHeader("Content-Disposition",
+      `attachment; filename="${file_name}"`);
   res.writeHead(200);
   var path = blob.getFilePath();
 
