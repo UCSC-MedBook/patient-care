@@ -38,12 +38,6 @@ Template.appBody.helpers({
   },
 });
 
-Template.appBody.events({
-  "click .entering-the-dark-ages"(event, instance) {
-    $(".ui.modal.telescope-warning").modal("show");
-  },
-});
-
 // Template.chatWithUsOnSlack
 
 Template.chatWithUsOnSlack.helpers({
