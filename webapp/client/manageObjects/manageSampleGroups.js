@@ -65,27 +65,41 @@ Template.showSampleGroup.helpers({
 
 // Sample Group Expression Level & Variance Filters
 
+// Setup the client-side Blobs2 collection
+Blobs2 = new Mongo.Collection('blobs');
+
+// Subscribe to associated jobs & blobs
 Template.sampleGroupExprVarFilters.onCreated(function(){
-  this.subscribe("jobsOfType", "ApplyExprAndVarianceFilters");
+  let instance = this;
+  let sampleGroupId = instance.data._id ;
+  // use Template.subscriptionsReady to know when these are available
+  console.log("setting up..."); // XXX
+  instance.subscribe("jobsOfType", "ApplyExprAndVarianceFilters");
+  console.log("subscribing with id", sampleGroupId); // XXX
+  instance.subscribe("blobsAssociatedWithObject", "SampleGroups", sampleGroupId);
 });
 
 Template.sampleGroupExprVarFilters.helpers({
   // Have the expression&variance filters been applied
   // to this sample group?
-  exprVarFilterApplied(){
-    // ie, is there an associated blobs2
-    // with the appropriate name
-    // for this sample group
-    return false; // TODO
+  hasFilter(){
+    let foundBlob = Blobs2.findOne({
+      //associated object is the sample group id
+      "associated_object.collection_name":"SampleGroups",
+      "associated_object.mongo_id":this._id,
+      "file_name":"sampleGroup_with_expr_filter_applied.tsv" // TODO make sure this is consistent with jobrunner
+    });
+    
+    console.log("do w have any RELEVANT blobs", foundBlob); // XXX
+
+    if(foundBlob){return foundBlob._id;}else{return false;}
   },
 
   // if there is a job currently processing or waiting, return its status;
   // else return false
-  exprVarFilterProcessing(){
+  isJobRunning(){
     let self = this;
-
     console.log("checking for jobs with", self._id); // XXX
-  
     let currentJob = Jobs.findOne({
       '$and': [
         {name: "ApplyExprAndVarianceFilters"},
@@ -96,7 +110,6 @@ Template.sampleGroupExprVarFilters.helpers({
     console.log("found job", currentJob); // XXX
     if(currentJob){ return currentJob.status; } else { return false; }
   },
-
 });
 
 Template.sampleGroupExprVarFilters.events({

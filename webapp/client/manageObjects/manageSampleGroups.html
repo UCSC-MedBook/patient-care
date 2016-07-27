@@ -146,25 +146,28 @@
 </template>
 
 <template name="sampleGroupExprVarFilters">
-  {{! UI for the expression & variance filters on sample groups.
+{{! UI for the expression & variance filters on sample groups.
       Allows user to download filtered sample group data, or
       generate it if it hasn't yet been created. }}
 
-  {{#if exprVarFilterApplied}}
-      The following filters have been applied to this sample group:
-      {{>sampleGroupsExprVarFilterDesc}}
-    <h3>
-      Download filtered samples
-      <a href="TODO" class="ui tiny primary button" target="_blank">
-      Download as .tsv
-      </a>
-    </h3>  
-  {{else}}
-    {{#let currentJobStatus=exprVarFilterProcessing }}
-      {{#if currentJobStatus}}
-        <div class="ui active inline loader tiny"></div>
-        Your filters will be applied soon. The current status is: {{currentJobStatus}}.
+  {{#if Template.subscriptionsReady}}
+    {{#if hasFilter}}
+    {{! If filters already run, provide download link.}}
+        The following filters have been applied to this sample group:
+        {{>sampleGroupsExprVarFilterDesc}}
+      <h3>
+        Download filtered samples
+        <a href="TODO" class="ui tiny primary button" target="_blank">
+        Download as .tsv
+        </a>
+      </h3>  
+    {{else}}
+      {{#if isJobRunning}}
+      {{! If the filters are running, don't let them queue another job}} 
+          <div class="ui active inline loader tiny"></div>
+          Your filters will be applied soon. The current status is: {{isJobRunning}}.
       {{else}}
+      {{! There's no filters; let them apply them. }}
         <h3>Expression-level & Variance Filters</h3>
         Filters have not been applied to this sample group. If applied, a filtered version
         of the sample group will be created; the original samples will remain available.<br/>
@@ -173,10 +176,13 @@
               <a class="ui tiny primary button run-job" >
           Apply filters
         </a>
-      {{/if}}
-    {{/let}}
+      {{/if}} 
+    {{/if}}
+  {{else}}
+    {{! subscriptions not yet ready...}}
+    <div class="ui active inline loader tiny"></div>Loading filters...
   {{/if}}
-</template>
+  </template>
 <template name="sampleGroupsExprVarFilterDesc">
 <ul><li>
         Expression level filter: Remove each gene that has an expression level of 0 in

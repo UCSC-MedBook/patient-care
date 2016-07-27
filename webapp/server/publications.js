@@ -166,6 +166,23 @@ Meteor.publish("jobsOfType", function (name) {
   });
 });
 
+// Let a document subscribe to all blobs2 associated with it
+Meteor.publish("blobsAssociatedWithObject", function(collectionName, objectId) {
+  check(collectionName, String);
+  check(objectId, String);
+
+  let user = MedBook.ensureUser(this.userId);
+  let doc = MedBook.collections[collectionName].findOne(objectId);
+
+  // Indicate that the subscription will send no further data
+  if(! user.hasAccess(doc)){ return this.ready();}
+
+  return Blobs2.find({
+    "associated_object.collection_name": collectionName,
+    "associated_object.mongo_id": objectId,
+  });
+});
+
 // Meteor.publish("patientAndSampleLabels", function() {
 //   var user = MedBook.ensureUser(this.userId);
 //
