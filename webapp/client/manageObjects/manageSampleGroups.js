@@ -73,9 +73,7 @@ Template.sampleGroupExprVarFilters.onCreated(function(){
   let instance = this;
   let sampleGroupId = instance.data._id ;
   // use Template.subscriptionsReady to know when these are available
-  console.log("setting up..."); // XXX
   instance.subscribe("jobsOfType", "ApplyExprAndVarianceFilters");
-  console.log("subscribing with id", sampleGroupId); // XXX
   instance.subscribe("blobsAssociatedWithObject", "SampleGroups", sampleGroupId);
 });
 
@@ -92,8 +90,6 @@ Template.sampleGroupExprVarFilters.helpers({
       "file_name": fileName,
     });
     
-    console.log("do w have any RELEVANT blobs", foundBlob); // XXX
-
     if(!foundBlob){return false;}
     // Construct the URL a la downloadUrl above
 
@@ -106,8 +102,6 @@ Template.sampleGroupExprVarFilters.helpers({
 
     let url = `/download/${userId}/${loginToken}/blob/` +
         `${foundBlob._id}/${visibleFileName}`;
-
-    console.log("made url", url); // XXX
     return url;
   },
 
@@ -125,7 +119,6 @@ Template.sampleGroupExprVarFilters.helpers({
 // heavily depends on there only ever being 1 job per sample group
 // as it will pick an arbitrary one
 function getFilterJobStatus(sampleGroupId){
-    console.log("checking for jobs with", sampleGroupId); // XXX
     let currentJob = Jobs.findOne({
       '$and': [
         {name: "ApplyExprAndVarianceFilters"},
@@ -133,7 +126,6 @@ function getFilterJobStatus(sampleGroupId){
         {'args.sample_group_id': sampleGroupId},
       ],
     },);
-    console.log("found job", currentJob); // XXX
     if(currentJob){ return currentJob.status; } else { return false; }
 }
 
@@ -141,15 +133,22 @@ Template.sampleGroupExprVarFilters.events({
   // initiate the expression & variance filter job 
   "click .button.run-job": function(event, instance){
     let sampleGroupId = instance.data._id ;
-    console.log("about to run the job for expr var filter", sampleGroupId); // XXX 
-    // TODO anything else before calling the method?
     Meteor.call("applyExprVarianceFilters", sampleGroupId, (error, result) => {
       if(error){
-        // TODO recover? throw?
-      } else {
-        console.log("called meteor method and got result", result); // XXX
-        // TODO handle result
+        console.log("error:", error);
+        if (!error.details) {
+          instance.error.set({
+            header: "Internal server error",
+            message: error.reason || "Error: " + error.error,
+          });
+        } else {
+          instance.error.set({
+            header: error.reason,
+            message: error.details
+          });
+        }
       }
+      // No action needed if call succeeds.
     });
   }
 });
