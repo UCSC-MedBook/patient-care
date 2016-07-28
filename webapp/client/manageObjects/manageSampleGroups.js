@@ -109,19 +109,28 @@ Template.sampleGroupExprVarFilters.helpers({
   // if there is a job currently processing or waiting, return its status;
   // else return false
   isJobRunning(){
-    let self = this;
-    console.log("checking for jobs with", self._id); // XXX
+    return getFilterJobStatus(this._id);
+  },
+  // did the job error out
+  didJobFail(){
+    return ( getFilterJobStatus(this._id) === "error" );
+  }
+});
+// helper for isJobRunning & didJobFail above
+// heavily depends on there only ever being 1 job per sample group
+// as it will pick an arbitrary one
+function getFilterJobStatus(sampleGroupId){
+    console.log("checking for jobs with", sampleGroupId); // XXX
     let currentJob = Jobs.findOne({
       '$and': [
         {name: "ApplyExprAndVarianceFilters"},
-        {status: {$in: ["creating", "waiting", "running"]}}, // TODO remove done
-        {'args.sample_group_id': self._id},
+        {status: {$in: ["creating", "waiting", "running","error"]}},
+        {'args.sample_group_id': sampleGroupId},
       ],
     },);
     console.log("found job", currentJob); // XXX
     if(currentJob){ return currentJob.status; } else { return false; }
-  },
-});
+}
 
 Template.sampleGroupExprVarFilters.events({
   // initiate the expression & variance filter job 

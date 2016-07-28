@@ -164,8 +164,15 @@
     {{else}}
       {{#if isJobRunning}}
       {{! If the filters are running, don't let them queue another job}} 
+      {{! If a job failed, there's nothing the user can do; tell them to see help}}
+        {{#if didJobFail}}
+          <i class="warning sign icon"></i>Something went wrong filtering the data
+          of this sample group. Please let us know and we will investigate.
+          {{>contactUsButton}}
+        {{else}}
           <div class="ui active inline loader tiny"></div>
           Your filters will be applied soon. The current status is: {{isJobRunning}}.
+        {{/if}}
       {{else}}
       {{! There's no filters; let them apply them. }}
         <h3>Expression-level & Variance Filters</h3>
