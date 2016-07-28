@@ -137,6 +137,14 @@ Template.showErrorMessage.events({
   },
 });
 
+// Template.contactUsButton
+
+Template.contactUsButton.helpers({
+  emailSubject() {
+    return `MedBook%20Patient%20Care:%20${FlowRouter.current().path}`;
+  },
+});
+
 // Template.listSamplesButton
 
 Template.listSamplesButton.onCreated(function () {
