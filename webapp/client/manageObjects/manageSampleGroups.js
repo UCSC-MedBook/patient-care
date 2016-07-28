@@ -84,7 +84,7 @@ Template.sampleGroupExprVarFilters.helpers({
   // if a filter has been applied, the download URL for the
   // filtered data; otherwise, 'false'
   urlForFilteredData(){
-    let fileName = "sampleGroup_with_expr_filter_applied.tsv" // TODO make sure this is consistent with jobrunner
+    let fileName = "sampleGroup_filteredByExprAndVar.tsv" 
     let foundBlob = Blobs2.findOne({
       //associated object is the sample group id
       "associated_object.collection_name":"SampleGroups",
@@ -96,11 +96,16 @@ Template.sampleGroupExprVarFilters.helpers({
 
     if(!foundBlob){return false;}
     // Construct the URL a la downloadUrl above
-    
+
+    // Use the samplegroup name to make a custom download
+    // filename. Url encode it since it will be going into a path
+    let sampleGroupName = encodeURI(this.name);
+    let visibleFileName = `${sampleGroupName}.genes_filtered.tsv`;
     let userId = Meteor.userId();
     let loginToken = Accounts._storedLoginToken();
+
     let url = `/download/${userId}/${loginToken}/blob/` +
-        `${foundBlob._id}/${fileName}`;
+        `${foundBlob._id}/${visibleFileName}`;
 
     console.log("made url", url); // XXX
     return url;
