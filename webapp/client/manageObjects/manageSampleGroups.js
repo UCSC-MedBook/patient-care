@@ -80,19 +80,30 @@ Template.sampleGroupExprVarFilters.onCreated(function(){
 });
 
 Template.sampleGroupExprVarFilters.helpers({
-  // Have the expression&variance filters been applied
-  // to this sample group?
-  hasFilter(){
+
+  // if a filter has been applied, the download URL for the
+  // filtered data; otherwise, 'false'
+  urlForFilteredData(){
+    let fileName = "sampleGroup_with_expr_filter_applied.tsv" // TODO make sure this is consistent with jobrunner
     let foundBlob = Blobs2.findOne({
       //associated object is the sample group id
       "associated_object.collection_name":"SampleGroups",
       "associated_object.mongo_id":this._id,
-      "file_name":"sampleGroup_with_expr_filter_applied.tsv" // TODO make sure this is consistent with jobrunner
+      "file_name": fileName,
     });
     
     console.log("do w have any RELEVANT blobs", foundBlob); // XXX
 
-    if(foundBlob){return foundBlob._id;}else{return false;}
+    if(!foundBlob){return false;}
+    // Construct the URL a la downloadUrl above
+    
+    let userId = Meteor.userId();
+    let loginToken = Accounts._storedLoginToken();
+    let url = `/download/${userId}/${loginToken}/blob/` +
+        `${foundBlob._id}/${fileName}`;
+
+    console.log("made url", url); // XXX
+    return url;
   },
 
   // if there is a job currently processing or waiting, return its status;

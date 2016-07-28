@@ -151,13 +151,13 @@
       generate it if it hasn't yet been created. }}
 
   {{#if Template.subscriptionsReady}}
-    {{#if hasFilter}}
+    {{#if urlForFilteredData}}
     {{! If filters already run, provide download link.}}
         The following filters have been applied to this sample group:
         {{>sampleGroupsExprVarFilterDesc}}
       <h3>
         Download filtered samples
-        <a href="TODO" class="ui tiny primary button" target="_blank">
+        <a href={{urlForFilteredData}} class="ui tiny primary button" target="_blank">
         Download as .tsv
         </a>
       </h3>  
