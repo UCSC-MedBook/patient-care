@@ -6,9 +6,9 @@ Template.listLimmaGSEA.onCreated(function () {
   instance.subscribe("sampleGroups");
   instance.subscribe("geneSetCollections");
 
-  function makeDefaultGroup (title, name) {
+  function makeDefaultGroup (title, inputName) {
     return {
-      title, name,
+      title, inputName,
       customize: new ReactiveVar(false),
       customSampleGroup: new ReactiveVar({
         name: "",
@@ -18,8 +18,8 @@ Template.listLimmaGSEA.onCreated(function () {
       }),
     }
   }
-  instance.groupA = makeDefaultGroup("Reference group", "sampleGroupA");
-  instance.groupB = makeDefaultGroup("Experimental group", "sampleGroupB");
+  instance.groupA = makeDefaultGroup("Experimental group", "sampleGroupA");
+  instance.groupB = makeDefaultGroup("Reference group", "sampleGroupB");
 
   instance.error = new ReactiveVar(null); // null = don't show
   instance.creatingJob = new ReactiveVar(false); // spinner on submit button
@@ -66,7 +66,7 @@ function getSampleGroupId (group, instance) {
       });
     });
   } else {
-    let sgId = instance.$(`input[name=${group.name}]`).val();
+    let sgId = instance.$(`input[name=${group.inputName}]`).val();
     if (sgId) {
       return Promise.resolve(sgId);
     } else {
