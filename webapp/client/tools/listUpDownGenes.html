@@ -33,11 +33,14 @@
       {{/if}}
     </div>
 
-    <div class="two fields">
+    <div class="three fields">
       {{> afQuickField name="iqr_multiplier" value=1.5}}
 
       {{> afQuickField name="sample_group_id" options=sampleGroupOptions
           type="select" search=true placeholder="Choose background..."}}
+
+      {{> afQuickField name="use_filtered_sample_group" 
+          type="boolean-checkbox" }}
     </div>
 
     {{#if afFieldValueIs name="sample_group_id" value="creating"}}

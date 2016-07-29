@@ -20,6 +20,7 @@ Template.listUpDownGenes.helpers({
       sample_label: { type: String, label: "Sample" },
       sample_group_id: { type: String, label: "Background sample group" },
       iqr_multiplier: { type: Number, decimal: true },
+      use_filtered_sample_group: {type: Boolean, label: "Use gene filters?", defaultValue:true},
     });
   },
   undefined() { return undefined; },
@@ -79,6 +80,7 @@ Template.listUpDownGenes.events({
     event.preventDefault();
 
     let formValues = AutoForm.getFormValues("createUpDownGenes");
+    console.log("got values which are", formValues); // XXX 
     let customSampleGroup = instance.customSampleGroup.get();
 
     // until Match.Maybe is available, make sure this is an Object
