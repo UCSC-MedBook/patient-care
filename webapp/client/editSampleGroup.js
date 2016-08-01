@@ -422,7 +422,7 @@ Template.formValuesFilter.events({
 
     let query = $(queryBuilderDivId).queryBuilder('getMongo');
     let serialized_query = JSON.stringify(query);
-    let sampleCrfId = decodeURI(instance.active_crf.get());
+    let sampleCrfId = decodeURIComponent(instance.active_crf.get());
      let dataset_id = instance.data.data_set_id;
 
     instance.editing.set(false);

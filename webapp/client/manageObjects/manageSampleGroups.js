@@ -93,10 +93,11 @@ Template.sampleGroupExprVarFilters.helpers({
 
     // Use the samplegroup name to make a custom download
     // filename. Url encode it since it will be going into a path
-    let sampleGroupName = encodeURI(this.name);
+    let sampleGroupName = encodeURIComponent(this.name);
     let visibleFileName = `${sampleGroupName}.genes_filtered.tsv`;
     let userId = Meteor.userId();
     let loginToken = Accounts._storedLoginToken();
+
 
     let url = `/download/${userId}/${loginToken}/blob/` +
         `${foundBlob._id}/${visibleFileName}`;
