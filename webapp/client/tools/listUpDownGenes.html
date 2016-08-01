@@ -68,6 +68,7 @@
             <th>Sample</th>
             <th>Comparison group</th>
             <th>IQR multiplier</th>
+            <th>Gene filters</th>
             <th>Upregulated genes</th>
             <th>Downregulated genes</th>
             <th>Status</th>
@@ -83,6 +84,13 @@
               </td>
               <td>{{args.sample_group_name}}</td>
               <td>{{args.iqr_multiplier}}</td>
+              <td>
+                {{#if args.use_filtered_sample_group}}
+                  Yes
+                {{else}}
+                  None
+                {{/if}}
+              </td>
               <td>{{output.up_genes.length}}</td>
               <td>{{output.down_genes.length}}</td>
               <td>
