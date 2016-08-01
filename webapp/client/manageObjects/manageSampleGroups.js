@@ -82,12 +82,10 @@ Template.sampleGroupExprVarFilters.helpers({
   // if a filter has been applied, the download URL for the
   // filtered data; otherwise, 'false'
   urlForFilteredData(){
-    let fileName = "sampleGroup_filteredByExprAndVar.tsv" 
     let foundBlob = Blobs2.findOne({
-      //associated object is the sample group id
       "associated_object.collection_name":"SampleGroups",
       "associated_object.mongo_id":this._id,
-      "file_name": fileName,
+      "metadata.type":"ExprAndVarFilteredSampleGroupData",
     });
     
     if(!foundBlob){return false;}
