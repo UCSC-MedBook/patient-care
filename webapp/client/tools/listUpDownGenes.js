@@ -20,7 +20,8 @@ Template.listUpDownGenes.helpers({
       sample_label: { type: String, label: "Sample" },
       sample_group_id: { type: String, label: "Background sample group" },
       iqr_multiplier: { type: Number, decimal: true },
-      use_filtered_sample_group: {type: Boolean, label: "Use gene filters?", defaultValue:true},
+      use_filtered_sample_group: {type: Boolean, label:
+         "Apply gene filters to background sample group?", defaultValue:true},
     });
   },
   undefined() { return undefined; },
