@@ -53,15 +53,12 @@
     </tbody>
   </table>
 
-  <h3>
-    Contents
+  <a href={{downloadUrl}} class="ui primary button"
+      target="_blank">
+    Download as .tsv
+  </a>
 
-    <a href={{downloadUrl}} class="ui tiny primary button"
-        target="_blank">
-      Download as .tsv
-    </a>
-  </h3>
-
+  <h3>Contents</h3>
   <div class="ui list">
     {{#each data_sets}}
       <div class="item">
@@ -75,6 +72,9 @@
           {{else}}
             All {{unfiltered_sample_count}} samples included without filtering.
           {{/if}}
+          {{> listSamplesButton sample_labels}}
+
+          Filters aplied:
         </div>
 
         {{#if length filters}}

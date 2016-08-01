@@ -104,12 +104,14 @@
   </table>
 
   {{#if length sample_labels}}
-    <a href={{downloadUrl}} class="ui primary button"
-        target="_blank">
-      Download as .tsv
-    </a>
+    <div>
+      <a href={{downloadUrl}} class="ui primary button"
+          target="_blank">
+        Download as .tsv
+      </a>
+    </div>
 
-    <h4>
+    <h4 style="display: inline-block; margin-bottom: 0px;">
       Samples
     </h4>
     {{> listSamplesButton sample_labels}}

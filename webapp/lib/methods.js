@@ -653,6 +653,9 @@ Meteor.methods({
     MedBook.collections[collection_name].remove(mongo_id);
 
     // remove associated blobs
+    // NOTE: there is a client-side error here because Blobs2 isn't defined
+    // on the client just yet. The method itself works because Blobs2 is
+    // defined on the server.
     Blobs2.delete({
       associated_object: { collection_name, mongo_id }
     }, (err, out) => {
