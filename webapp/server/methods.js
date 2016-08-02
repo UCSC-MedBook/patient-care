@@ -77,9 +77,10 @@ Meteor.methods({
     // and if so, return that job's _id
     // NOTE: I believe there could be a race condition here, but
     // I don't think Meteor handles more than one Meteor method at once.
-    // NOTE 2: if there is a job that predates sample group filters,
-    // that job will never be found as a duplicate here as the args have changed.
-    // TODO is that the case? or do the args let us find them?
+    
+    // Jobs that predate sample group filters will match for new jobs using
+    // an unfiltered sample group as neither has 'use_filtered_sample_group'
+    // as an arg.
     let duplicateJob = Jobs.findOne({
       args,
       collaborations: user.getCollaborations()
@@ -302,11 +303,14 @@ Meteor.methods({
     let sampleGroup = SampleGroups.findOne(sampleGroupId);
     user.ensureAccess(sampleGroup);
 
+    // TODO : this job should never run more than once for
+    // a sample group, so we should never need to search for
+    // an existing filter blob & delete it. But we probably should,
+    // just in case.
 
-  // delete existing filter blob if there is one ? TODO
-  args = {
-    sample_group_id: sampleGroupId
-  }
+    args = {
+      sample_group_id: sampleGroupId
+    }
     
     return Jobs.insert({
       name: "ApplyExprAndVarianceFilters",
