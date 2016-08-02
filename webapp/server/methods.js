@@ -188,6 +188,11 @@ Meteor.methods({
         let { options } = filter;
 
         if (filter.type === "form_values"){
+          if (!options.mongo_query) {
+            throw new Meteor.Error("mongo-query-empty", "Not done editing filters",
+                "Please click done to continue.");
+          }
+
           // Run the mongo_query
           // Get the result sample labels synchronously
           let result_sample_labels = Meteor.call('getSamplesFromFormFilter',
