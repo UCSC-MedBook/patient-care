@@ -53,12 +53,19 @@
     </tbody>
   </table>
 
-  <a href={{downloadUrl}} class="ui primary button"
-      target="_blank">
-    Download as .tsv
-  </a>
+  <h3>
+    Download samples without gene filters
 
-  <h3>Contents</h3>
+    <a href={{downloadUrl}} class="ui tiny primary button"
+        target="_blank">
+      Download as .tsv
+    </a>
+  </h3>
+
+  {{>sampleGroupExprVarFilters}}
+
+  <h3>Filters applied to data sets</h3>
+
   <div class="ui list">
     {{#each data_sets}}
       <div class="item">
@@ -141,4 +148,59 @@
       </p>
     </div>
   {{/if}}
+</template>
+
+<template name="sampleGroupExprVarFilters">
+  {{! UI for the expression & variance filters on sample groups.
+      Allows user to download filtered sample group data, or
+      generate it if it hasn't yet been created. }}
+
+  <h3 style="display:inline">Expression-level & Variance Filters</h3>
+  {{#if Template.subscriptionsReady}}
+    {{#if urlForFilteredData}}
+    {{! If filters already run, provide download link.}}
+    <h3 style="display:inline">
+        <a href={{urlForFilteredData}} class="ui tiny primary button" target="_blank">
+        Download as .tsv
+        </a>
+      </h3>
+      <br/> 
+        The following filters have been applied to this sample group:
+        {{>sampleGroupsExprVarFilterDesc}}
+    {{else}}
+      {{#if isJobRunning}}
+        {{! If the filters are running, don't let them queue another job}} 
+        {{! If a job failed, there's nothing the user can do; tell them to see help}}
+        {{#if didJobFail}}
+          <i class="warning sign icon"></i>Something went wrong filtering the data
+          of this sample group. Please let us know and we will investigate.
+          {{>contactUsButton}}
+        {{else}}
+          <div class="ui active inline loader tiny"></div>
+          Your filters are being applied. The current status is: {{isJobRunning}}.
+        {{/if}}
+      {{else}}
+      {{! There's no filters; let them apply them. }}
+        Filters have not been applied to this sample group. If applied, a filtered version
+        of the sample group will be created; the original samples will remain available.<br/>
+        The following filters will be applied:
+        {{>sampleGroupsExprVarFilterDesc}}
+              <a class="ui tiny primary button run-job" >
+          Apply filters
+        </a>
+      {{/if}} 
+    {{/if}}
+  {{else}}
+    {{! subscriptions not yet ready...}}
+    <div class="ui active inline loader tiny"></div>Loading filters...
+  {{/if}}
+  </template>
+<template name="sampleGroupsExprVarFilterDesc">
+<ul><li>
+        Expression level filter: Remove each gene that has an expression level of 0 in
+        80% or more of the samples in this sample group.
+      </li><li>
+        Variance filter: Ranks the remaining genes by variance and removes the 20% with the lowest
+        variances.
+      </li></ul>
 </template>

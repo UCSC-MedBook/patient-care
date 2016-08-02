@@ -13,6 +13,13 @@
     Sample: {{args.sample_label}}<br>
     Comparison group: {{args.sample_group_name}}<br>
     IQR multiplier: {{args.iqr_multiplier}}<br>
+    Gene filters used:
+      {{#if args.use_filtered_sample_group}}
+        Genes unexpressed in 80% of background samples removed;
+        20% of lowest-variance genes removed.
+      {{else}}
+        None
+      {{/if}}
   </p>
 
   {{#if Template.subscriptionsReady}}
