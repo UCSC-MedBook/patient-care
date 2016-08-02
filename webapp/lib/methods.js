@@ -758,7 +758,7 @@ Meteor.methods({
   renameSampleLabel(studyId, oldSampleLabel, newUQSampleLabel) {
     check([studyId, oldSampleLabel, newUQSampleLabel], [String]);
 
-    let user = MedBook.ensureAccess(Meteor.userId());
+    let user = MedBook.ensureUser(Meteor.userId());
     let study = Studies.findOne(studyId);
     user.ensureAccess(study);
 
