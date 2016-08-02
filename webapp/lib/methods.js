@@ -620,7 +620,7 @@ Meteor.methods({
   removeObject(collection_name, mongo_id) {
     check([collection_name, mongo_id], [String]);
 
-    let user = MedBook.findUser(Meteor.userId());
+    let user = MedBook.ensureUser(Meteor.userId());
     let object = MedBook.collections[collection_name].findOne(mongo_id);
     user.ensureAccess(object);
 
@@ -653,6 +653,9 @@ Meteor.methods({
     MedBook.collections[collection_name].remove(mongo_id);
 
     // remove associated blobs
+    // NOTE: there is a client-side error here because Blobs2 isn't defined
+    // on the client just yet. The method itself works because Blobs2 is
+    // defined on the server.
     Blobs2.delete({
       associated_object: { collection_name, mongo_id }
     }, (err, out) => {
@@ -675,7 +678,7 @@ Meteor.methods({
     check([collectionName, mongoId], [String]);
     check(collaborations, [String]);
 
-    let user = MedBook.findUser(Meteor.userId());
+    let user = MedBook.ensureUser(Meteor.userId());
     let collection = MedBook.collections[collectionName];
     let object = collection.findOne(mongoId);
     user.ensureAccess(object);
@@ -707,7 +710,7 @@ Meteor.methods({
 
     let { uq_sample_label, study_label } = sampleDefinition;
 
-    let user = MedBook.findUser(Meteor.userId());
+    let user = MedBook.ensureUser(Meteor.userId());
     user.ensureAccess(Studies.findOne({ study_label }));
 
     let sample_label = study_label + "/" + uq_sample_label;
@@ -725,7 +728,7 @@ Meteor.methods({
   studyLabelTaken(study_label) {
     check(study_label, String);
 
-    let user = MedBook.findUser(Meteor.userId());
+    let user = MedBook.ensureUser(Meteor.userId());
 
     return !!Studies.findOne({ study_label });
   },
@@ -736,7 +739,7 @@ Meteor.methods({
       "study_label",
     ]));
 
-    let user = MedBook.findUser(Meteor.userId());
+    let user = MedBook.ensureUser(Meteor.userId());
 
     newStudy.collaborations = [ user.personalCollaboration() ];
 
@@ -755,7 +758,7 @@ Meteor.methods({
   renameSampleLabel(studyId, oldSampleLabel, newUQSampleLabel) {
     check([studyId, oldSampleLabel, newUQSampleLabel], [String]);
 
-    let user = MedBook.findUser(Meteor.userId());
+    let user = MedBook.ensureUser(Meteor.userId());
     let study = Studies.findOne(studyId);
     user.ensureAccess(study);
 
@@ -828,6 +831,22 @@ Meteor.methods({
           });
         }
       });
+    });
+  },
+
+  // Allow anyone to refresh the access table for cBioPortal. There is
+  // no UI for this job and if an attacker calls it, it will just refresh
+  // the list again which isn't the end of the world.
+  refreshCBioPortalAccess() {
+    // at least make sure they're logged in so we know who they are...
+    let user = MedBook.ensureUser(Meteor.userId());
+
+    Jobs.insert({
+      name: "UpdateCbioSecurity",
+      user_id: user._id,
+      args: {
+        collab_names: [ "WCDT" ]
+      }
     });
   },
 });

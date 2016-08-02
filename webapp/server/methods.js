@@ -139,7 +139,8 @@ Meteor.methods({
 
       // don't trust the client's name or unfiltered count
       sampleGroupDataSet.data_set_name = dataSet.name;
-      sampleGroupDataSet.unfiltered_sample_count = dataSet.sample_labels.length;
+      sampleGroupDataSet.unfiltered_sample_count =
+          dataSet.sample_labels.length;
 
       // Apply the sample group's filters.
       // We start with all the sample labels in a data set.
@@ -150,21 +151,22 @@ Meteor.methods({
       // -  Exclude Specific Samples : remove all samples on the exclude list
       let allSamples = dataSet.sample_labels;
       let sample_labels = allSamples; // need a copy of this
-  
+
 
       _.each(sampleGroupDataSet.filters, (filter) => {
         let { options } = filter;
-  
+
         if (filter.type === "form_values"){
           // Run the mongo_query
           // Get the result sample labels synchronously
-          let result_sample_labels = Meteor.call('getSamplesFromFormFilter', 
+          let result_sample_labels = Meteor.call('getSamplesFromFormFilter',
             sampleGroupDataSet.data_set_id,
             options.mongo_query,
             options.form_id
           );
 
-          console.log("Query found", result_sample_labels.length, "sample labels.");
+          console.log("Query found", result_sample_labels.length,
+              "sample labels.");
 
           sample_labels = _.intersection(sample_labels, result_sample_labels);
 
@@ -208,7 +210,8 @@ Meteor.methods({
 
       // Confirm the filter options (include / exclude sample list only)
       _.each(dataSet.filters, (filter) => {
-        if((filter.type === "include_sample_list")||(filter.type === "exclude_sample_list")){
+        if((filter.type === "include_sample_list") ||
+            (filter.type === "exclude_sample_list")){
           check(filter.options.sample_labels, [String]);
           filter.options.sample_count = filter.options.sample_labels.length;
         }
@@ -226,6 +229,8 @@ Meteor.methods({
     let validationContext = SampleGroups.simpleSchema().newContext();
     var isValid = validationContext.validate(clonedSampleGroup);
     if (!isValid) {
+      console.log("Someone's doing something funky or there's a bug in " +
+          "the UI code. User:", user._id);
       console.log("clonedSampleGroup:", clonedSampleGroup);
       console.log("validationContext.invalidKeys():",
           validationContext.invalidKeys());
@@ -239,13 +244,13 @@ Meteor.methods({
     // insert asynchronously -- thanks @ArnaudGallardo
     var future = new Future();
     SampleGroups.rawCollection().insert(sampleGroup, (err, insertedObj) => {
-      // Need to either throw err, or return ID, but NOT BOTH 
-      // or will crash with "Future resolved more than once" error 
+      // Need to either throw err, or return ID, but NOT BOTH
+      // or will crash with "Future resolved more than once" error
       if (err) {
-       console.log("Creating sample group threw Future error:", err);
-       future.throw(err);
+        console.log("Creating sample group threw Future error:", err);
+        future.throw(err);
       } else {
-      future.return(newId);
+        future.return(newId);
       }
     });
 

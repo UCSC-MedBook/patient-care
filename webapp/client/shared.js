@@ -150,18 +150,54 @@ Template.contactUsButton.helpers({
 Template.listSamplesButton.onCreated(function () {
   let instance = this;
 
-  let showAtFirst = instance.data.length < 100;
-  instance.showList = new ReactiveVar(showAtFirst);
+  let showAllDefault = instance.data.length <= 5;
+  instance.showAllSamples = new ReactiveVar(showAllDefault);
+
+  instance.hideStudyLabels = new ReactiveVar(false);
 });
 
 Template.listSamplesButton.helpers({
-  showList() { return Template.instance().showList.get(); },
+  showAllSamples() { return Template.instance().showAllSamples.get(); },
+  hideStudyLabels() { return Template.instance().hideStudyLabels.get(); },
+  sampleToShow() {
+    let instance = Template.instance();
+
+    let sampleLabels = instance.data;
+
+    // remove study labels if necessary
+    if (instance.hideStudyLabels.get()) {
+      sampleLabels = MedBook.utility.unqualifySampleLabels(sampleLabels);
+    }
+
+    // return either the whole list or the first couple items
+    if (instance.showAllSamples.get()) {
+      return sampleLabels;
+    } else {
+      return sampleLabels
+        .slice(0, 3)
+        .concat([`... and ${sampleLabels.length - 3} more samples`]);
+    }
+  },
+  dropdownOptions() {
+    return {
+      action: "nothing"
+    };
+  },
 });
 
 Template.listSamplesButton.events({
   "click .show-list"(event, instance) {
-    instance.showList.set(!instance.showList.get());
+    instance.showAllSamples.set(!instance.showAllSamples.get());
   },
+  "click .toggle-study-labels"(event, instance) {
+    instance.hideStudyLabels.set(!instance.hideStudyLabels.get());
+  },
+});
+
+// Template.semanticUIDropdown
+
+Template.semanticUIDropdown.onRendered(function () {
+  this.$(".ui.dropdown").dropdown(this.data.options);
 });
 
 // Template.viewJobButton
