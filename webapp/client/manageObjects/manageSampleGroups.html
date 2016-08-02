@@ -155,52 +155,85 @@
       Allows user to download filtered sample group data, or
       generate it if it hasn't yet been created. }}
 
-  <h3 style="display:inline">Expression-level & Variance Filters</h3>
   {{#if Template.subscriptionsReady}}
-    {{#if urlForFilteredData}}
-    {{! If filters already run, provide download link.}}
-    <h3 style="display:inline">
-        <a href={{urlForFilteredData}} class="ui tiny primary button" target="_blank">
-        Download as .tsv
+    <h3>
+      Expression-level & Variance Filters
+
+      {{#if urlForFilteredData}}
+        {{! If filters already run, provide download link.}}
+        <a href={{urlForFilteredData}} class="ui tiny primary button"
+            target="_blank">
+          Download as .tsv
         </a>
-      </h3>
-      <br/> 
-        The following filters have been applied to this sample group:
-        {{>sampleGroupsExprVarFilterDesc}}
+      {{else}}
+        {{#unless isJobRunning}}
+          <a class="ui tiny primary button run-job" >
+            Apply filters
+          </a>
+        {{/unless}}
+      {{/if}}
+    </h3>
+
+    {{#if urlForFilteredData}}
+      The following filters have been applied to this sample group:
+      {{> sampleGroupsExprVarFilterDesc}}
     {{else}}
       {{#if isJobRunning}}
-        {{! If the filters are running, don't let them queue another job}} 
+        {{! If the filters are running, don't let them queue another job}}
         {{! If a job failed, there's nothing the user can do; tell them to see help}}
         {{#if didJobFail}}
-          <i class="warning sign icon"></i>Something went wrong filtering the data
-          of this sample group. Please let us know and we will investigate.
-          {{>contactUsButton}}
+          <div class="ui error icon message">
+            <i class="warning sign icon"></i>
+            <div class="content">
+              <div class="header">
+                Something went wrong...
+              </div>
+              <p>
+                Something went wrong filtering the data of this sample group.
+              </p>
+              <p>
+                Please let us know and we will investigate.
+              </p>
+              <p>
+                {{> contactUsButton}}
+              </p>
+            </div>
+          </div>
         {{else}}
-          <div class="ui active inline loader tiny"></div>
-          Your filters are being applied. The current status is: {{isJobRunning}}.
+          <div class="ui info icon message">
+            <i class="notched circle loading icon"></i>
+            <div class="content">
+              <div class="header">
+                Your filters are being applied.
+              </div>
+              <p>The current status is: {{isJobRunning}}.</p>
+            </div>
+          </div>
         {{/if}}
       {{else}}
-      {{! There's no filters; let them apply them. }}
-        Filters have not been applied to this sample group. If applied, a filtered version
-        of the sample group will be created; the original samples will remain available.<br/>
+        {{! There's no filters; let them apply them. }}
+        <p>
+          Filters have not been applied to this sample group. If applied, a filtered version
+          of the sample group will be created; the original samples will remain available.
+        </p>
         The following filters will be applied:
-        {{>sampleGroupsExprVarFilterDesc}}
-              <a class="ui tiny primary button run-job" >
-          Apply filters
-        </a>
-      {{/if}} 
+        {{> sampleGroupsExprVarFilterDesc}}
+      {{/if}}
     {{/if}}
   {{else}}
     {{! subscriptions not yet ready...}}
-    <div class="ui active inline loader tiny"></div>Loading filters...
+    {{> dataLoading}}
   {{/if}}
   </template>
 <template name="sampleGroupsExprVarFilterDesc">
-<ul><li>
-        Expression level filter: Remove each gene that has an expression level of 0 in
-        80% or more of the samples in this sample group.
-      </li><li>
-        Variance filter: Ranks the remaining genes by variance and removes the 20% with the lowest
-        variances.
-      </li></ul>
+  <ul>
+    <li>
+      Expression level filter: Remove each gene that has an expression
+      level of 0 in 80% or more of the samples in this sample group.
+    </li>
+    <li>
+      Variance filter: Ranks the remaining genes by variance and removes
+      the 20% with the lowest variances.
+    </li>
+  </ul>
 </template>
