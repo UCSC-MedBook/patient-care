@@ -70,9 +70,6 @@ Meteor.methods({
       user.ensureAccess(dataSet);
     }
 
-    console.log("staring oa job with args", args); // XXX 
-
-
     // check to see if a job like this one has already been run,
     // and if so, return that job's _id
     // NOTE: I believe there could be a race condition here, but
@@ -86,7 +83,6 @@ Meteor.methods({
       collaborations: user.getCollaborations()
     });
     if (duplicateJob) {
-      console.log("found duplicate job", duplicateJob._id) // XXX
       return duplicateJob._id;
     }
 
@@ -97,7 +93,6 @@ Meteor.methods({
     // for the outlier analysis job.
     let prerequisite_job_ids = [];
     if(use_filtered_sample_group){
-      console.log("lookin for samplegroup filter"); // XXX
       // check the sample group for a gene-filter blob
       let foundFilter = Blobs2.findOne({
         "associated_object.collection_name":"SampleGroups",
@@ -105,7 +100,6 @@ Meteor.methods({
         "metadata.type":"ExprAndVarFilteredSampleGroupData",
       });
       if(!foundFilter){
-        console.log("didn't find filter, pushing new job"); // XXX
         // No existing filters -- queue a new job to create them
         prerequisite_job_ids.push(Jobs.insert({
           name: "ApplyExprAndVarianceFilters",
@@ -116,9 +110,6 @@ Meteor.methods({
         }));  
       }
     } 
-
-    console.log("prerequiste IDS are", prerequisite_job_ids); //XXX
-
 
     return Jobs.insert({
       name: "UpDownGenes",
