@@ -8,16 +8,18 @@ Template.listUpDownGenes.onCreated(function() {
 
   instance.customSampleGroup = new ReactiveVar();
   instance.error = new ReactiveVar(); // { header: "Uh oh", message: "hi" }
+
+  instance.talkingToServer = new ReactiveVar(false);
 });
 
 Template.listUpDownGenes.helpers({
   formSchema() {
     return new SimpleSchema({
-      data_set_or_patient_id: {
+      data_set_id: {
         type: String,
-        label: "Sample's data set or patient"
+        label: "Sample's data set"
       },
-      sample_label: { type: String, label: "Sample" },
+      sample_labels: { type: [String], label: "Samples" },
       sample_group_id: { type: String, label: "Background sample group" },
       iqr_multiplier: { type: Number, decimal: true },
       use_filtered_sample_group: {type: Boolean, label:
@@ -26,43 +28,27 @@ Template.listUpDownGenes.helpers({
   },
   undefined() { return undefined; },
   patientAndDataSets() {
-    return [{
-      itemGroup: "Data sets",
-      items: DataSets.find({}).map((dataSet) => {
-        return { value: "data_set-" + dataSet._id, label: dataSet.name };
-      })
-    }];
-    //},
-    // {
-    //   itemGroup: "Patients",
-    //   items: Patients.find({}).map((patient) => {
-    //     return {
-    //       value: "patient-" + patient._id,
-    //       label: patient.patient_label
-    //     };
-    //   })
-    // }];
+    return DataSets.find({}, { sort: { name: 1 } }).map((dataSet) => {
+      return { value: dataSet._id, label: dataSet.name };
+    });
   },
   sampleOptions() {
-    let fieldValue =
-        AutoForm.getFieldValue("data_set_or_patient_id", "createUpDownGenes");
+    let _id = AutoForm.getFieldValue("data_set_id", "createUpDownGenes");
 
-    if (fieldValue.startsWith("patient-")) {
-      let _id = fieldValue.slice("patient-".length);
+    // http://stackoverflow.com/questions/8996963/
+    // how-to-perform-case-insensitive-sorting-in-javascript
+    let samples = DataSets.findOne(_id).sample_labels.sort((a, b) => {
+      return a.toLowerCase().localeCompare(b.toLowerCase());
+    });
 
-      return _.map(Patients.findOne(_id).samples, ({ sample_label }) => {
-        return { value: sample_label, label: sample_label };
-      });
-    } else if (fieldValue.startsWith("data_set-")) {
-      let _id = fieldValue.slice("data_set-".length);
-
-      return _.map(DataSets.findOne(_id).sample_labels, (label) => {
-        return { value: label, label };
-      });
-    }
+    return _.map(samples, (label) => {
+      return { value: label, label };
+    });
   },
   sampleGroupOptions() {
-    let sgOptions = SampleGroups.find({}).map((sampleGroup) => {
+    let query = SampleGroups.find({}, { sort: { name: 1 } });
+
+    let sgOptions = query.map((sampleGroup) => {
       return { value: sampleGroup._id, label: sampleGroup.name };
     });
 
@@ -74,6 +60,7 @@ Template.listUpDownGenes.helpers({
   },
   customSampleGroup() { return Template.instance().customSampleGroup; },
   error() { return Template.instance().error; },
+  talkingToServer() { return Template.instance().talkingToServer.get() },
 });
 
 Template.listUpDownGenes.events({
@@ -86,8 +73,11 @@ Template.listUpDownGenes.events({
     // until Match.Maybe is available, make sure this is an Object
     if (!customSampleGroup) customSampleGroup = {};
 
+    instance.talkingToServer.set(true);
     Meteor.call("createUpDownGenes", formValues.insertDoc, customSampleGroup,
-        (error, job_id) => {
+        (error, jobIds) => {
+      instance.talkingToServer.set(false);
+
       if (error) {
         if (error.reason === "Match failed") {
           // there might be edge cases here which I haven't found yet so other
@@ -100,7 +90,9 @@ Template.listUpDownGenes.events({
           });
         }
       } else {
-        FlowRouter.go("upDownGenesJob", { job_id });
+        if (jobIds.length === 1) {
+          FlowRouter.go("upDownGenesJob", { job_id: jobIds[0] });
+        }
       }
     });
   },

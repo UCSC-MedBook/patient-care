@@ -14,21 +14,23 @@
 
   {{#autoForm id="createUpDownGenes" schema=formSchema}}
     <div class="two fields">
-      {{> afQuickField name="data_set_or_patient_id"
+      {{> afQuickField name="data_set_id"
           options=patientAndDataSets type="select" search=true
-          placeholder="Select a data set/patient..."}}
+          placeholder="Select a data set..."}}
 
-      {{#if afFieldValueIs name="data_set_or_patient_id" value=undefined}}
-        {{> afQuickField name="sample_label" type="select"
-            placeholder="Select a data set/patient" disabled=true}}
+      {{#if afFieldValueIs name="data_set_id" value=undefined}}
+        {{> afQuickField name="sample_labels" type="select"
+            placeholder="Select a data set to continue" disabled=true}}
       {{else}}
         {{! use basic-select if there's a whole lot of samples}}
         {{#if firstGreater (length sampleOptions) 500}}
-          {{> afQuickField name="sample_label" type="basic-select" search=true
-              placeholder="Select a sample..." options=sampleOptions}}
+          {{> afQuickField name="sample_labels" type="basic-select" search=true
+              placeholder="Select a sample..." options=sampleOptions
+              multiple=true}}
         {{else}}
-          {{> afQuickField name="sample_label" type="select" search=true
-              placeholder="Select a sample..." options=sampleOptions}}
+          {{> afQuickField name="sample_labels" type="select" search=true
+              placeholder="Select a sample..." options=sampleOptions
+              multiple=true}}
         {{/if}}
       {{/if}}
     </div>
@@ -48,9 +50,20 @@
       {{> editSampleGroup sampleGroup=customSampleGroup}}
     {{/if}}
 
+    <div class="ui info message">
+      <p>
+        A seperate outlier analysis job will be created for each sample selected.
+      </p>
+      <p>
+        If a job has already been run with the given arguments, a
+        duplicate will not be created.
+      </p>
+    </div>
+
     {{> showErrorMessage error}}
 
-    <button type="submit" class="ui primary button">
+    <button type="submit" class="ui primary button
+        {{#if talkingToServer}}loading{{/if}}">
       Start analysis
     </button>
   {{/autoForm}}
