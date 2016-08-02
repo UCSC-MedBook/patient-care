@@ -81,7 +81,6 @@ Template.listUpDownGenes.events({
     event.preventDefault();
 
     let formValues = AutoForm.getFormValues("createUpDownGenes");
-    console.log("got values which are", formValues); // XXX 
     let customSampleGroup = instance.customSampleGroup.get();
 
     // until Match.Maybe is available, make sure this is an Object
