@@ -73,7 +73,7 @@ Template.sampleGroupExprVarFilters.onCreated(function(){
   let instance = this;
   let sampleGroupId = instance.data._id ;
   // use Template.subscriptionsReady to know when these are available
-  instance.subscribe("jobsOfType", "ApplyExprAndVarianceFilters");
+  instance.subscribe("sampleGroupFilterJobs", sampleGroupId);
   instance.subscribe("blobsAssociatedWithObject", "SampleGroups", sampleGroupId);
 });
 

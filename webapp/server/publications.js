@@ -166,6 +166,21 @@ Meteor.publish("jobsOfType", function (name) {
   });
 });
 
+// Let anyone with access to a sample group have access
+// to all ApplyExprAndVarianceFilters jobs for that sample group,
+// to avoid applying them twice.
+Meteor.publish("sampleGroupFilterJobs", function(sampleGroupId) {
+  check(sampleGroupId, String);
+  let user = MedBook.ensureUser(this.userId);
+  let sampleGroup = SampleGroups.findOne(sampleGroupId);
+  if(! user.hasAccess(sampleGroup)){ return this.ready();}
+
+  return Jobs.find({
+    name: "ApplyExprAndVarianceFilters",
+    'args.sample_group_id': sampleGroupId,
+  });
+});
+
 // Let a document subscribe to all blobs2 associated with it
 Meteor.publish("blobsAssociatedWithObject", function(collectionName, objectId) {
   check(collectionName, String);
