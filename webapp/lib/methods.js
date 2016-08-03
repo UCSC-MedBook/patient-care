@@ -849,4 +849,31 @@ Meteor.methods({
       }
     });
   },
+  // Applies the expression and variance filters to a sample group
+  // returns the job id...
+  applyExprVarianceFilters: function(sampleGroupId){
+
+    // checks and permissions
+    check(sampleGroupId, String);
+    let user = MedBook.ensureUser(Meteor.userId());
+    let sampleGroup = SampleGroups.findOne(sampleGroupId);
+    user.ensureAccess(sampleGroup);
+
+    // TODO : this job should never run more than once for
+    // a sample group, so we should never need to search for
+    // an existing filter blob & delete it. But we probably should,
+    // just in case.
+
+    args = {
+      sample_group_id: sampleGroupId
+    }
+
+    return Jobs.insert({
+      name: "ApplyExprAndVarianceFilters",
+      status: "waiting",
+      user_id: user._id,
+      collaborations: [ user.personalCollaboration() ],
+      args
+    });
+  },
 });
