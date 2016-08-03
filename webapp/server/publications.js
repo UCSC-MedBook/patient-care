@@ -230,3 +230,15 @@ Meteor.publish("blob", function (blobId) {
   // NOTE: no security... if they have the _id they can have it
   return Blobs.find(blobId);
 });
+
+Meteor.publish("geneSetsForGroup", function (geneSetGroupId) {
+  check(geneSetGroupId, String);
+
+  let user = MedBook.ensureUser(this.userId);
+  let geneSetGroup = GeneSetCollections.findOne(geneSetGroupId);
+  user.ensureAccess(geneSetGroup);
+
+  return GeneSets.find({
+    gene_set_collection_id: geneSetGroupId
+  });
+});

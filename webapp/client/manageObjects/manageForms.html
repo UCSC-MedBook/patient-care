@@ -21,5 +21,61 @@
 </template>
 
 <template name="showForm">
-  Form details coming soon!
+  <a href={{pathFor "viewFormRecords" form_id=_id}}
+      class="ui primary button">
+    View data
+  </a>
+
+  <h3>Fields</h3>
+  <table class="ui celled striped table">
+    <thead>
+      <tr>
+        <th>
+          Field name</th>
+        <th>Type</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each fields}}
+        <tr>
+          <td>
+            {{#if compare name ../sample_label_field}}
+              <div class="ui ribbon label">Sample name</div>
+            {{/if}}
+            {{name}}
+          </td>
+          <td>{{value_type}}</td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</template>
+
+<template name="viewFormRecords">
+  <h1>
+    View records for
+    {{#if Template.subscriptionsReady}}
+      {{getForm.name}}
+    {{else}}
+      loading...
+    {{/if}}
+  </h1>
+
+  {{#if gettingRecordsData}}
+    {{> dataLoading}}
+  {{else}}
+    {{> recordsHandsOnTable recordsData=recordsData form=getForm}}
+  {{/if}}
+</template>
+
+<template name="recordsHandsOnTable">
+  <div class="ui info message">
+    <div class="header">
+      No changes will be saved
+    </div>
+    <p>
+      Changing the spreadsheet below will not modify the data.
+    </p>
+  </div>
+  <div id="recordsHOT"></div>
 </template>

@@ -11,7 +11,7 @@
 <template name="createGeneSetGroup">
   <h3>Create new gene set group</h3>
 
-  <div class="ui message">
+  <div class="ui large message">
     <p>
       Use Wrangler to upload a new gene set group.
     </p>
@@ -24,5 +24,40 @@
 </template>
 
 <template name="showGeneSetGroup">
-  Gene set group details coming soon!
+  <h3>Description</h3>
+  <p>
+    {{description}}
+  </p>
+
+  <table class="ui celled striped table">
+    <thead>
+      <tr>
+        <th colspan="2">
+          Metadata
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Number of gene sets</td>
+        <td>{{length getGeneSets}}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Gene sets</h3>
+  {{#if Template.subscriptionsReady}}
+    <div class="ui list">
+      {{#each getGeneSets}}
+        <div class="item">
+          <div class="header">{{name}}</div>
+          <div class="description">
+            {{joinedGenes}}
+          </div>
+        </div>
+      {{/each}}
+    </div>
+  {{else}}
+    {{> dataLoading}}
+  {{/if}}
 </template>

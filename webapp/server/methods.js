@@ -319,4 +319,15 @@ Meteor.methods({
       args
     });
   },
+  getFormRecords(form_id) {
+    check(form_id, String);
+
+    let user = MedBook.ensureUser(this.userId);
+    let form = Forms.findOne(form_id);
+    user.ensureAccess(form);
+
+    return Records.find({ form_id }, {
+      sort: { [form.sample_label_field]: 1 },
+    }).fetch();
+  },
 });
