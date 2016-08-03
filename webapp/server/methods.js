@@ -303,4 +303,36 @@ Meteor.methods({
       sort: { [form.sample_label_field]: 1 },
     }).fetch();
   },
+  // Applies the expression and variance filters to a sample group
+  // returns the upsert return value
+  applyExprVarianceFilters(sampleGroupId) {
+    // checks and permissions
+    check(sampleGroupId, String);
+    let user = MedBook.ensureUser(Meteor.userId());
+    let sampleGroup = SampleGroups.findOne(sampleGroupId);
+    user.ensureAccess(sampleGroup);
+
+    // This job should never run more than once for
+    // a sample group, so we should never need to search for
+    // an existing filter blob & delete it. But we probably should,
+    // just in case.
+    return Jobs.upsert({
+      name: "ApplyExprAndVarianceFilters",
+      args: {
+        sample_group_id: sampleGroupId,
+      }
+    }, {
+      $setOnInsert: {
+        status: "waiting",
+        user_id: user._id,
+        collaborations: [],
+
+        // defaultValues don't work with upserts, so set some fields manually
+        timeout_length: 7 * 24 * 60 * 60 * 1000, // a week
+        collaborations: [],
+        prerequisite_job_ids: [],
+        retry_count: 0,
+      }
+    });
+  },
 });
