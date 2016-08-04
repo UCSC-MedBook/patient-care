@@ -85,14 +85,14 @@
       {{#if isTop5percent}}
         {{#each currentPageData}}
           <tr>
-            <td>{{gene_label}}</td>
+            <td>{{>annotatedGene gene=gene_label}}</td>
             <td>{{fewDecimals sample_value}}</td>
           </tr>
         {{/each}}
       {{else}}
         {{#each currentPageData}}
           <tr>
-            <td>{{gene_label}}</td>
+            <td>{{>annotatedGene gene=gene_label}}</td>
             <td>{{fewDecimals background_median}}</td>
             <td>{{fewDecimals sample_value}}</td>
           </tr>

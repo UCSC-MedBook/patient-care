@@ -229,3 +229,22 @@ Template.jobStatusWrapper.helpers({
     return Jobs.findOne(this.toString());
   },
 });
+
+// Does the annotated Gene have an associated pathology stain?
+// Currently hardcoded -- see stainGenes in pathologyStains.js
+Template.annotatedGene.helpers({
+  hasStain(gene) {
+    return (Template.instance().stainGenes.indexOf(gene) !== -1)
+    // Quick & dirty
+    // TODO -- generalize this to use a GeneSet instead.
+  },
+  hasFamilyStain(gene){
+    return (Template.instance().geneFamily.indexOf(gene) !== -1)
+  },
+});
+Template.annotatedGene.onRendered(function(){
+  this.$(".tree.icon").popup({
+    position: "bottom left",
+    hoverable: true,
+  });
+});

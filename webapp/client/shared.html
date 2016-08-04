@@ -205,3 +205,31 @@
     {{> dataLoading}}
   {{/if}}
 </template>
+
+
+<template name="annotatedGene">
+  {{! call with: annotatedGene gene="Foo"}}
+  {{! any time we display a gene name, use this template to see if }}
+  {{! it is in a highlighted gene set. Right now, the only option is}}
+  {{! a hardcoded list of stanford pathology stains and stains for a.}}
+  {{! gene family. }}
+
+  {{gene}}
+  {{#if hasStain gene }}
+  <i class="tree icon"></i>
+  <div class="ui popup">
+    {{> stainAvailable}}
+  </div>
+  {{else}}
+    {{#if hasFamilyStain gene}}
+      <i class="tree icon" style="color:gray;"></i>
+    {{/if}}
+  {{/if}}
+
+</template>
+<template name="stainAvailable">
+Stanford pathology stain available
+</template>
+<template name="stainAvailableGeneFamily">
+Stanford pathology stain available for this gene family
+</template>
