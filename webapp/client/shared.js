@@ -229,18 +229,3 @@ Template.jobStatusWrapper.helpers({
     return Jobs.findOne(this.toString());
   },
 });
-
-Template.geneWithInfo.helpers({
-// return all info items where the gene is on that info's genes list.
-  foundGeneInfos(gene){
-    return _.filter(Template.instance().geneInfos, function(info){
-      return (info.genes.indexOf(gene) !== -1);
-    });
-  },
-});
-Template.geneWithInfo.onRendered(function(){
-  this.$(".tree.icon").popup({
-    position: "bottom left",
-    hoverable: true,
-  });
-});

@@ -205,20 +205,3 @@
     {{> dataLoading}}
   {{/if}}
 </template>
-
-
-<template name="geneWithInfo">
-  {{! call with: geneWithInfo gene="Foo"}}
-  {{! any time we display a gene name, use this template to see if }}
-  {{! it is in a highlighted gene set. Right now, the only option is}}
-  {{! a hardcoded list of stanford pathology stains and stains for a.}}
-  {{! gene family. }}
-
-  {{gene}}
-  {{#each foundGeneInfos gene}}
-    <i class="tree icon" style="color:{{this.color}}"></i>
-    <div class="ui popup">
-      {{this.description}}
-    </div>
-  {{/each}}
-</template>
