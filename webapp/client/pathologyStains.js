@@ -5,7 +5,7 @@
 
 // Current list is from DLL's preliminary Sheet1 (August 4)
 // removed N/A and blank entries
-Template.annotatedGene.onCreated(function(){
+Template.geneWithInfo.onCreated(function(){
   let stainGenesString = `
 SERPINA1
 POMC
@@ -287,14 +287,24 @@ S100A2
 S100A3
 `;
 
-  this.stainGenes = stainGenesString.split("\n");
-  this.geneFamily = geneFamilyString.split("\n");
-  console.log("with blank", this.stainGenes);
-  // remove the blank lines at the beginning and end
-  this.stainGenes.pop();
-  this.geneFamily.pop();
-  this.stainGenes.shift();
-  this.geneFamily.shift();
-  console.log("without blank", this.stainGenes);
-  console.log("without blank", this.geneFamily);
+  // prepare the lists - remove blank entries
+  // This would be replaced by fetching the appropriate GeneSets
+  let stainGenes = _.filter(stainGenesString.split("\n"), function(x){return x !== ""});
+  let geneFamily = _.filter(geneFamilyString.split("\n"), function(x){return x !== ""});
+
+  // set up the available lists with icons and descriptions
+
+  this.geneInfos = [
+    {
+      genes: stainGenes,
+      description: "Stanford pathology stain available",
+      color: "black",
+    },
+    {
+      genes: geneFamily,
+      description: "Stanford pathology stain available for this gene family",
+      color: "grey",
+    },
+  ] 
+  console.log("set up options,", this.geneInfos);
 });
