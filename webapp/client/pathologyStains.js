@@ -3,7 +3,8 @@
 // user.profile variable to control which geneSets genes are annotated
 // by for each user.
 
-// Current list is from DLL's preliminary Sheet1 (August 4)
+// Current list -- August 4 - olena's edits
+// still not the final version
 // removed N/A and blank entries
 Template.geneWithInfo.onCreated(function(){
   let stainGenesString = `
@@ -25,6 +26,8 @@ POU2AF1
 T
 BRAF
 PIP
+C3
+C4B
 CA9
 CALCA
 CALD1
@@ -32,9 +35,6 @@ CNN1
 CALB2
 CD1A
 CD2
-CD3D
-CD3E
-CD4G
 CD4
 CD5
 CD7
@@ -53,6 +53,7 @@ CD34
 CD34
 CD38
 SPN
+PTPRC
 CLTA
 UCHL1
 NCAM1
@@ -71,37 +72,17 @@ CEACAM5
 CEACAM5
 CHGA
 CTRC
+KRT5 KRT6
 KRT7
 KRT19
 KRT20
-KRT1
-KRT5
-KRT10
-KRT14
-KRT1
-KRT2
-KRT3
-KRT4
-KRT5
-KRT6
-KRT7
-KRT8
-KRT10
-KRT14
-KRT16
-KRT19
 KRT8
 MYC
 CXCL13
 CCND2
 CCND3
 PDPN
-TINP1,
-HCLG1,
-HUSSY-29,
-HUSSY29,
-CDK105,
-HCL-G1
+TINP1 HCLG1 HUSSY-29 HUSSY29 CDK105 HCL-G1
 DES
 ANO1
 CDH1
@@ -128,16 +109,10 @@ GZMB
 CGB5
 ERBB2
 GCSAM
+PMEL
 IDH1
 CD79A
 IGHD
-FCGR1A
-FCGR1B
-FCGR1CP
-FCGR2A
-FCGR2B
-FCGR3A
-FCGR3B
 FCGBP
 FCMR
 INHA
@@ -167,14 +142,10 @@ MUM1
 MYOD1
 MYOG
 NAPSA
-STAT4
 RBFOX3
 CD63
 NKX3-1
 NMP1
-ENO1
-ENO2
-ENO3
 NUTM1
 POU2F2
 POU5F1
@@ -194,18 +165,16 @@ PIN4
 LNPEP
 PMS2
 PGR
-HSD18B7
+PRAP1
 PRL
 PROX1
 KLK3
-S100A1
-S100A2
-S100A3
 S100P
 SALL4
 SDHB
 SF1
-ACTA2
+SMN1
+MYH11
 SST
 SOX10
 SOX11
@@ -226,13 +195,17 @@ NKX2-1
 TYR
 VIM
 WT1
+WT1
 ZAP70
 `;
 
 let geneFamilyString=`
-CD3D
-CD3E
-CD4G
+ACTA1
+ACTA2
+ACTB
+ACT1
+ACTG1
+ACTG2
 BCL2
 BCL2L1
 BCL2L2
@@ -247,12 +220,9 @@ BCL2L13
 BCL2L14
 BCL2L15
 BNIP2
-ACTA1
-ACTA2
-ACTB
-ACT1
-ACTG1
-ACTG2
+CD3D
+CD3E
+CD4G
 KRT1
 KRT5
 KRT10
@@ -306,5 +276,4 @@ S100A3
       color: "grey",
     },
   ] 
-  console.log("set up options,", this.geneInfos);
 });
