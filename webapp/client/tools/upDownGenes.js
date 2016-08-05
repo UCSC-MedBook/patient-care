@@ -78,6 +78,11 @@ Template.outlierGenesTable.onCreated(function () {
     let rowsPerPage = instance.rowsPerPage.get();
 
     instance.maxPageIndex.set(Math.floor(filteredData.length / rowsPerPage));
+
+  // set up the list of which genes have stanford stain info
+  // so that icons can be added by geneWithInfo template
+  instance.geneInfos = getGeneInfos();
+
   });
 });
 
@@ -98,6 +103,12 @@ Template.outlierGenesTable.onRendered(function () {
 });
 
 Template.outlierGenesTable.helpers({
+
+  getInfoForGene: function(gene){
+    return _.filter(Template.instance().geneInfos, function(info){
+      return (info.genes.indexOf(gene) !== -1);
+    });
+  },
   currentPageData: function () {
     return Template.instance().currentPageData.get();
   },
@@ -185,23 +196,14 @@ Template.outlierGenesTable.events({
   },
 });
 
-// Template.geneWithInfo helper functions
-// displays extra info next to a gene name
 
-Template.geneWithInfo.helpers({
-// return all info items where the gene is on that info's genes list.
-  foundGeneInfos(gene){
-    return _.filter(Template.instance().geneInfos, function(info){
-      return (info.genes.indexOf(gene) !== -1);
-    });
-  },
-});
 Template.geneWithInfo.onRendered(function(){
-  this.$(".tree.icon").popup({
+  this.$(".geneInfoIcon.icon").popup({
     position: "bottom left",
     hoverable: true,
   });
 });
+
 
 // List of gene names with stanford pathology stains
 // TODO : Don't hardcode this, but use a geneSet and add a 
@@ -211,7 +213,7 @@ Template.geneWithInfo.onRendered(function(){
 // Current list -- August 4 - olena's edits
 // still not the final version
 // removed N/A and blank entries
-Template.geneWithInfo.onCreated(function(){
+function getGeneInfos(){
   let stainGenesString = `
 SERPINA1
 POMC
@@ -475,16 +477,19 @@ S100A3
 
   // set up the available lists with icons and descriptions
 
-  this.geneInfos = [
+   geneInfos = [
     {
       genes: stainGenes,
       description: "Stanford pathology stain available",
+      icon: "tree",
       color: "black",
     },
     {
       genes: geneFamily,
       description: "Stanford pathology stain available for this gene family",
+      icon: "tree",
       color: "grey",
     },
   ] 
-});
+  return geneInfos;
+}
