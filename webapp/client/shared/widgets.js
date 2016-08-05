@@ -1,3 +1,51 @@
+// Template.widgetsDemo
+// This template is for internal documentation only.
+
+Template.widgetsDemo.onCreated(function () {
+  let instance = this;
+
+  instance.error = new ReactiveVar({
+    header: "I am a header",
+    message: "You did something very wrong.",
+  });
+});
+
+Template.widgetsDemo.helpers({
+  fakeObject() {
+    return {
+      _id: "I am an _id",
+      collaborations: [
+        "wow Teo is so cool",
+        "Ellen is cool too I guess",
+        "I am a potato collaboration name",
+      ],
+    };
+  },
+  reactiveError() { return Template.instance().error; },
+  fakeSamples() {
+    return [
+      "ckcc/A01",
+      "ckcc/A02",
+      "ckcc/A03",
+      "ckcc/A04",
+      "ckcc/A05",
+      "ckcc/B01",
+      "ckcc/B02",
+      "ckcc/B03",
+      "ckcc/B04",
+      "ckcc/B05",
+    ];
+  },
+  fakeJob(status) {
+    return { status };
+  },
+  noAction() {
+    return {
+      action: "nothing"
+    }
+  },
+});
+
 // Template.shareAndDeleteButtons
 
 Template.shareAndDeleteButtons.onCreated(function() {

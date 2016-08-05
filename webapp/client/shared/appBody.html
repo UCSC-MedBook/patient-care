@@ -200,6 +200,12 @@
     {{#if invalidUrl}}
       {{#breadcrumbItem isActive=true}}Invalid URL{{/breadcrumbItem}}
     {{/if}}
+
+    {{#if isActiveRoute "widgetsDemo"}}
+      {{#breadcrumbItem isActive=true}}
+        Widgets
+      {{/breadcrumbItem}}
+    {{/if}}
   </div>
 </template>
 

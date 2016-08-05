@@ -46,3 +46,7 @@ tools.route("/limma-gsea/:job_id", sameNameAndAction("limmaGseaJob"));
 tools.route("/tumor-map", sameNameAndAction("listTumorMap"));
 tools.route("/outlier-analysis", sameNameAndAction("listUpDownGenes"));
 tools.route("/outlier-analysis/:job_id", sameNameAndAction("upDownGenesJob"));
+
+// documentation
+
+FlowRouter.route("/widgets", sameNameAndAction("widgetsDemo"));
