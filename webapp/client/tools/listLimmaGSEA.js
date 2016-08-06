@@ -4,7 +4,7 @@ Template.listLimmaGSEA.onCreated(function () {
   let instance = this;
 
   instance.subscribe("sampleGroups");
-  instance.subscribe("geneSetCollections");
+  instance.subscribe("GeneSetGroups");
 
   function makeDefaultGroup (title, inputName) {
     return {
@@ -37,7 +37,7 @@ Template.listLimmaGSEA.helpers({
   error: function () { return Template.instance().error; },
   creatingJob: function () { return Template.instance().creatingJob.get(); },
   getSampleGroupCollections: function () {
-    return GeneSetCollections.find({});
+    return GeneSetGroups.find({});
   },
 });
 

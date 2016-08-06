@@ -221,7 +221,7 @@ Meteor.methods({
 
     let user = MedBook.ensureUser(Meteor.userId());
 
-    let geneSetColl = GeneSetCollections.findOne(args.gene_set_collection_id);
+    let geneSetColl = GeneSetGroups.findOne(args.gene_set_collection_id);
     user.ensureAccess(geneSetColl);
 
     // ensure access to sample group, data sets inside
@@ -629,7 +629,7 @@ Meteor.methods({
       "DataSets",
       "SampleGroups",
       "Forms",
-      "GeneSetCollections",
+      "GeneSetGroups",
       "Studies",
     ];
     if (removeAllowedCollections.indexOf(collection_name) === -1) {
@@ -670,7 +670,7 @@ Meteor.methods({
       GenomicExpression.remove({ data_set_id: mongo_id });
     } else if (collection_name === "Forms") {
       Records.remove({ form_id: mongo_id });
-    } if (collection_name === "GeneSetCollections") {
+    } if (collection_name === "GeneSetGroups") {
       GeneSets.remove({ gene_set_collection_id: mongo_id });
     }
   },
@@ -750,6 +750,64 @@ Meteor.methods({
     }
 
     return Studies.insert(newStudy);
+  },
+
+  insertGeneSet(nameAndDesc, computedColumns) {
+    check(nameAndDesc, GeneSets.simpleSchema().pick([
+      "name",
+      "description"
+    ]));
+    check(computedColumns, [ new SimpleSchema({
+      header: { type: String },
+      // allowedValues validation will happen on insert
+      value_type: { type: String },
+      values: { type: [String] },
+    }) ]);
+
+    let user = MedBook.ensureUser(Meteor.userId());
+
+    let columns = computedColumns.slice(1);
+    let firstColValues = computedColumns[0].values;
+    let features = _.map(firstColValues, (feature_label, rowIndex) => {
+      console.log("feature_label:", feature_label);
+      let column_values = _.map(columns, (column, colIndex) => {
+        let cellValue = column.values[rowIndex];
+        console.log("cellValue:", cellValue);
+
+        if (column.value_type === "Number") {
+          // if the cell was blank, make it a 0
+          if (cellValue === "") { return 0; }
+
+          // if the number was entered as an integer, save it as an integer
+          if (cellValue.indexOf(".") === -1) {
+            return parseInt(cellValue);
+          } else {
+            return parseFloat(cellValue);
+          }
+        } else {
+          // if falsey, pretend it's blank for the SimpleSchema custom
+          // function which uses typeof
+          if (!cellValue) { return ""; }
+
+          return cellValue;
+        }
+      });
+      console.log("column_values:", column_values);
+
+      return { feature_label, column_values };
+    });
+
+    console.log("features:", features);
+
+    return GeneSets.insert({
+      name: nameAndDesc.name,
+      description: nameAndDesc.description,
+      collaborations: [ user.personalCollaboration() ],
+      features,
+
+      // NOTE: values attributes will be ignored
+      columns,
+    });
   },
 
   // Rename a sample: if a user has access to a study they can rename

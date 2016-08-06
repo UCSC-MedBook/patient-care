@@ -1,0 +1,135 @@
+<template name="introGeneSets">
+  <p>
+    A gene set group is a list of genes.
+  </p>
+  <p>
+    Each gene can have text or numerical information associated with
+    each gene, such as a description, a rank, or p-value.
+  </p>
+</template>
+
+<template name="createGeneSet">
+  <h2>Create a new gene set</h2>
+
+  {{#autoForm id="createGeneSet" schema=nameAndDescription}}
+    {{> afQuickField name="name" type="text"
+        placeholder="Name your gene set"}}
+    {{> afQuickField name="description" type="textarea" rows="3"
+        placeholder="How was this gene set generated? How should it be used?"}}
+  {{/autoForm}}
+
+  <h3>Enter your gene set</h3>
+  <div id="createGeneSetData" style="margin-top: 10px; margin-bottom: 10px;">
+  </div>
+
+  {{#unless compare (length computedColumns) 0}}
+    {{#if getInstanceReactive "ignoringColumns"}}
+      <div class="ui warning message">
+        <div class="header">
+          Columns without headers or data will be ignored
+        </div>
+        <ul class="list">
+          {{#each getInstanceReactive "ignoringColumns"}}
+            <li>{{this}}</li>
+          {{/each}}
+        </ul>
+      </div>
+    {{/if}}
+
+    {{#if warnBlankNumbersZero}}
+      <div class="ui info message">
+        Numerical values that are blank will be set to 0.
+      </div>
+    {{/if}}
+
+    {{#if computedColumns}}
+      <table class="ui celled striped table">
+        <thead>
+          <tr>
+            <th>Column headers</th>
+            <th>Value type</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each computedColumns}}
+            <tr>
+              <td>
+                {{header}}
+              </td>
+              <td>
+                {{#if compare value_type "String"}}
+                  Text
+                {{else}}
+                  Number
+                {{/if}}
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    {{/if}}
+
+    <button class="ui primary create button" type="submit">
+      Create!
+    </button>
+  {{else}}
+    <div class="ui error message">
+      <div class="header">
+        No genes
+      </div>
+      Please enter at least one gene.
+    </div>
+  {{/unless}}
+</template>
+
+<!--
+Modified from:
+https://github.com/fabienb4/meteor-autoform-semantic-ui/
+blob/master/templates/semantic-ui/components/afObjectField/afObjectField.html
+-->
+<!-- <template name="afObjectField_geneSetsPatientCare">
+  {{print 'this ::' this}}
+  <div class="ui secondary bottom attached segment form
+      {{#if afFieldIsInvalid name=this.name}}error{{/if}}">
+    {{#if afFieldIsInvalid name=this.name}}
+      <div class="ui pointing red basic label">
+        {{{afFieldMessage name=this.name}}}
+      </div>
+    {{/if}}
+
+    <div class="two fields">
+      {{> afQuickField name=(thisField "label") template="semanticUI"}}
+      {{> afQuickField name=(thisField "type") type="select"
+          options="allowed" template="semanticUI"}}
+    </div>
+
+    <div class="fields">
+      {{#with name=(makeName "header")}}
+        <div class="eight wide field
+            {{#if afFieldIsInvalid name=name}}error{{/if}}">
+          <label>Field name</label>
+          {{> afFieldInput name=name template="semanticUI"}}
+          {{#if afFieldIsInvalid name=name}}
+            <div class="ui pointing red basic label">
+              {{{afFieldMessage name=name}}}
+            </div>
+          {{/if}}
+        </div>
+      {{/with}}
+      {{#with name=(makeName "value_type")}}
+        <div class="eight wide field
+            {{#if afFieldIsInvalid name=name}}error{{/if}}">
+          <label>Type</label>
+
+          {{> afFieldInput name=name type="select"
+              options="allowed" template="semanticUI"}}
+          {{#if afFieldIsInvalid name=name}}
+            <div class="ui pointing red basic label">
+              {{{afFieldMessage name=name}}}
+            </div>
+          {{/if}}
+        </div>
+      {{/with}}
+    </div>
+  </div>
+</template> -->

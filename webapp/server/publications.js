@@ -98,7 +98,8 @@ Meteor.publish("browseCollaborations", function() {
 var allowedCollections = [
   "DataSets",
   "SampleGroups",
-  "GeneSetCollections",
+  "GeneSets",
+  "GeneSetGroups",
   "Forms",
   "Studies",
 ];
@@ -222,10 +223,10 @@ Meteor.publish("specificJob", function (jobId) {
 
 // general
 
-Meteor.publish("geneSetCollections", function () {
+Meteor.publish("GeneSetGroups", function () {
   let user = MedBook.ensureUser(this.userId);
 
-  return GeneSetCollections.find({
+  return GeneSetGroups.find({
     collaborations: { $in: user.getCollaborations() },
   });
 });
@@ -250,7 +251,7 @@ Meteor.publish("geneSetsForGroup", function (geneSetGroupId) {
   check(geneSetGroupId, String);
 
   let user = MedBook.ensureUser(this.userId);
-  let geneSetGroup = GeneSetCollections.findOne(geneSetGroupId);
+  let geneSetGroup = GeneSetGroups.findOne(geneSetGroupId);
   user.ensureAccess(geneSetGroup);
 
   return GeneSets.find({
