@@ -35,6 +35,22 @@
 </template>
 
 <template name="showDataSet">
+  {{#if currently_wrangling}}
+    <div class="ui info message">
+      <div class="header">
+        Wrangling in process...
+      </div>
+      <p>
+        Someone is currently wrangling data into this data set.
+      </p>
+      <p>
+        If you believe you are seeing this message in error, please
+        {{> contactUsButton cssClass="tiny"}}
+      </p>
+    </div>
+  {{/if}}
+
+  <h3>Description</h3>
   <p>
     {{description}}
   </p>
@@ -111,9 +127,9 @@
       </a>
     </div>
 
-    <h4 style="display: inline-block; margin-bottom: 0px;">
+    <h3 style="display: inline-block; margin-bottom: 0px;">
       Samples
-    </h4>
+    </h3>
     {{> listSamplesButton sample_labels}}
   {{else}}
     <div class="ui message">

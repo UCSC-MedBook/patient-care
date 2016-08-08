@@ -180,10 +180,19 @@
       {{/breadcrumbItem}}
     {{/if}}
 
-    {{#if isActiveRoute "manageObjects"}}
-      {{#breadcrumbItem isActive=true}}
+    {{#if or (isActiveRoute "manageObjects")
+        (isActiveRoute "viewFormRecords")}}
+      {{! TODO: don't hardcode collectionSlug}}
+      {{#breadcrumbItem isActive=(isActiveRoute "manageObjects")
+          href=(pathFor "manageObjects" collectionSlug="clinical-forms")}}
         Manage data
       {{/breadcrumbItem}}
+
+      {{#if isActiveRoute "viewFormRecords"}}
+        {{#breadcrumbItem isActive=true}}
+          View records
+        {{/breadcrumbItem}}
+      {{/if}}
     {{/if}}
 
     {{! Utility}}

@@ -48,7 +48,7 @@ Meteor.methods({
       if (! user.hasAccess(form)) { return; }
 
       // Populate the form field table with its fields
-      let encoded_form_id = encodeURI(form._id);
+      let encoded_form_id = encodeURIComponent(form._id);
       let sample_label_field = form.sample_label_field ;
 
       // Set up the fields to be populated with potential values

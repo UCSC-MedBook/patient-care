@@ -422,14 +422,15 @@ Template.formValuesFilter.events({
 
     let query = $(queryBuilderDivId).queryBuilder('getMongo');
     let serialized_query = JSON.stringify(query);
-    let sampleCrfId = decodeURI(instance.active_crf.get());
+    let sampleCrfId = decodeURIComponent(instance.active_crf.get());
      let dataset_id = instance.data.data_set_id;
 
     instance.editing.set(false);
    
     // Populate the filter info
-    // TODO: refactor to use the ID from metadata of the overall CRF
-    // rather than, as here, the id of a random sample record within the CRF
+    // TODO: rename variables -- sampleCrfId no longer refers to a CRF 
+    // but to a Form; & it's the ID of the actual Form (not a Record
+    // of that form)
     instance.data.setOptions({
       form_id: sampleCrfId,
       mongo_query: serialized_query,

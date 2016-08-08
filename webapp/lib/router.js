@@ -31,8 +31,12 @@ collaborations.route("/browse", {
 // manage data
 
 var manage = FlowRouter.group({ prefix: "/manage" });
+
 manage.route("/:collectionSlug?/:selected?",
     sameNameAndAction("manageObjects"));
+
+manage.route("/clinical-forms/:form_id/view-records",
+    sameNameAndAction("viewFormRecords"));
 
 // tools
 

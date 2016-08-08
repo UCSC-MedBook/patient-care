@@ -153,7 +153,8 @@ Meteor.publish("jobsOfType", function (name) {
   let allowedJobNames = [
     "RunLimmaGSEA",
     "UpDownGenes",
-    "TumorMapOverlay"
+    "TumorMapOverlay",
+    "ApplyExprAndVarianceFilters",
   ];
   if (allowedJobNames.indexOf(name) === -1) {
     return null;
@@ -162,6 +163,38 @@ Meteor.publish("jobsOfType", function (name) {
   return Jobs.find({
     name,
     collaborations: { $in: user.getCollaborations() },
+  });
+});
+
+// Let anyone with access to a sample group have access
+// to all ApplyExprAndVarianceFilters jobs for that sample group,
+// to avoid applying them twice.
+Meteor.publish("sampleGroupFilterJobs", function(sampleGroupId) {
+  check(sampleGroupId, String);
+  let user = MedBook.ensureUser(this.userId);
+  let sampleGroup = SampleGroups.findOne(sampleGroupId);
+  if(! user.hasAccess(sampleGroup)){ return this.ready();}
+
+  return Jobs.find({
+    name: "ApplyExprAndVarianceFilters",
+    'args.sample_group_id': sampleGroupId,
+  });
+});
+
+// Let a document subscribe to all blobs2 associated with it
+Meteor.publish("blobsAssociatedWithObject", function(collectionName, objectId) {
+  check(collectionName, String);
+  check(objectId, String);
+
+  let user = MedBook.ensureUser(this.userId);
+  let doc = MedBook.collections[collectionName].findOne(objectId);
+
+  // Indicate that the subscription will send no further data
+  if(! user.hasAccess(doc)){ return this.ready();}
+
+  return Blobs2.find({
+    "associated_object.collection_name": collectionName,
+    "associated_object.mongo_id": objectId,
   });
 });
 
@@ -211,4 +244,16 @@ Meteor.publish("blob", function (blobId) {
   // TODO
   // NOTE: no security... if they have the _id they can have it
   return Blobs.find(blobId);
+});
+
+Meteor.publish("geneSetsForGroup", function (geneSetGroupId) {
+  check(geneSetGroupId, String);
+
+  let user = MedBook.ensureUser(this.userId);
+  let geneSetGroup = GeneSetCollections.findOne(geneSetGroupId);
+  user.ensureAccess(geneSetGroup);
+
+  return GeneSets.find({
+    gene_set_collection_id: geneSetGroupId
+  });
 });

@@ -1,25 +1,31 @@
 let Future = Npm.require('fibers/future');
 
 Meteor.methods({
-  // Starts a new job with the given args. If a job already exists with
-  // the given args, it instead returns the _id of that duplicate job.
+  // Starts an UpDownGenes job for each of the sample_labels. If a job already
+  // exists, the duplicate job is returned.
+  // Returns an array of job _ids
   createUpDownGenes: function (formValues, customSampleGroup) {
     check(formValues, new SimpleSchema({
-      data_set_or_patient_id: { type: String, label: "Data set or patient" },
-      sample_label: { type: String, label: "Sample" },
-      sample_group_id: { type: String, label: "Sample group" },
+      data_set_id: { type: String },
+      sample_labels: { type: [String] },
+      sample_group_id: { type: String },
       iqr_multiplier: { type: Number, decimal: true },
+      use_filtered_sample_group: {type: Boolean },
     }));
     check(customSampleGroup, Object);
 
     let user = MedBook.ensureUser(Meteor.userId());
+    // data set and sample group security is below...
 
     let {
-      data_set_or_patient_id,
-      sample_label,
+      data_set_id,
+      sample_labels,
       sample_group_id,
       iqr_multiplier,
+      use_filtered_sample_group,
     } = formValues;
+
+    user.ensureAccess(DataSets.findOne(data_set_id));
 
     // if we need to create a new sample group, do so
     if (formValues.sample_group_id === "creating") {
@@ -41,50 +47,75 @@ Meteor.methods({
     let sampleGroup = SampleGroups.findOne(sample_group_id);
     user.ensureAccess(sampleGroup);
 
-    let args = {
-      sample_label,
+    // If this job uses the gene filters on the sample group,
+    // and they're not already generated,
+    // queue a job to generate them and set it as a prerequisite
+    // for the outlier analysis job.
+    let prerequisite_job_ids = [];
+    if(use_filtered_sample_group){
+      // check the sample group for a gene-filter blob
+      let foundFilter = Blobs2.findOne({
+        "associated_object.collection_name":"SampleGroups",
+        "associated_object.mongo_id":sample_group_id,
+        "metadata.type":"ExprAndVarFilteredSampleGroupData",
+      });
+      if(!foundFilter){
+        // No existing filters -- queue a new job to create them
+        prerequisite_job_ids.push(Jobs.insert({
+          name: "ApplyExprAndVarianceFilters",
+          status: "waiting",
+          user_id: user._id,
+          collaborations: [ user.personalCollaboration() ],
+          args: {"sample_group_id":sample_group_id},
+        }));
+      }
+    }
+
+    let sameArgs = {
+      data_set_id,
       iqr_multiplier,
       sample_group_id,
       sample_group_name: sampleGroup.name,
+      use_filtered_sample_group,
     };
 
-    // set args.data_set_id and args.data_set_name_or_patient_label
-    if (data_set_or_patient_id.startsWith("patient-")) {
-      let patientId = data_set_or_patient_id.slice("patient-".length);
-      let patient = Patients.findOne(patientId);
-      let sample = _.findWhere(patient.samples, { sample_label });
+    return _.map(sample_labels, (sample_label) => {
+      // figure out the args for this job
+      var args = _.clone(sameArgs);
+      args.sample_label = sample_label;
 
-      args.data_set_id = sample.data_set_id;
-      args.data_set_name_or_patient_label = patient.patient_label;
+      // check to see if a job like this one has already been run,
+      // and if so, return that job's _id
+      // NOTE: I believe there could be a race condition here, but
+      // I don't think Meteor handles more than one Meteor method at once.
+      // (That said, we unblock above to create a sample group, but because
+      // that is a new object, this should be the first thing run with the
+      // new _id.)
 
-      user.ensureAccess(patient);
-    } else if (data_set_or_patient_id.startsWith("data_set-")) {
-      args.data_set_id = data_set_or_patient_id.slice("data_set-".length);
+      // Jobs that predate sample group filters will match for new jobs using
+      // an unfiltered sample group as neither has 'use_filtered_sample_group'
+      // as an arg.
+      let duplicateJob = Jobs.findOne({
+        args,
+        collaborations: user.personalCollaboration(),
+        status: { $ne: "error" }
+      });
 
-      let dataSet = DataSets.findOne(args.data_set_id);
-      args.data_set_name_or_patient_label = dataSet.name;
+      let jobId;
+      if (duplicateJob) {
+        jobId = duplicateJob._id;
+      } else {
+        jobId = Jobs.insert({
+          name: "UpDownGenes",
+          status: "waiting",
+          user_id: user._id,
+          collaborations: [ user.personalCollaboration() ],
+          args,
+          prerequisite_job_ids
+        });
+      }
 
-      user.ensureAccess(dataSet);
-    }
-
-    // check to see if a job like this one has already been run,
-    // and if so, return that job's _id
-    // NOTE: I believe there could be a race condition here, but
-    // I don't think Meteor handles more than one Meteor method at once.
-    let duplicateJob = Jobs.findOne({
-      args,
-      collaborations: user.getCollaborations()
-    });
-    if (duplicateJob) {
-      return duplicateJob._id;
-    }
-
-    return Jobs.insert({
-      name: "UpDownGenes",
-      status: "waiting",
-      user_id: user._id,
-      collaborations: [ user.personalCollaboration() ],
-      args
+      return jobId;
     });
   },
   createSampleGroup: function (sampleGroup) {
@@ -157,6 +188,11 @@ Meteor.methods({
         let { options } = filter;
 
         if (filter.type === "form_values"){
+          if (!options.mongo_query) {
+            throw new Meteor.Error("mongo-query-empty", "Not done editing filters",
+                "Please click done to continue.");
+          }
+
           // Run the mongo_query
           // Get the result sample labels synchronously
           let result_sample_labels = Meteor.call('getSamplesFromFormFilter',
@@ -255,5 +291,48 @@ Meteor.methods({
     });
 
     return future.wait();
+  },
+  getFormRecords(form_id) {
+    check(form_id, String);
+
+    let user = MedBook.ensureUser(this.userId);
+    let form = Forms.findOne(form_id);
+    user.ensureAccess(form);
+
+    return Records.find({ form_id }, {
+      sort: { [form.sample_label_field]: 1 },
+    }).fetch();
+  },
+  // Applies the expression and variance filters to a sample group
+  // returns the upsert return value
+  applyExprVarianceFilters(sampleGroupId) {
+    // checks and permissions
+    check(sampleGroupId, String);
+    let user = MedBook.ensureUser(Meteor.userId());
+    let sampleGroup = SampleGroups.findOne(sampleGroupId);
+    user.ensureAccess(sampleGroup);
+
+    // This job should never run more than once for
+    // a sample group, so we should never need to search for
+    // an existing filter blob & delete it. But we probably should,
+    // just in case.
+    return Jobs.upsert({
+      name: "ApplyExprAndVarianceFilters",
+      args: {
+        sample_group_id: sampleGroupId,
+      }
+    }, {
+      $setOnInsert: {
+        status: "waiting",
+        user_id: user._id,
+        collaborations: [],
+
+        // defaultValues don't work with upserts, so set some fields manually
+        timeout_length: 7 * 24 * 60 * 60 * 1000, // a week
+        collaborations: [],
+        prerequisite_job_ids: [],
+        retry_count: 0,
+      }
+    });
   },
 });
