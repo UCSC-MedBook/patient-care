@@ -6,6 +6,22 @@
   {{/jobStatusWrapper}}
 </template>
 
+<template name="geneWithInfo">
+  {{! data context requires: gene (String) - name of gene }}
+  {{! and foundGeneInfos - [objects] with description:, color:, icon fields that apply to this gene. }}
+  {{! any time we display a gene name, use this template to see if }}
+  {{! it is in a highlighted gene set. Right now, the only option is}}
+  {{! a hardcoded list of stanford pathology stains for either a gene }}
+  {{! or for a gene family. }}
+  {{gene}}
+  {{#each foundGeneInfos}}
+    <i class="geneInfoIcon icon {{this.icon}}" style="color:{{this.color}}"></i>
+    <div class="ui popup">
+      {{this.description}}
+    </div>
+  {{/each}}
+</template>
+
 <template name="outlierAnalysis">
   <h2>Options</h2>
   <p>
@@ -85,14 +101,14 @@
       {{#if isTop5percent}}
         {{#each currentPageData}}
           <tr>
-            <td>{{gene_label}}</td>
+            <td>{{>geneWithInfo gene=gene_label foundGeneInfos=(getInfoForGene gene_label)}}</td>
             <td>{{fewDecimals sample_value}}</td>
           </tr>
         {{/each}}
       {{else}}
         {{#each currentPageData}}
           <tr>
-            <td>{{gene_label}}</td>
+            <td>{{>geneWithInfo gene=gene_label foundGeneInfos=(getInfoForGene gene_label)}}</td>
             <td>{{fewDecimals background_median}}</td>
             <td>{{fewDecimals sample_value}}</td>
           </tr>
