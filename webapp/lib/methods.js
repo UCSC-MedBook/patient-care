@@ -629,6 +629,7 @@ Meteor.methods({
       "DataSets",
       "SampleGroups",
       "Forms",
+      "GeneSets",
       "GeneSetGroups",
       "Studies",
     ];
@@ -668,9 +669,15 @@ Meteor.methods({
     // remove other linked object types
     if (collection_name === "DataSets") {
       GenomicExpression.remove({ data_set_id: mongo_id });
-    } else if (collection_name === "Forms") {
-      Records.remove({ form_id: mongo_id });
-    } if (collection_name === "GeneSetGroups") {
+    } else if (collection_name === "Forms"
+        || collection_name === "GeneSets") {
+      Records.remove({
+        associated_object: {
+          mongo_id,
+          collection_name
+        },
+      });
+    } else if (collection_name === "GeneSetGroups") {
       GeneSets.remove({ gene_set_collection_id: mongo_id });
     }
   },
@@ -752,11 +759,13 @@ Meteor.methods({
     return Studies.insert(newStudy);
   },
 
-  insertGeneSet(nameAndDesc, computedColumns) {
-    check(nameAndDesc, GeneSets.simpleSchema().pick([
+  insertGeneSet(formValues, computedColumns) {
+    check(formValues, GeneSets.simpleSchema().pick([
       "name",
-      "description"
+      "description",
+      "gene_label_field"
     ]));
+
     check(computedColumns, [ new SimpleSchema({
       header: { type: String },
       // allowedValues validation will happen on insert
@@ -766,17 +775,30 @@ Meteor.methods({
 
     let user = MedBook.ensureUser(Meteor.userId());
 
-    let columns = computedColumns.slice(1);
-    let firstColValues = computedColumns[0].values;
-    let features = _.map(firstColValues, (feature_label, rowIndex) => {
-      console.log("feature_label:", feature_label);
-      let column_values = _.map(columns, (column, colIndex) => {
-        let cellValue = column.values[rowIndex];
-        console.log("cellValue:", cellValue);
+    // initialize enough records to be inserted later
+    let records = [];
+    _.times(computedColumns[0].values.length, () => {
+      records.push({
+        associated_object: {
+          collection_name: "GeneSets"
+        }
+      });
+    });
 
-        if (column.value_type === "Number") {
-          // if the cell was blank, make it a 0
-          if (cellValue === "") { return 0; }
+    let fields = _.map(computedColumns, (column, colIndex) => {
+      let field = {
+        name: column.header,
+        value_type: column.value_type,
+      };
+
+      // calculate the record values for this field
+      let recordValues = _.map(column.values, (cellValue, recordIndex) => {
+        if (field.value_type === "Number") {
+          // if the cell was blank, make the field optional and return null
+          if (cellValue === "") {
+            field.optional = true;
+            return null;
+          }
 
           // if the number was entered as an integer, save it as an integer
           if (cellValue.indexOf(".") === -1) {
@@ -792,22 +814,63 @@ Meteor.methods({
           return cellValue;
         }
       });
-      console.log("column_values:", column_values);
 
-      return { feature_label, column_values };
+      // add the record values to the record
+      _.each(recordValues, (value, index) => {
+        records[index][field.name] = value;
+      });
+
+      return field;
     });
 
-    console.log("features:", features);
 
-    return GeneSets.insert({
-      name: nameAndDesc.name,
-      description: nameAndDesc.description,
+
+    // make sure the gene_label_field points to a valid field:
+    // - all values defined, not blank, and no spaces
+    // - values are unique
+    // - value_type is string
+
+    let geneLabelField = _.findWhere(fields, {
+      name: formValues.gene_label_field
+    });
+
+    // make sure it's type String
+    if (geneLabelField.value_type !== "String") {
+      throw new Meteor.Error("gene-label-field-invalid");
+    }
+
+    // make sure they're unique
+    let geneLabelValues = _.pluck(records, geneLabelField.name);
+    let gene_labels = _.uniq(geneLabelValues);
+    if (gene_labels.length !== geneLabelValues.length) {
+      throw new Meteor.Error("gene-label-field-invalid");
+    }
+
+    // make sure there's no blank values or spaces
+    _.each(gene_labels, (label) => {
+      if (/\s/.test(label) || !label) {
+        throw new Meteor.Error("gene-label-field-invalid");
+      }
+    });
+
+
+
+    // create the gene set
+    let geneSetId = GeneSets.insert(_.extend(formValues, {
       collaborations: [ user.personalCollaboration() ],
-      features,
+      fields,
+      gene_labels,
+    }));
 
-      // NOTE: values attributes will be ignored
-      columns,
+    // set the mongo_id for each record and insert
+    _.each(records, (record, index) => {
+      record.associated_object.mongo_id = geneSetId;
+
+      var ret = Records.insert(record);
+      console.log("ret:", ret);
     });
+
+    return geneSetId;
   },
 
   // Rename a sample: if a user has access to a study they can rename

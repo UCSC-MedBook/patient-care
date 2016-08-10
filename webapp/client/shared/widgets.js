@@ -248,6 +248,26 @@ Template.semanticUIDropdown.onRendered(function () {
   this.$(".ui.dropdown").dropdown(this.data.options);
 });
 
+// Template.semanticUICheckbox
+
+Template.semanticUICheckbox.onRendered(function () {
+  this.$(".ui.checkbox").checkbox(this.data.options);
+});
+
+// // Template.semanticUIPopup
+//
+// // can give:
+// // selector=".ui.popup.hi.yop"
+// // options={ option: "hi" }
+// Template.semanticUIPopup.onRendered(function () {
+//   let { selector } = this.data;
+//   if (!selector) {
+//     selector = ".ui.checkbox";
+//   }
+//
+//   this.$(selector).checkbox(this.data.options);
+// });
+
 // Template.viewJobButton
 
 Template.viewJobButton.helpers({
@@ -275,5 +295,71 @@ Template.jobStatusWrapper.onCreated(function () {
 Template.jobStatusWrapper.helpers({
   getJob: function () {
     return Jobs.findOne(this.toString());
+  },
+});
+
+// Template.showRecords
+
+Template.showRecords.onCreated(function () {
+  let instance = this;
+
+  let { mongoId, collectionName } = instance.data;
+
+  instance.gettingRecordsData = new ReactiveVar(true);
+  instance.recordsData = [];
+  Meteor.call("getRecords", collectionName, mongoId, (error, result) => {
+    if (error) { throw error; }
+    else {
+      instance.recordsData = result;
+      instance.gettingRecordsData.set(false);
+    }
+  });
+});
+
+Template.showRecords.helpers({
+  gettingRecordsData() {
+    return Template.instance().gettingRecordsData.get();
+  },
+  recordsData() {
+    return Template.instance().recordsData;
+  },
+});
+
+// Template.recordsHandsOnTable
+
+Template.recordsHandsOnTable.onRendered(function () {
+  let instance = this;
+  let { recordsData, fields, primaryFieldName } = instance.data;
+
+  // calculate the spreadsheet columns
+  // always have the sample label field be first
+  let columns = [ { data: primaryFieldName } ];
+  let colHeaders = [ primaryFieldName ];
+
+  _.each(fields, (field) => {
+    if (field.name !== primaryFieldName) {
+      columns.push({ data: field.name });
+      colHeaders.push(field.name);
+    }
+  });
+
+  var container = document.getElementById('recordsHOT');
+  var hot = new Handsontable(container, {
+    data: recordsData,
+    startRows: fields.length,
+    startCols: recordsData.length,
+    columns,
+    colHeaders,
+    readOnly: true
+  });
+});
+
+Template.recordsHandsOnTable.helpers({
+  height() {
+    if (this.recordsData.length > 500) {
+      return "1000px";
+    } else {
+      return "100%";
+    }
   },
 });

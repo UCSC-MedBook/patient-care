@@ -292,16 +292,31 @@ Meteor.methods({
 
     return future.wait();
   },
-  getFormRecords(form_id) {
-    check(form_id, String);
+  getRecords(collection_name, mongo_id) {
+    check([collection_name, mongo_id], [String]);
 
     let user = MedBook.ensureUser(this.userId);
-    let form = Forms.findOne(form_id);
-    user.ensureAccess(form);
+    let obj = MedBook.collections[collection_name].findOne(mongo_id);
+    user.ensureAccess(obj);
 
-    return Records.find({ form_id }, {
-      sort: { [form.sample_label_field]: 1 },
-    }).fetch();
+    // make sure the collection name is okay, figure out the sort object
+    let sort;
+    if (collection_name === "Forms") {
+      sort = {
+        [obj.sample_label_field]: 1
+      };
+    } else if (collection_name === "GeneSets") {
+      sort = {
+        [obj.gene_label_field]: 1
+      };
+    } else {
+      throw new Meteor.Error("permission-denied");
+    }
+
+    return Records.find({
+      "associated_object.mongo_id": mongo_id,
+      "associated_object.collection_name": collection_name,
+    }, { sort }).fetch();
   },
   // Applies the expression and variance filters to a sample group
   // returns the upsert return value

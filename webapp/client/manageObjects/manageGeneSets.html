@@ -11,125 +11,163 @@
 <template name="createGeneSet">
   <h2>Create a new gene set</h2>
 
-  {{#autoForm id="createGeneSet" schema=nameAndDescription}}
+  {{#autoForm id="nameAndDescription" schema=nameAndDescription type="normal"}}
     {{> afQuickField name="name" type="text"
         placeholder="Name your gene set"}}
     {{> afQuickField name="description" type="textarea" rows="3"
         placeholder="How was this gene set generated? How should it be used?"}}
   {{/autoForm}}
 
-  <h3>Enter your gene set</h3>
-  <div id="createGeneSetData" style="margin-top: 10px; margin-bottom: 10px;">
+  <h3>
+    Enter your gene set
+
+    <div class="ui tiny secondary button clear">
+      Clear
+    </div>
+  </h3>
+
+  {{! height, width, overflow: makes the table scroll when it gets too big}}
+  <div id="handsOnTable" style="margin-top: 10px; margin-bottom: 10px;
+      height: 100%; width: 100%; overflow: hidden;">
   </div>
 
-  {{#unless compare (length computedColumns) 0}}
-    {{#if getInstanceReactive "ignoringColumns"}}
-      <div class="ui warning message">
-        <div class="header">
-          Columns without headers or data will be ignored
-        </div>
-        <ul class="list">
-          {{#each getInstanceReactive "ignoringColumns"}}
-            <li>{{this}}</li>
-          {{/each}}
-        </ul>
+  {{#if getInstanceReactive "ignoringColumns"}}
+    <div class="ui warning message">
+      <div class="header">
+        Columns without headers or data will be ignored
       </div>
-    {{/if}}
+      <ul class="list">
+        {{#each getInstanceReactive "ignoringColumns"}}
+          <li>{{this}}</li>
+        {{/each}}
+      </ul>
+    </div>
+  {{/if}}
 
+  {{#unless compare (length computedColumns) 0}}
     {{#if warnBlankNumbersZero}}
       <div class="ui info message">
-        Numerical values that are blank will be set to 0.
+        Numerical values that are blank are ignored.
       </div>
     {{/if}}
 
-    {{#if computedColumns}}
-      <table class="ui celled striped table">
-        <thead>
+    <table class="ui celled striped table">
+      <thead>
+        <tr>
+          <th>Column headers</th>
+          <th>Value type</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each computedColumns}}
           <tr>
-            <th>Column headers</th>
-            <th>Value type</th>
+            <td>
+              {{header}}
+            </td>
+            <td>
+              {{#if compare value_type "String"}}
+                Text
+              {{else}}
+                Number
+              {{/if}}
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          {{#each computedColumns}}
-            <tr>
-              <td>
-                {{header}}
-              </td>
-              <td>
-                {{#if compare value_type "String"}}
-                  Text
-                {{else}}
-                  Number
-                {{/if}}
-              </td>
-            </tr>
-          {{/each}}
-        </tbody>
-      </table>
-    {{/if}}
+        {{/each}}
+      </tbody>
+    </table>
 
-    <button class="ui primary create button" type="submit">
-      Create!
-    </button>
-  {{else}}
-    <div class="ui error message">
-      <div class="header">
-        No genes
+    {{#if length possibleGeneLabelFields}}
+      {{#autoForm id="geneLabelField" schema=geneLabeFieldSchema
+          type="normal"}}
+        {{> geneLabelFieldWithPopup options=possibleGeneLabelFields}}
+
+        {{#if fieldNamesValid}}
+          {{! type="button" so it doesn't refresh the page. Ugh}}
+          <button class="ui primary create button" type="button">
+            Create!
+          </button>
+        {{else}}
+          {{! see below for else: .warning.message doesn't show up in a form}}
+        {{/if}}
+      {{/autoForm}}
+
+      {{#unless fieldNamesValid}}
+        <div class="ui warning message">
+          <div class="header">
+            Column headers invalid
+          </div>
+          <p>
+            Column headers must be unique and may not be <code>_id</code>
+            or <code>associated_object</code>.
+          </p>
+        </div>
+      {{/unless}}
+    {{else}}
+      <div class="ui warning message">
+        <div class="header">
+          No available gene fields
+        </div>
+        <p>
+          There must be at least one text column that lists the genes.
+        </p>
+        {{> geneSetFieldRules}}
       </div>
-      Please enter at least one gene.
+    {{/if}}
+  {{else}}
+    <div class="ui info message">
+      <div class="header">
+        No data
+      </div>
+      Please enter at least one column of data.
     </div>
   {{/unless}}
 </template>
 
-<!--
-Modified from:
-https://github.com/fabienb4/meteor-autoform-semantic-ui/
-blob/master/templates/semantic-ui/components/afObjectField/afObjectField.html
--->
-<!-- <template name="afObjectField_geneSetsPatientCare">
-  {{print 'this ::' this}}
-  <div class="ui secondary bottom attached segment form
-      {{#if afFieldIsInvalid name=this.name}}error{{/if}}">
-    {{#if afFieldIsInvalid name=this.name}}
-      <div class="ui pointing red basic label">
-        {{{afFieldMessage name=this.name}}}
-      </div>
-    {{/if}}
+<template name="geneLabelFieldWithPopup">
+  {{> afQuickField name="gene_label_field" type="select" options=options
+      placeholder="Which column lists the genes?"
+      label-class="rules-popup"}}
 
-    <div class="two fields">
-      {{> afQuickField name=(thisField "label") template="semanticUI"}}
-      {{> afQuickField name=(thisField "type") type="select"
-          options="allowed" template="semanticUI"}}
-    </div>
-
-    <div class="fields">
-      {{#with name=(makeName "header")}}
-        <div class="eight wide field
-            {{#if afFieldIsInvalid name=name}}error{{/if}}">
-          <label>Field name</label>
-          {{> afFieldInput name=name template="semanticUI"}}
-          {{#if afFieldIsInvalid name=name}}
-            <div class="ui pointing red basic label">
-              {{{afFieldMessage name=name}}}
-            </div>
-          {{/if}}
-        </div>
-      {{/with}}
-      {{#with name=(makeName "value_type")}}
-        <div class="eight wide field
-            {{#if afFieldIsInvalid name=name}}error{{/if}}">
-          <label>Type</label>
-
-          {{> afFieldInput name=name type="select"
-              options="allowed" template="semanticUI"}}
-          {{#if afFieldIsInvalid name=name}}
-            <div class="ui pointing red basic label">
-              {{{afFieldMessage name=name}}}
-            </div>
-          {{/if}}
-        </div>
-      {{/with}}
-    </div>
+  <div class="ui gene-set-field-rules popup hidden">
+    {{> geneSetFieldRules}}
   </div>
-</template> -->
+</template>
+
+<template name="geneSetFieldRules">
+  <p>
+    Values in this column:
+    <div class="ui bulleted list">
+      <div class="item">Must be unique</div>
+      <div class="item">Must be filled in (not blank)</div>
+      <div class="item">Must be text (non-numerical)</div>
+    </div>
+  </p>
+</template>
+
+<template name="showGeneSet">
+  <h3>Fields</h3>
+  <table class="ui celled striped table">
+    <thead>
+      <tr>
+        <th>Column name</th>
+        <th>Type</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each fields}}
+        <tr>
+          <td>
+            {{#if compare name ../gene_label_field}}
+              <div class="ui ribbon label">Genes</div>
+            {{/if}}
+            {{name}}
+          </td>
+          <td>{{value_type}}</td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  {{> showRecords fields=fields mongoId=(param "selected")
+      collectionName="GeneSets" primaryFieldName=gene_label_field}}
+</template>

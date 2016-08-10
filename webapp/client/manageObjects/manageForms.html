@@ -60,21 +60,6 @@
     {{/if}}
   </h1>
 
-  {{#if gettingRecordsData}}
-    {{> dataLoading}}
-  {{else}}
-    {{> recordsHandsOnTable recordsData=recordsData form=getForm}}
-  {{/if}}
-</template>
-
-<template name="recordsHandsOnTable">
-  <div class="ui info message">
-    <div class="header">
-      No changes will be saved
-    </div>
-    <p>
-      Changing the spreadsheet below will not modify the data.
-    </p>
-  </div>
-  <div id="recordsHOT"></div>
+  {{> showRecords fields=getForm.fields mongoId=(param "form_id")
+      collectionName="Forms" primaryFieldName=getForm.sample_label_field}}
 </template>

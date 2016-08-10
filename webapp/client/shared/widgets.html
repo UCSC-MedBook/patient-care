@@ -1,6 +1,9 @@
 <template name="widgetsDemo">
   <h1>Widgets demo page</h1>
 
+  <h2><code>{{|> dataLoading}}</code></h2>
+  {{> dataLoading}}
+
   <h2><code>{{|> shareAndDeleteButtons}}</code></h2>
   {{> shareAndDeleteButtons
       collectionName="DataSets" object=fakeObject}}
@@ -51,6 +54,13 @@
   <p>
     This one is really hard to demonstrate because the job subscription is
     handled from within the template, but that's how you use it!
+  </p>
+
+  <h2><code>{{|> showRecords}}</code></h2>
+  <p>
+    This will show records in a Handsontable.
+
+    See manageForms or manageGeneSets for a code example.
   </p>
 </template>
 
@@ -180,6 +190,16 @@
   {{> UI.contentBlock}}
 </template>
 
+<template name="semanticUICheckbox">
+  {{! Calls $(".ui.checkbox").checkbox() when rendered}}
+  {{> UI.contentBlock}}
+</template>
+
+<!-- <template name="semanticUIPopup">
+  {{! Calls $(selector).popup() when rendered}}
+  {{> UI.contentBlock}}
+</template> -->
+
 <template name="viewJobButton">
   <a href={{href}}
       class="ui right labeled icon {{buttonClass}} button">
@@ -260,4 +280,27 @@
   {{else}}
     {{> dataLoading}}
   {{/if}}
+</template>
+
+<template name="showRecords">
+  {{#if gettingRecordsData}}
+    {{> dataLoading}}
+  {{else}}
+    {{! wait until the data loads in the template above: this is to
+        allow us to make the call for the records immediately before all
+        the information about the form has loaded}}
+    {{#if and fields primaryFieldName}}
+      {{> recordsHandsOnTable recordsData=recordsData fields=fields
+          primaryFieldName=primaryFieldName}}
+    {{else}}
+      {{> dataLoading}}
+    {{/if}}
+  {{/if}}
+</template>
+
+<template name="recordsHandsOnTable">
+  {{! height, width, overflow: makes the table scroll when it gets too big}}
+  <div id="recordsHOT"
+      style="height: {{height}}; width: 100%; overflow: hidden;">
+  </div>
 </template>
