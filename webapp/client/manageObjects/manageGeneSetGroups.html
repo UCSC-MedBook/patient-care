@@ -50,16 +50,31 @@
     {{#each gene_set_names}}
       <div class="title">
         <i class="dropdown icon"></i>
-        <b>{{this}}</b>
+        <h4 style="display: inline;">{{this}}</h4>
       </div>
       <div class="content">
-        <p>
-          {{#if joinedGenes}}
-            {{joinedGenes}}
-          {{else}}
+        {{#if getGeneSet}}
+          {{#with getGeneSet.description}}
+            <p>
+              <h5 style="display: inline;">Description:</h5>
+              {{#if isUrl this}}
+                <a href={{this}} target="_blank">
+                  {{this}}
+                </a>
+              {{else}}
+                {{this}}
+              {{/if}}
+            </p>
+          {{/with}}
+          <p>
+            <h5 style="display: inline;">Genes:</h5>
+            {{joinedGenes getGeneSet}}
+          </p>
+        {{else}}
+          <p>
             Loading...
-          {{/if}}
-        </p>
+          </p>
+        {{/if}}
       </div>
     {{/each}}
   </div>

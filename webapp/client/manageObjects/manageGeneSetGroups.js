@@ -28,14 +28,17 @@ Template.showGeneSetGroup.onRendered(function () {
 });
 
 Template.showGeneSetGroup.helpers({
-  joinedGenes() {
-    let geneSet = GeneSets.findOne({
+  getGeneSet() {
+    return GeneSets.findOne({
       name: this.toString(),
       gene_set_group_id: Template.instance().data._id
     });
-
-    if (geneSet) {
-      return geneSet.gene_labels.join(", ");
-    }
+  },
+  joinedGenes(geneSet) {
+    return geneSet.gene_labels.join(", ");
+  },
+  isUrl(string) {
+    // true if it starts with "http" and doesn't have any whitespace
+    return string.startsWith("http") && !/\s/.test(string);
   },
 });
