@@ -9,7 +9,7 @@
 </template>
 
 <template name="createGeneSetGroup">
-  <h3>Create new gene set group</h3>
+  <h2>Create new gene set group</h2>
 
   <div class="ui large message">
     <p>
@@ -40,17 +40,50 @@
     <tbody>
       <tr>
         <td>Number of gene sets</td>
-        <td>{{length getGeneSets}}</td>
+        <td>{{gene_set_count}}</td>
       </tr>
     </tbody>
   </table>
 
   <h3>Gene sets</h3>
+  <div class="ui accordion">
+    {{#each gene_set_names}}
+      <div class="title">
+        <i class="dropdown icon"></i>
+        <h4 style="display: inline;">{{this}}</h4>
+      </div>
+      <div class="content">
+        {{#if getGeneSet}}
+          {{#with getGeneSet.description}}
+            <p>
+              <h5 style="display: inline;">Description:</h5>
+              {{#if isUrl this}}
+                <a href={{this}} target="_blank">
+                  {{this}}
+                </a>
+              {{else}}
+                {{this}}
+              {{/if}}
+            </p>
+          {{/with}}
+          <p>
+            <h5 style="display: inline;">Genes:</h5>
+            {{joinedGenes getGeneSet}}
+          </p>
+        {{else}}
+          <p>
+            Loading...
+          </p>
+        {{/if}}
+      </div>
+    {{/each}}
+  </div>
   {{#if Template.subscriptionsReady}}
     <div class="ui list">
       {{#each getGeneSets}}
         <div class="item">
           <div class="header">{{name}}</div>
+          <div>{{description}}</div>
           <div class="description">
             {{joinedGenes}}
           </div>

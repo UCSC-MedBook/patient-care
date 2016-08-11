@@ -216,12 +216,12 @@ Meteor.methods({
       sample_group_a_id: { type: String },
       sample_group_b_id: { type: String },
       limma_top_genes_count: { type: Number, min: 1 },
-      gene_set_collection_id: { type: String },
+      gene_set_group_id: { type: String },
     }));
 
     let user = MedBook.ensureUser(Meteor.userId());
 
-    let geneSetColl = GeneSetCollections.findOne(args.gene_set_collection_id);
+    let geneSetColl = GeneSetGroups.findOne(args.gene_set_group_id);
     user.ensureAccess(geneSetColl);
 
     // ensure access to sample group, data sets inside
@@ -629,7 +629,8 @@ Meteor.methods({
       "DataSets",
       "SampleGroups",
       "Forms",
-      "GeneSetCollections",
+      "GeneSets",
+      "GeneSetGroups",
       "Studies",
     ];
     if (removeAllowedCollections.indexOf(collection_name) === -1) {
@@ -657,7 +658,8 @@ Meteor.methods({
     // on the client just yet. The method itself works because Blobs2 is
     // defined on the server.
     Blobs2.delete({
-      associated_object: { collection_name, mongo_id }
+      "associated_object.collection_name": collection_name,
+      "associated_object.mongo_id": mongo_id,
     }, (err, out) => {
       if (err) {
         console.log("Error deleting blobs for:",
@@ -668,10 +670,14 @@ Meteor.methods({
     // remove other linked object types
     if (collection_name === "DataSets") {
       GenomicExpression.remove({ data_set_id: mongo_id });
-    } else if (collection_name === "Forms") {
-      Records.remove({ form_id: mongo_id });
-    } if (collection_name === "GeneSetCollections") {
-      GeneSets.remove({ gene_set_collection_id: mongo_id });
+    } else if (collection_name === "Forms"
+        || collection_name === "GeneSets") {
+      Records.remove({
+        "associated_object.collection_name": collection_name,
+        "associated_object.mongo_id": mongo_id,
+      });
+    } else if (collection_name === "GeneSetGroups") {
+      GeneSets.remove({ gene_set_group_id: mongo_id });
     }
   },
   updateObjectCollaborations(collectionName, mongoId, collaborations) {
@@ -750,6 +756,131 @@ Meteor.methods({
     }
 
     return Studies.insert(newStudy);
+  },
+
+  insertGeneSet(formValues, computedColumns) {
+    check(formValues, GeneSets.simpleSchema().pick([
+      "name",
+      "description",
+      "gene_label_field"
+    ]));
+
+    check(computedColumns, [ new SimpleSchema({
+      header: { type: String },
+      // allowedValues validation will happen on insert
+      value_type: { type: String },
+      values: { type: [String] },
+    }) ]);
+
+    let user = MedBook.ensureUser(Meteor.userId());
+
+    // initialize enough records to be inserted later
+    let records = [];
+    _.times(computedColumns[0].values.length, () => {
+      records.push({
+        associated_object: {
+          collection_name: "GeneSets"
+        }
+      });
+    });
+
+    let fields = _.map(computedColumns, (column, colIndex) => {
+      let field = {
+        name: column.header,
+        value_type: column.value_type,
+      };
+
+      // calculate the record values for this field
+      let recordValues = _.map(column.values, (cellValue, recordIndex) => {
+        if (field.value_type === "Number") {
+          // if the cell was blank, make the field optional and return null
+          // NOTE: if they entered 0, cellValue would be "0", which is truthy
+          if (!cellValue) {
+            field.optional = true;
+            return null;
+          }
+
+          // if the number was entered as an integer, save it as an integer
+          if (cellValue.indexOf(".") === -1) {
+            return parseInt(cellValue);
+          } else {
+            return parseFloat(cellValue);
+          }
+        } else {
+          // if falsey, pretend it's blank for the SimpleSchema custom
+          // function which uses typeof
+          if (!cellValue) { return ""; }
+
+          return cellValue;
+        }
+      });
+
+      // add the record values to the record
+      _.each(recordValues, (value, index) => {
+        records[index][field.name] = value;
+      });
+
+      return field;
+    });
+
+
+
+    // make sure the gene_label_field points to a valid field:
+    // - all values defined, not blank, and no spaces
+    // - values are unique
+    // - value_type is string
+
+    let geneLabelField = _.findWhere(fields, {
+      name: formValues.gene_label_field
+    });
+
+    // make sure it's type String
+    if (geneLabelField.value_type !== "String") {
+      throw new Meteor.Error("gene-label-field-invalid");
+    }
+
+    // make sure they're unique
+    let geneLabelValues = _.pluck(records, geneLabelField.name);
+    let gene_labels = _.uniq(geneLabelValues);
+    if (gene_labels.length !== geneLabelValues.length) {
+      throw new Meteor.Error("gene-label-field-invalid");
+    }
+
+    // make sure there's no blank values or spaces
+    _.each(gene_labels, (label) => {
+      if (/\s/.test(label) || !label) {
+        throw new Meteor.Error("gene-label-field-invalid");
+      }
+    });
+
+
+
+    // validate all records before inserting the gene set
+    _.each(records, (record) => {
+      // set to a dummy value so that the record is valid: we'll set
+      // this to the actual gene set _id after inserting
+      record.associated_object.mongo_id = "not a real _id";
+
+      MedBook.validateRecord(record, fields);
+    });
+
+    // create the gene set
+    let geneSet = _.extend(formValues, {
+      collaborations: [ user.personalCollaboration() ],
+      fields,
+      gene_labels,
+    });
+
+    let geneSetId = GeneSets.insert(geneSet);
+
+    // set the mongo_id for each record and insert
+    _.each(records, (record) => {
+      record.associated_object.mongo_id = geneSetId;
+
+      Records.insert(record);
+    });
+
+    return geneSetId;
   },
 
   // Rename a sample: if a user has access to a study they can rename

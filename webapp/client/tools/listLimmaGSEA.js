@@ -4,7 +4,7 @@ Template.listLimmaGSEA.onCreated(function () {
   let instance = this;
 
   instance.subscribe("sampleGroups");
-  instance.subscribe("geneSetCollections");
+  instance.subscribe("geneSetGroups");
 
   function makeDefaultGroup (title, inputName) {
     return {
@@ -37,7 +37,7 @@ Template.listLimmaGSEA.helpers({
   error: function () { return Template.instance().error; },
   creatingJob: function () { return Template.instance().creatingJob.get(); },
   getSampleGroupCollections: function () {
-    return GeneSetCollections.find({});
+    return GeneSetGroups.find({});
   },
 });
 
@@ -102,13 +102,13 @@ Template.listLimmaGSEA.events({
 
         let limma_top_genes_count =
             parseInt(instance.$("input[name=limmaTopGenes]").val(), 10);
-        let gene_set_collection_id =
-            instance.$("input[name=geneSetCollection]").val();
+        let gene_set_group_id =
+            instance.$("input[name=geneSetGroup]").val();
         if (!limma_top_genes_count) {
           throw new Meteor.Error("Invalid top gene count",
               "Please enter the number of genes you'd like Limma to find.");
         }
-        if (!gene_set_collection_id) {
+        if (!gene_set_group_id) {
           throw new Meteor.Error("No gene sets selected",
               "Please select the gene sets you'd like to use for GSEA");
         }
@@ -117,7 +117,7 @@ Template.listLimmaGSEA.events({
         return new Promise((resolve, reject) => {
           Meteor.call("createLimmaGSEA", {
             sample_group_a_id, sample_group_b_id,
-            limma_top_genes_count, gene_set_collection_id
+            limma_top_genes_count, gene_set_group_id
           }, (error, result) => {
             if (error) {
               reject(new Meteor.Error("Error creating job",

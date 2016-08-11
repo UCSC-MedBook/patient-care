@@ -41,6 +41,24 @@ Template.outlierGenesTable.onCreated(function () {
   instance.maxPageIndex = new ReactiveVar(0);
   instance.currentPageData = new ReactiveVar([]);
   instance.rowsPerPage = new ReactiveVar(5);
+  instance.geneInfos = new ReactiveVar([]);
+  instance.gotGeneInfosVar = new ReactiveVar(false);
+
+  // Get the lists of genes which have icons/tooltips
+  // so they can be added to the gene names column
+  // The result of the call may correctly be an empty array, so don't i
+  // rely on that; instead separately note when it's been completed.
+  Meteor.call("getGeneInfos", (error, result) => {
+    if(error) {
+      console.log("Couldn't get geneInfos:", error);
+      // Show the genelist, just omitting stain info.
+      instance.gotGeneInfosVar.set(true);
+    }
+    if (result){
+      instance.geneInfos.set(result) ;
+      instance.gotGeneInfosVar.set(true);
+    };
+  });
 
   let unfilteredData = instance.data.data;
   let f = new Fuse(unfilteredData, {
@@ -98,6 +116,18 @@ Template.outlierGenesTable.onRendered(function () {
 });
 
 Template.outlierGenesTable.helpers({
+
+  // Tracking the meteor method for gene icon info completion
+  gotGeneInfos: function(){
+    return Template.instance().gotGeneInfosVar.get();
+  },
+
+  // given a gene label, return all icons that should be applied to it
+  getInfoForGene: function(gene){
+    return _.filter(Template.instance().geneInfos.get(), function(info){
+      return (info.genes.indexOf(gene) !== -1);
+    });
+  },
   currentPageData: function () {
     return Template.instance().currentPageData.get();
   },
@@ -183,4 +213,12 @@ Template.outlierGenesTable.events({
       instance.rowsPerPage.set(newValue);
     }
   },
+});
+
+
+Template.geneWithInfo.onRendered(function(){
+  this.$(".geneInfoIcon.icon").popup({
+    position: "bottom left",
+    hoverable: true,
+  });
 });

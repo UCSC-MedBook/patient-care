@@ -292,16 +292,31 @@ Meteor.methods({
 
     return future.wait();
   },
-  getFormRecords(form_id) {
-    check(form_id, String);
+  getRecords(collection_name, mongo_id) {
+    check([collection_name, mongo_id], [String]);
 
     let user = MedBook.ensureUser(this.userId);
-    let form = Forms.findOne(form_id);
-    user.ensureAccess(form);
+    let obj = MedBook.collections[collection_name].findOne(mongo_id);
+    user.ensureAccess(obj);
 
-    return Records.find({ form_id }, {
-      sort: { [form.sample_label_field]: 1 },
-    }).fetch();
+    // make sure the collection name is okay, figure out the sort object
+    let sort;
+    if (collection_name === "Forms") {
+      sort = {
+        [obj.sample_label_field]: 1
+      };
+    } else if (collection_name === "GeneSets") {
+      sort = {
+        [obj.gene_label_field]: 1
+      };
+    } else {
+      throw new Meteor.Error("permission-denied");
+    }
+
+    return Records.find({
+      "associated_object.mongo_id": mongo_id,
+      "associated_object.collection_name": collection_name,
+    }, { sort }).fetch();
   },
   // Applies the expression and variance filters to a sample group
   // returns the upsert return value
@@ -334,5 +349,37 @@ Meteor.methods({
         retry_count: 0,
       }
     });
+  },
+
+  // Get the genes that should have icons appear next to their names.
+  // They are contained in a special geneSetGroup named
+  // "GeneSets appearing as icons. Do not delete. oRZvz3Gbim"
+  // To specify the icon & color, each gene_set's name should be, eg, "yellow star".
+  // (this is a meteor method & not a publication so we can transform the find server-side)
+  getGeneInfos(){
+    let findBlessedSet = {"name":"GeneSets appearing as icons. Do not delete. oRZvz3Gbim"};
+
+    let addExtraInfo = function(geneSet) {
+      let genesWithInfo = {} ;
+      genesWithInfo.color = geneSet.name.split(" ")[0];
+      genesWithInfo.icon = geneSet.name.split(" ")[1];
+      genesWithInfo.description = geneSet.description ;
+      genesWithInfo.genes = geneSet.gene_labels;
+      return genesWithInfo ;
+    }
+    let howManyBlessed = GeneSetGroups.find(findBlessedSet).count();
+    // If we don't find the collection -- OR someone else has attempted to hijack the icons by
+    // making their own collection -- shut the whole thing down
+    // TODO: This isn't the best implementation --
+    // We need a better way / UI to indicate this collection.
+    if(howManyBlessed !== 1){
+      console.log("Can't determine which gene sets to display as icons.")
+     return [];
+    }
+    let blessedGeneSet = GeneSetGroups.findOne(findBlessedSet);
+
+    return GeneSets.find({
+      gene_set_collection_id: blessedGeneSet._id,
+    }, {transform: addExtraInfo}).fetch();
   },
 });
