@@ -794,7 +794,8 @@ Meteor.methods({
       let recordValues = _.map(column.values, (cellValue, recordIndex) => {
         if (field.value_type === "Number") {
           // if the cell was blank, make the field optional and return null
-          if (cellValue === "") {
+          // NOTE: if they entered 0, cellValue would be "0", which is truthy
+          if (!cellValue) {
             field.optional = true;
             return null;
           }
