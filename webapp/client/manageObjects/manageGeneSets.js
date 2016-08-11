@@ -154,9 +154,15 @@ Template.createGeneSet.helpers({
     ]);
   },
   geneLabeFieldSchema() {
-    return GeneSets.simpleSchema().pick([
+    let geneLabelSchema = GeneSets.simpleSchema().pick([
       "gene_label_field"
-    ]);
+    ]).schema();
+
+    // pretend it's false because otherwise Semantic UI shows this weird
+    // eraser icon as one of the options
+    geneLabelSchema.gene_label_field.optional = false;
+
+    return new SimpleSchema(geneLabelSchema);
   },
   possibleGeneLabelFields() {
     let computedColumns = Template.instance().computedColumns.get();

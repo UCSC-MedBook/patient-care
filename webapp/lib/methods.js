@@ -658,7 +658,8 @@ Meteor.methods({
     // on the client just yet. The method itself works because Blobs2 is
     // defined on the server.
     Blobs2.delete({
-      associated_object: { collection_name, mongo_id }
+      "associated_object.collection_name": collection_name,
+      "associated_object.mongo_id": mongo_id,
     }, (err, out) => {
       if (err) {
         console.log("Error deleting blobs for:",
@@ -672,10 +673,8 @@ Meteor.methods({
     } else if (collection_name === "Forms"
         || collection_name === "GeneSets") {
       Records.remove({
-        associated_object: {
-          mongo_id,
-          collection_name
-        },
+        "associated_object.collection_name": collection_name,
+        "associated_object.mongo_id": mongo_id,
       });
     } else if (collection_name === "GeneSetGroups") {
       GeneSets.remove({ gene_set_group_id: mongo_id });
@@ -855,15 +854,26 @@ Meteor.methods({
 
 
 
+    // validate all records before inserting the gene set
+    _.each(records, (record) => {
+      // set to a dummy value so that the record is valid: we'll set
+      // this to the actual gene set _id after inserting
+      record.associated_object.mongo_id = "not a real _id";
+
+      MedBook.validateRecord(record, fields);
+    });
+
     // create the gene set
-    let geneSetId = GeneSets.insert(_.extend(formValues, {
+    let geneSet = _.extend(formValues, {
       collaborations: [ user.personalCollaboration() ],
       fields,
       gene_labels,
-    }));
+    });
+
+    let geneSetId = GeneSets.insert(geneSet);
 
     // set the mongo_id for each record and insert
-    _.each(records, (record, index) => {
+    _.each(records, (record) => {
       record.associated_object.mongo_id = geneSetId;
 
       Records.insert(record);
