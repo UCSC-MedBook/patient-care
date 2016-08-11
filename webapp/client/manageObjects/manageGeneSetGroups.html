@@ -40,24 +40,27 @@
     <tbody>
       <tr>
         <td>Number of gene sets</td>
-        <td>{{length getGeneSets}}</td>
+        <td>{{gene_set_count}}</td>
       </tr>
     </tbody>
   </table>
 
   <h3>Gene sets</h3>
-  {{#if Template.subscriptionsReady}}
-    <div class="ui list">
-      {{#each getGeneSets}}
-        <div class="item">
-          <div class="header">{{name}}</div>
-          <div class="description">
+  <div class="ui accordion">
+    {{#each gene_set_names}}
+      <div class="title">
+        <i class="dropdown icon"></i>
+        <b>{{this}}</b>
+      </div>
+      <div class="content">
+        <p>
+          {{#if joinedGenes}}
             {{joinedGenes}}
-          </div>
-        </div>
-      {{/each}}
-    </div>
-  {{else}}
-    {{> dataLoading}}
-  {{/if}}
+          {{else}}
+            Loading...
+          {{/if}}
+        </p>
+      </div>
+    {{/each}}
+  </div>
 </template>

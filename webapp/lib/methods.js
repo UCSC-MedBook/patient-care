@@ -216,12 +216,12 @@ Meteor.methods({
       sample_group_a_id: { type: String },
       sample_group_b_id: { type: String },
       limma_top_genes_count: { type: Number, min: 1 },
-      gene_set_collection_id: { type: String },
+      gene_set_group_id: { type: String },
     }));
 
     let user = MedBook.ensureUser(Meteor.userId());
 
-    let geneSetColl = GeneSetGroups.findOne(args.gene_set_collection_id);
+    let geneSetColl = GeneSetGroups.findOne(args.gene_set_group_id);
     user.ensureAccess(geneSetColl);
 
     // ensure access to sample group, data sets inside
@@ -678,7 +678,7 @@ Meteor.methods({
         },
       });
     } else if (collection_name === "GeneSetGroups") {
-      GeneSets.remove({ gene_set_collection_id: mongo_id });
+      GeneSets.remove({ gene_set_group_id: mongo_id });
     }
   },
   updateObjectCollaborations(collectionName, mongoId, collaborations) {
@@ -866,8 +866,7 @@ Meteor.methods({
     _.each(records, (record, index) => {
       record.associated_object.mongo_id = geneSetId;
 
-      var ret = Records.insert(record);
-      console.log("ret:", ret);
+      Records.insert(record);
     });
 
     return geneSetId;
