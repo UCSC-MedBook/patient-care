@@ -350,4 +350,36 @@ Meteor.methods({
       }
     });
   },
+
+  // Get the genes that should have icons appear next to their names.
+  // They are contained in a special geneSetGroup named
+  // "GeneSets appearing as icons. Do not delete. oRZvz3Gbim"
+  // To specify the icon & color, each gene_set's name should be, eg, "yellow star".
+  // (this is a meteor method & not a publication so we can transform the find server-side)
+  getGeneInfos(){
+    let findBlessedSet = {"name":"GeneSets appearing as icons. Do not delete. oRZvz3Gbim"};
+
+    let addExtraInfo = function(geneSet) {
+      let genesWithInfo = {} ;
+      genesWithInfo.color = geneSet.name.split(" ")[0];
+      genesWithInfo.icon = geneSet.name.split(" ")[1];
+      genesWithInfo.description = geneSet.description ;
+      genesWithInfo.genes = geneSet.gene_labels;
+      return genesWithInfo ;
+    }
+    let howManyBlessed = GeneSetGroups.find(findBlessedSet).count();
+    // If we don't find the collection -- OR someone else has attempted to hijack the icons by
+    // making their own collection -- shut the whole thing down
+    // TODO: This isn't the best implementation --
+    // We need a better way / UI to indicate this collection.
+    if(howManyBlessed !== 1){
+      console.log("Can't determine which gene sets to display as icons.")
+     return [];
+    }
+    let blessedGeneSet = GeneSetGroups.findOne(findBlessedSet);
+
+    return GeneSets.find({
+      gene_set_collection_id: blessedGeneSet._id,
+    }, {transform: addExtraInfo}).fetch();
+  },
 });

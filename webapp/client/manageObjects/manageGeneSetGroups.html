@@ -78,4 +78,19 @@
       </div>
     {{/each}}
   </div>
+  {{#if Template.subscriptionsReady}}
+    <div class="ui list">
+      {{#each getGeneSets}}
+        <div class="item">
+          <div class="header">{{name}}</div>
+          <div>{{description}}</div>
+          <div class="description">
+            {{joinedGenes}}
+          </div>
+        </div>
+      {{/each}}
+    </div>
+  {{else}}
+    {{> dataLoading}}
+  {{/if}}
 </template>
