@@ -6,6 +6,22 @@
   {{/jobStatusWrapper}}
 </template>
 
+<template name="geneWithInfo">
+  {{! data context requires: gene (String) - name of gene }}
+  {{! and foundGeneInfos - [objects] with description:, color:, icon fields that apply to this gene. }}
+  {{! any time we display a gene name, use this template to see if }}
+  {{! it is in a highlighted gene set. Right now, the only option is}}
+  {{! a hardcoded list of stanford pathology stains for either a gene }}
+  {{! or for a gene family. }}
+  {{gene}}
+  {{#each foundGeneInfos}}
+    <i class="geneInfoIcon icon {{this.icon}}" style="color:{{this.color}}"></i>
+    <div class="ui popup">
+      {{this.description}}
+    </div>
+  {{/each}}
+</template>
+
 <template name="outlierAnalysis">
   <h2>Options</h2>
   <p>
@@ -67,72 +83,77 @@
       </div>
     </div>
   </div>
+  {{! wait until the gene tooltips load to display table }}
+  {{# if gotGeneInfos }}
+    <table class="ui celled table">
+      <thead>
+        <tr>
+          <th>Gene</th>
+        <!--  top5% overexpressed doesn't have background median -->
+        {{#unless isTop5percent}}
+          <th>Background median</th>
+        {{/unless}}
+          <th>Sample value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!--  top5% overexpressed doesn't have background median -->
+        <!-- #if must be outside #each or `this` changes and it doesn't work-->
 
-  <table class="ui celled table">
-    <thead>
-      <tr>
-        <th>Gene</th>
-      <!--  top5% overexpressed doesn't have background median -->
-      {{#unless isTop5percent}}
-        <th>Background median</th>
-      {{/unless}}
-        <th>Sample value</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!--  top5% overexpressed doesn't have background median -->
-      <!-- #if must be outside #each or `this` changes and it doesn't work-->
-      {{#if isTop5percent}}
-        {{#each currentPageData}}
-          <tr>
-            <td>{{gene_label}}</td>
-            <td>{{fewDecimals sample_value}}</td>
-          </tr>
-        {{/each}}
-      {{else}}
-        {{#each currentPageData}}
-          <tr>
-            <td>{{gene_label}}</td>
-            <td>{{fewDecimals background_median}}</td>
-            <td>{{fewDecimals sample_value}}</td>
-          </tr>
-        {{/each}}
-      {{/if}}
-    </tbody>
-    <tfoot>
-      <tr>
-        <th colspan={{#if isTop5percent}}2{{else}}3{{/if}}>
-          <span>
-            Showing
-            <div class="ui input" style="width: 80px;">
-              <input placeholder="# results" class="results-per-page"
-                  value={{getInstanceReactive "rowsPerPage"}} type="text">
+        {{#if isTop5percent}}
+          {{#each currentPageData}}
+            <tr>
+              <td>{{>geneWithInfo gene=gene_label foundGeneInfos=(getInfoForGene gene_label)}}</td>
+              <td>{{fewDecimals sample_value}}</td>
+            </tr>
+          {{/each}}
+        {{else}}
+          {{#each currentPageData}}
+            <tr>
+              <td>{{>geneWithInfo gene=gene_label foundGeneInfos=(getInfoForGene gene_label)}}</td>
+              <td>{{fewDecimals background_median}}</td>
+              <td>{{fewDecimals sample_value}}</td>
+            </tr>
+          {{/each}}
+        {{/if}}
+      </tbody>
+      <tfoot>
+        <tr>
+          <th colspan={{#if isTop5percent}}2{{else}}3{{/if}}>
+            <span>
+              Showing
+              <div class="ui input" style="width: 80px;">
+                <input placeholder="# results" class="results-per-page"
+                    value={{getInstanceReactive "rowsPerPage"}} type="text">
+              </div>
+              of {{totalRows}} results</span>
+
+            <div class="ui right floated pagination menu">
+              {{#unless compare pageNumber 1}}
+                <a class="icon item previous-page">
+                  <i class="left chevron icon"></i>
+                </a>
+              {{/unless}}
+
+              {{#each pagesToShow}}
+                <a class="item go-to-page
+                    {{#if compare this "..."}}disabled{{/if}}
+                    {{#if compare this pageNumber}}active{{/if}}">
+                  {{this}}
+                </a>
+              {{/each}}
+
+              {{#unless compare pageNumber maxPageNumber}}
+                <a class="icon item next-page">
+                  <i class="right chevron icon"></i>
+                </a>
+              {{/unless}}
             </div>
-            of {{totalRows}} results</span>
-
-          <div class="ui right floated pagination menu">
-            {{#unless compare pageNumber 1}}
-              <a class="icon item previous-page">
-                <i class="left chevron icon"></i>
-              </a>
-            {{/unless}}
-
-            {{#each pagesToShow}}
-              <a class="item go-to-page
-                  {{#if compare this "..."}}disabled{{/if}}
-                  {{#if compare this pageNumber}}active{{/if}}">
-                {{this}}
-              </a>
-            {{/each}}
-
-            {{#unless compare pageNumber maxPageNumber}}
-              <a class="icon item next-page">
-                <i class="right chevron icon"></i>
-              </a>
-            {{/unless}}
-          </div>
-        </th>
-      </tr>
-    </tfoot>
-  </table>
+          </th>
+        </tr>
+      </tfoot>
+    </table>
+  {{else}}
+    {{>dataLoading}}
+  {{/if}}
 </template>
