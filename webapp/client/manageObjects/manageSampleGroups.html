@@ -81,7 +81,9 @@
           {{/if}}
           {{> listSamplesButton sample_labels}}
 
-          Filters aplied:
+          {{#if length filters}}
+            Filters applied:
+          {{/if}}
         </div>
 
         {{#if length filters}}
