@@ -27,7 +27,11 @@
   <p>
     Data set/patient: {{args.data_set_name_or_patient_label}}<br>
     Sample: {{args.sample_label}}<br>
-    Comparison group: {{args.sample_group_name}}<br>
+    Comparison group:
+      {{args.sample_group_name}}
+      {{#if getSampleGroupVersion args.sample_group_id}}
+        (v{{getSampleGroupVersion args.sample_group_id}})
+      {{/if}}<br>
     IQR multiplier: {{args.iqr_multiplier}}<br>
     Gene filters used:
       {{#if args.use_filtered_sample_group}}

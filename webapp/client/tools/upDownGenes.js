@@ -7,6 +7,7 @@ Template.outlierAnalysis.onCreated(function () {
   instance.autorun(function () {
     instance.subscribe("blob", Jobs.findOne().output.up_blob_id);
     instance.subscribe("blob", Jobs.findOne().output.down_blob_id);
+    instance.subscribe("sampleGroups");
   });
 });
 
@@ -25,6 +26,13 @@ Template.outlierAnalysis.helpers({
       let jobId = FlowRouter.getParam("job_id");
       return `/download/${userId}/${loginToken}/job-blob/${jobId}/${blobFileName}`;
     }
+  },
+  // Get version of a sample group visible to this user
+  getSampleGroupVersion(sampleGroupId){
+    let sg = SampleGroups.findOne(sampleGroupId);
+    let version = "";
+    if(sg){ version = sg.version; }
+    return version;
   },
 });
 
