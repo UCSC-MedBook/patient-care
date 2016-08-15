@@ -254,19 +254,20 @@ Template.semanticUICheckbox.onRendered(function () {
   this.$(".ui.checkbox").checkbox(this.data.options);
 });
 
-// // Template.semanticUIPopup
-//
-// // can give:
-// // selector=".ui.popup.hi.yop"
-// // options={ option: "hi" }
-// Template.semanticUIPopup.onRendered(function () {
-//   let { selector } = this.data;
-//   if (!selector) {
-//     selector = ".ui.checkbox";
-//   }
-//
-//   this.$(selector).checkbox(this.data.options);
-// });
+// Template.semanticUIPopup
+
+// can give:
+// selector=".ui.popup.hi.yop"
+// options={ option: "hi" }
+Template.semanticUIPopup.onRendered(function () {
+  let { selector, options } = this.data;
+
+  if (!selector) {
+    console.log("Didn't give a selector to the semanticUIPopup");
+  } else {
+    this.$(selector).popup(options);
+  }
+});
 
 // Template.viewJobButton
 

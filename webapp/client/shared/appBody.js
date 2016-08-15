@@ -30,6 +30,7 @@ Template.appBody.helpers({
   activeRouteIsInTools() {
     return [
       "listTools",
+      "listGsea",
       "listLimmaGSEA",
       "listTumorMap",
       "listUpDownGenes",

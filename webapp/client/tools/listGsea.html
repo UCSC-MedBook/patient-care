@@ -1,0 +1,45 @@
+<template name="listGsea">
+  <h1>
+    GSEA
+
+    {{#semanticUIPopup selector=".help.circle.icon"}}
+      <i class="help circle icon"></i>
+      <p class="ui popup">
+        This tool runs the Gene Set Enrichment Analysis created by the Broad
+        Institute of MIT and Harvard.
+      </p>
+    {{/semanticUIPopup}}
+  </h1>
+
+  <h2>Run a new analysis</h2>
+
+  <h3>Arguments</h3>
+  <div class="ui bulleted list">
+    <div class="item">
+      two sample groups
+    </div>
+    <div class="item">
+      Gene set: is this the ranked set of genes?
+    </div>
+    <div class="item">
+      metric value: Class seperation metric - gene markers are ranked using this metric to produce the gene list
+      <div class="ui bulleted list">
+        <div class="item">Signal2Noise</div>
+        <div class="item">tTest</div>
+        <div class="item">Cosine</div>
+        <div class="item">Euclidean</div>
+        <div class="item">Manhatten</div>
+        <div class="item">Pearson</div>
+        <div class="item">Ratio_of_Classes</div>
+        <div class="item">Diff_of_Classes</div>
+        <div class="item">log2_Ratio_of_Classes</div>
+      </div>
+    </div>
+    <div class="item">
+      max and min (optional?): what is this?
+    </div>
+    <div class="item">
+      top x gene sets (optional? how many is "normal"?)
+    </div>
+  </div>
+</template>

@@ -41,6 +41,7 @@ manage.route("/clinical-forms/:form_id/view-records",
 // tools
 
 var tools = FlowRouter.group({ prefix: "/tools" });
+tools.route("/gsea", sameNameAndAction("listGsea"));
 tools.route("/limma-gsea", sameNameAndAction("listLimmaGSEA"));
 tools.route("/limma-gsea/:job_id", sameNameAndAction("limmaGseaJob"));
 tools.route("/tumor-map", sameNameAndAction("listTumorMap"));

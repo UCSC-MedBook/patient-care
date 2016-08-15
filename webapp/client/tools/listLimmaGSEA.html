@@ -1,12 +1,15 @@
 <template name="listLimmaGSEA">
   <h1>
     Limma <i class="right arrow icon"></i> GSEA
-  </h1>
 
-  <p>
-    This tool runs Limma on a contrast and then feeds the output from Limma
-    into GSEA.
-  </p>
+    {{#semanticUIPopup selector=".help.circle.icon"}}
+      <i class="help circle icon"></i>
+      <p class="ui popup">
+        This tool runs Limma on a contrast and then
+        feeds the output from Limma into GSEA.
+      </p>
+    {{/semanticUIPopup}}
+  </h1>
 
   <h2>Run a new analysis</h2>
 

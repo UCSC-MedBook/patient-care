@@ -16,6 +16,10 @@
       <a href={{pathFor "home"}} class="ui simple dropdown item">
         Tools
         <div class="menu">
+          <a href={{pathFor "listGsea"}} class="item">
+            GSEA
+          </a>
+
           <a href={{pathFor "listLimmaGSEA"}} class="item">
             Limma <i class="right arrow icon"></i> GSEA
           </a>
@@ -153,6 +157,14 @@
       {{#breadcrumbItem isActive=(isActiveRoute "listLimmaGSEA")
           href=(pathFor "listLimmaGSEA")}}
         Limma <i class="right arrow icon"></i> GSEA
+      {{/breadcrumbItem}}
+    {{/if}}
+
+    {{#if or (isActiveRoute "listGsea")
+        (isActiveRoute "gseaJob")}}
+      {{#breadcrumbItem isActive=(isActiveRoute "listGsea")
+          href=(pathFor "listGsea")}}
+        GSEA
       {{/breadcrumbItem}}
     {{/if}}
 
