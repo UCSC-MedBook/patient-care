@@ -39,14 +39,16 @@ Meteor.methods({
     let user = MedBook.ensureUser(Meteor.userId());
     user.ensureAccess(dataset);
 
-    let samples = dataset.sample_labels;
     let formsWithFields = [] ;
 
     // For each user-accessible form, find records that match our samples
     // if we found any, include the form as an option to pick
-    Forms.find().forEach(function(form){
-      if (! user.hasAccess(form)) { return; }
+    let formsCursor = Forms.find({
+      collaborations: { $in: user.getCollaborations() },
+      sample_labels: { $in: dataset.sample_labels }
+    });
 
+    formsCursor.forEach(function(form){
       // Populate the form field table with its fields
       let encoded_form_id = encodeURIComponent(form._id);
       let sample_label_field = form.sample_label_field ;
@@ -65,23 +67,14 @@ Meteor.methods({
       // Find all records in that form for our samples
       // and add its values to the values fields.
       // However, don't populate the unique ID fields.
-      let fieldsToSkip = ["_id", sample_label_field, "form_id"];
+      let fieldsToSkip = ["_id", sample_label_field, "associated_object"];
 
-      // in order to use sample_label_field as dynamic key,
-      // need to construct query in pieces
-      let sampleLabelQuery = {};
-      sampleLabelQuery[sample_label_field] = {"$in": samples}
+      let recordsQuery = {
+        "associated_object.collection_name": "Forms",
+        "associated_object.mongo_id": form._id,
+      };
 
-      let fullQuery = { "$and": [
-        sampleLabelQuery,
-        {"form_id" : form._id},
-      ]}
-
-      let foundAnyRecords = false; // Did we find any for this form?
-
-      Records.find(fullQuery).forEach(function(record){
-        foundAnyRecords = true;
-
+      Records.find(recordsQuery).forEach(function(record){
         for(field in record){
           if (fieldsToSkip.indexOf(field) === -1){
 
@@ -97,7 +90,8 @@ Meteor.methods({
             }
             // If the desired field exists in the form
             if(fieldIdx >= 0){
-              currentFormFields[fieldIdx].values = _.union([record[field]], currentFormFields[fieldIdx].values );
+              currentFormFields[fieldIdx].values =
+                  _.union([record[field]], currentFormFields[fieldIdx].values);
             }
             // console.log("populating", field);
             // console.log("Added ", record[field], "and it's now", currentFormFields);
@@ -105,14 +99,12 @@ Meteor.methods({
         }
       });
 
-      // Only include the form if there are any associated records in this dataset
-      if(foundAnyRecords){
-        formsWithFields.push({
-          urlencodedId: encoded_form_id,
-          name: form.name,
-          fields: currentFormFields
-        });
-      }
+      // add to the modified form object to return
+      formsWithFields.push({
+        urlencodedId: encoded_form_id,
+        name: form.name,
+        fields: currentFormFields
+      });
     });
 
     return formsWithFields ;
@@ -167,7 +159,10 @@ Meteor.methods({
     let querySpecificForm = {
       "$and": [
         sampleLabelQuery,
-        {"form_id" : form._id},
+        {
+          "associated_object.mongo_id": form._id,
+          "associated_object.collection_name": "Forms"
+        },
         query,
       ]
     }

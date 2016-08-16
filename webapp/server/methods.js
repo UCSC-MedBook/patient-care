@@ -222,8 +222,8 @@ Meteor.methods({
       });
 
       if (sample_labels.length === 0) {
-        throw new Meteor.Error("data-set-empty", "Data set empty",
-            `The ${dataSet.name} data set is empty. ` +
+        throw new Meteor.Error("data-set-empty", "No samples found",
+            `Specified filters for ${dataSet.name} returned no samples. ` +
             "Remove filters or remove the data set to continue.");
       }
 
