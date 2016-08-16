@@ -49,7 +49,8 @@ Template.listUpDownGenes.helpers({
     let query = SampleGroups.find({}, { sort: { name: 1 } });
 
     let sgOptions = query.map((sampleGroup) => {
-      return { value: sampleGroup._id, label: sampleGroup.name };
+      let sgLabel = `${sampleGroup.name} (v${sampleGroup.version})`;
+      return { value: sampleGroup._id, label: sgLabel };
     });
 
     return [ {
@@ -104,6 +105,7 @@ Template.previouslyRunUpDownGenes.onCreated(function() {
   let instance = this;
 
   instance.subscribe("jobsOfType", "UpDownGenes");
+  instance.subscribe("sampleGroups");
 });
 
 Template.previouslyRunUpDownGenes.helpers({
@@ -111,5 +113,12 @@ Template.previouslyRunUpDownGenes.helpers({
     return Jobs.find({ name: "UpDownGenes" }, {
       sort: { date_created: -1 }
     });
+  },
+  // Get version of a sample group visible to this user
+  getSampleGroupVersion(sampleGroupId){
+    let sg = SampleGroups.findOne(sampleGroupId);
+    let version = "";
+    if(sg){ version = sg.version; }
+    return version;
   },
 });

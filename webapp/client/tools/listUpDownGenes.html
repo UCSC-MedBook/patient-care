@@ -96,7 +96,12 @@
                 <i class="fa fa-flask"></i>{{args.sample_label}}
                 <!-- from {{args.comparison_group_name}} -->
               </td>
-              <td>{{args.sample_group_name}}</td>
+              <td>
+                {{args.sample_group_name}}
+                {{#if getSampleGroupVersion args.sample_group_id}}
+                  (v{{getSampleGroupVersion args.sample_group_id}})
+                {{/if}}
+              </td>
               <td>{{args.iqr_multiplier}}</td>
               <td>
                 {{#if args.use_filtered_sample_group}}
