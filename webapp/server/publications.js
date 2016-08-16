@@ -223,7 +223,7 @@ Meteor.publish("specificJob", function (jobId) {
 
 // general
 
-Meteor.publish("GeneSetGroups", function () {
+Meteor.publish("geneSetGroups", function () {
   let user = MedBook.ensureUser(this.userId);
 
   return GeneSetGroups.find({

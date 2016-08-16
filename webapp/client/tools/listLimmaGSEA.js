@@ -36,7 +36,7 @@ Template.listLimmaGSEA.helpers({
   groupB: function () { return Template.instance().groupB },
   error: function () { return Template.instance().error; },
   creatingJob: function () { return Template.instance().creatingJob.get(); },
-  getSampleGroupCollections: function () {
+  getGeneSetGroups: function () {
     return GeneSetGroups.find({});
   },
 });

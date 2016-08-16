@@ -50,7 +50,7 @@
           <i class="dropdown icon"></i>
           <div class="default text">Gene sets for GSEA</div>
           <div class="menu">
-            {{#each getSampleGroupCollections}}
+            {{#each getGeneSetGroups}}
               <div class="item" data-value={{_id}}>
                 {{name}}
               </div>
@@ -124,7 +124,7 @@
               <td>{{args.sample_group_a_name}}</td>
               <td>{{args.sample_group_b_name}}</td>
               <td>{{args.limma_top_genes_count}}</td>
-              <td>{{args.gene_set_collection_name}}</td>
+              <td>{{args.gene_set_group_name}}</td>
               <td>
                 {{> viewJobButton href=(pathFor "limmaGseaJob" job_id=_id)
                     job=this}}

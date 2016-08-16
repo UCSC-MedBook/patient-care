@@ -240,7 +240,7 @@ Meteor.methods({
     _.extend(args, {
       sample_group_a_name: SampleGroups.findOne(args.sample_group_a_id).name,
       sample_group_b_name: SampleGroups.findOne(args.sample_group_b_id).name,
-      gene_set_collection_name: geneSetColl.name,
+      gene_set_group_name: geneSetColl.name,
     });
 
     // if it's been run before return that
@@ -649,18 +649,18 @@ Meteor.methods({
     MedBook.collections[collection_name].remove(mongo_id);
 
     // remove associated blobs
-    // NOTE: there is a client-side error here because Blobs2 isn't defined
-    // on the client just yet. The method itself works because Blobs2 is
-    // defined on the server.
-    Blobs2.delete({
-      "associated_object.collection_name": collection_name,
-      "associated_object.mongo_id": mongo_id,
-    }, (err, out) => {
-      if (err) {
-        console.log("Error deleting blobs for:",
-            collection_name, mongo_id, err);
-      }
-    });
+    // NOTE: Blobs2.delete isn't defined on the client
+    if (Meteor.isServer) {
+      Blobs2.delete({
+        "associated_object.collection_name": collection_name,
+        "associated_object.mongo_id": mongo_id,
+      }, (err, out) => {
+        if (err) {
+          console.log("Error deleting blobs for:",
+              collection_name, mongo_id, err);
+        }
+      });
+    }
 
     // remove other linked object types
     if (collection_name === "DataSets") {

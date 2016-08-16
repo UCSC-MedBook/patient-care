@@ -379,7 +379,7 @@ Meteor.methods({
     let blessedGeneSet = GeneSetGroups.findOne(findBlessedSet);
 
     return GeneSets.find({
-      gene_set_collection_id: blessedGeneSet._id,
+      gene_set_group_id: blessedGeneSet._id,
     }, {transform: addExtraInfo}).fetch();
   },
 });
