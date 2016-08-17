@@ -104,7 +104,7 @@ var allowedCollections = [
   "Studies",
 ];
 
-Meteor.publish("allOfCollectionOnlyName", function(collectionName) {
+Meteor.publish("allOfCollectionOnlyMetadata", function(collectionName) {
   check(collectionName, String);
   let user = MedBook.ensureUser(this.userId);
 
@@ -112,7 +112,7 @@ Meteor.publish("allOfCollectionOnlyName", function(collectionName) {
 
   return MedBook.collections[collectionName].find({
     collaborations: { $in: user.getCollaborations() },
-  }, { fields: { name: 1 } });
+  }, { fields: { name: 1, version: 1 } });
 });
 
 Meteor.publish("objectFromCollection", function(collectionName, objectId) {
