@@ -56,6 +56,11 @@
           <a href={{pathFor "manageObjects" collectionSlug=../collectionSlug
                     selected=_id}}
               class="{{#if managingObject}}active{{/if}} item">
+            {{#if showVersion}}
+              <div class="ui basic grey label" style="margin-top: -0.3em;">
+                v{{version}}
+              </div>
+            {{/if}}
             {{name}}
           </a>
         {{/each}}

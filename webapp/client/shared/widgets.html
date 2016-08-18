@@ -1,3 +1,69 @@
+<template name="widgetsDemo">
+  <h1>Widgets demo page</h1>
+
+  <h2><code>{{|> dataLoading}}</code></h2>
+  {{> dataLoading}}
+
+  <h2><code>{{|> shareAndDeleteButtons}}</code></h2>
+  {{> shareAndDeleteButtons
+      collectionName="DataSets" object=fakeObject}}
+  <br />
+  <br />
+  {{> shareAndDeleteButtons extraButtonsClass="large"
+      collectionName="DataSets" object=fakeObject}}
+
+  <h2><code>{{|> showErrorMessage}}</code></h2>
+  {{> showErrorMessage reactiveError}}
+
+  <h2><code>{{|> contactUsButton}}</code></h2>
+  <p>
+    The URL within patient-care is include in the subject of the email :)
+  </p>
+  {{> contactUsButton}}
+
+  <h2><code>{{|> listSamplesButton}}</code></h2>
+  {{> listSamplesButton fakeSamples}}
+
+  <h2><code>{{|> viewJobButton}}</code></h2>
+  {{> viewJobButton job=(fakeJob "waiting") href="https://google.com"}}
+  {{> viewJobButton job=(fakeJob "running") href="https://google.com"}}
+  {{> viewJobButton job=(fakeJob "error") href="https://google.com"}}
+  {{> viewJobButton job=(fakeJob "done") href="https://google.com"}}
+
+  <h2><code>{{|#semanticUIDropdown}}code{{|/semanticUIDropdown}}</code></h2>
+  <p>
+    This simply calls <code>instance.$(".ui.dropdown").dropdown(options)</code>
+  </p>
+  {{#semanticUIDropdown options=noAction}}
+    <div class="ui dropdown">
+      <div class="text">Hello my name is Ui Dropdown</div>
+      <i class="dropdown icon"></i>
+      <div class="menu">
+        <div class="item">I am an option</div>
+        <div class="item">Another option</div>
+        <div class="item">A THIRD OPTION PICK ME PICK ME</div>
+      </div>
+    </div>
+  {{/semanticUIDropdown}}
+
+  <h2>
+    <code>
+      {{|#jobStatusWrapper "jobId"}} if done {{|/jobStatusWrapper}}
+    </code>
+  </h2>
+  <p>
+    This one is really hard to demonstrate because the job subscription is
+    handled from within the template, but that's how you use it!
+  </p>
+
+  <h2><code>{{|> showRecords}}</code></h2>
+  <p>
+    This will show records in a Handsontable.
+
+    See manageForms or manageGeneSets for a code example.
+  </p>
+</template>
+
 <template name="shareAndDeleteButtons">
   <div class="ui labeled icon tiny buttons {{extraButtonsClass}}">
     <button class="ui secondary share button">
@@ -124,6 +190,16 @@
   {{> UI.contentBlock}}
 </template>
 
+<template name="semanticUICheckbox">
+  {{! Calls $(".ui.checkbox").checkbox() when rendered}}
+  {{> UI.contentBlock}}
+</template>
+
+<!-- <template name="semanticUIPopup">
+  {{! Calls $(selector).popup() when rendered}}
+  {{> UI.contentBlock}}
+</template> -->
+
 <template name="viewJobButton">
   <a href={{href}}
       class="ui right labeled icon {{buttonClass}} button">
@@ -204,4 +280,27 @@
   {{else}}
     {{> dataLoading}}
   {{/if}}
+</template>
+
+<template name="showRecords">
+  {{#if gettingRecordsData}}
+    {{> dataLoading}}
+  {{else}}
+    {{! wait until the data loads in the template above: this is to
+        allow us to make the call for the records immediately before all
+        the information about the form has loaded}}
+    {{#if and fields primaryFieldName}}
+      {{> recordsHandsOnTable recordsData=recordsData fields=fields
+          primaryFieldName=primaryFieldName}}
+    {{else}}
+      {{> dataLoading}}
+    {{/if}}
+  {{/if}}
+</template>
+
+<template name="recordsHandsOnTable">
+  {{! height, width, overflow: makes the table scroll when it gets too big}}
+  <div id="recordsHOT"
+      style="height: {{height}}; width: 100%; overflow: hidden;">
+  </div>
 </template>

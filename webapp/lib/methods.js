@@ -39,14 +39,16 @@ Meteor.methods({
     let user = MedBook.ensureUser(Meteor.userId());
     user.ensureAccess(dataset);
 
-    let samples = dataset.sample_labels;
     let formsWithFields = [] ;
 
     // For each user-accessible form, find records that match our samples
     // if we found any, include the form as an option to pick
-    Forms.find().forEach(function(form){
-      if (! user.hasAccess(form)) { return; }
+    let formsCursor = Forms.find({
+      collaborations: { $in: user.getCollaborations() },
+      sample_labels: { $in: dataset.sample_labels }
+    });
 
+    formsCursor.forEach(function(form){
       // Populate the form field table with its fields
       let encoded_form_id = encodeURIComponent(form._id);
       let sample_label_field = form.sample_label_field ;
@@ -65,23 +67,14 @@ Meteor.methods({
       // Find all records in that form for our samples
       // and add its values to the values fields.
       // However, don't populate the unique ID fields.
-      let fieldsToSkip = ["_id", sample_label_field, "form_id"];
+      let fieldsToSkip = ["_id", sample_label_field, "associated_object"];
 
-      // in order to use sample_label_field as dynamic key,
-      // need to construct query in pieces
-      let sampleLabelQuery = {};
-      sampleLabelQuery[sample_label_field] = {"$in": samples}
+      let recordsQuery = {
+        "associated_object.collection_name": "Forms",
+        "associated_object.mongo_id": form._id,
+      };
 
-      let fullQuery = { "$and": [
-        sampleLabelQuery,
-        {"form_id" : form._id},
-      ]}
-
-      let foundAnyRecords = false; // Did we find any for this form?
-
-      Records.find(fullQuery).forEach(function(record){
-        foundAnyRecords = true;
-
+      Records.find(recordsQuery).forEach(function(record){
         for(field in record){
           if (fieldsToSkip.indexOf(field) === -1){
 
@@ -97,7 +90,8 @@ Meteor.methods({
             }
             // If the desired field exists in the form
             if(fieldIdx >= 0){
-              currentFormFields[fieldIdx].values = _.union([record[field]], currentFormFields[fieldIdx].values );
+              currentFormFields[fieldIdx].values =
+                  _.union([record[field]], currentFormFields[fieldIdx].values);
             }
             // console.log("populating", field);
             // console.log("Added ", record[field], "and it's now", currentFormFields);
@@ -105,14 +99,12 @@ Meteor.methods({
         }
       });
 
-      // Only include the form if there are any associated records in this dataset
-      if(foundAnyRecords){
-        formsWithFields.push({
-          urlencodedId: encoded_form_id,
-          name: form.name,
-          fields: currentFormFields
-        });
-      }
+      // add to the modified form object to return
+      formsWithFields.push({
+        urlencodedId: encoded_form_id,
+        name: form.name,
+        fields: currentFormFields
+      });
     });
 
     return formsWithFields ;
@@ -167,7 +159,10 @@ Meteor.methods({
     let querySpecificForm = {
       "$and": [
         sampleLabelQuery,
-        {"form_id" : form._id},
+        {
+          "associated_object.mongo_id": form._id,
+          "associated_object.collection_name": "Forms"
+        },
         query,
       ]
     }
@@ -216,12 +211,12 @@ Meteor.methods({
       sample_group_a_id: { type: String },
       sample_group_b_id: { type: String },
       limma_top_genes_count: { type: Number, min: 1 },
-      gene_set_collection_id: { type: String },
+      gene_set_group_id: { type: String },
     }));
 
     let user = MedBook.ensureUser(Meteor.userId());
 
-    let geneSetColl = GeneSetCollections.findOne(args.gene_set_collection_id);
+    let geneSetColl = GeneSetGroups.findOne(args.gene_set_group_id);
     user.ensureAccess(geneSetColl);
 
     // ensure access to sample group, data sets inside
@@ -245,7 +240,7 @@ Meteor.methods({
     _.extend(args, {
       sample_group_a_name: SampleGroups.findOne(args.sample_group_a_id).name,
       sample_group_b_name: SampleGroups.findOne(args.sample_group_b_id).name,
-      gene_set_collection_name: geneSetColl.name,
+      gene_set_group_name: geneSetColl.name,
     });
 
     // if it's been run before return that
@@ -629,7 +624,8 @@ Meteor.methods({
       "DataSets",
       "SampleGroups",
       "Forms",
-      "GeneSetCollections",
+      "GeneSets",
+      "GeneSetGroups",
       "Studies",
     ];
     if (removeAllowedCollections.indexOf(collection_name) === -1) {
@@ -653,25 +649,30 @@ Meteor.methods({
     MedBook.collections[collection_name].remove(mongo_id);
 
     // remove associated blobs
-    // NOTE: there is a client-side error here because Blobs2 isn't defined
-    // on the client just yet. The method itself works because Blobs2 is
-    // defined on the server.
-    Blobs2.delete({
-      associated_object: { collection_name, mongo_id }
-    }, (err, out) => {
-      if (err) {
-        console.log("Error deleting blobs for:",
-            collection_name, mongo_id, err);
-      }
-    });
+    // NOTE: Blobs2.delete isn't defined on the client
+    if (Meteor.isServer) {
+      Blobs2.delete({
+        "associated_object.collection_name": collection_name,
+        "associated_object.mongo_id": mongo_id,
+      }, (err, out) => {
+        if (err) {
+          console.log("Error deleting blobs for:",
+              collection_name, mongo_id, err);
+        }
+      });
+    }
 
     // remove other linked object types
     if (collection_name === "DataSets") {
       GenomicExpression.remove({ data_set_id: mongo_id });
-    } else if (collection_name === "Forms") {
-      Records.remove({ form_id: mongo_id });
-    } if (collection_name === "GeneSetCollections") {
-      GeneSets.remove({ gene_set_collection_id: mongo_id });
+    } else if (collection_name === "Forms"
+        || collection_name === "GeneSets") {
+      Records.remove({
+        "associated_object.collection_name": collection_name,
+        "associated_object.mongo_id": mongo_id,
+      });
+    } else if (collection_name === "GeneSetGroups") {
+      GeneSets.remove({ gene_set_group_id: mongo_id });
     }
   },
   updateObjectCollaborations(collectionName, mongoId, collaborations) {
@@ -750,6 +751,131 @@ Meteor.methods({
     }
 
     return Studies.insert(newStudy);
+  },
+
+  insertGeneSet(formValues, computedColumns) {
+    check(formValues, GeneSets.simpleSchema().pick([
+      "name",
+      "description",
+      "gene_label_field"
+    ]));
+
+    check(computedColumns, [ new SimpleSchema({
+      header: { type: String },
+      // allowedValues validation will happen on insert
+      value_type: { type: String },
+      values: { type: [String] },
+    }) ]);
+
+    let user = MedBook.ensureUser(Meteor.userId());
+
+    // initialize enough records to be inserted later
+    let records = [];
+    _.times(computedColumns[0].values.length, () => {
+      records.push({
+        associated_object: {
+          collection_name: "GeneSets"
+        }
+      });
+    });
+
+    let fields = _.map(computedColumns, (column, colIndex) => {
+      let field = {
+        name: column.header,
+        value_type: column.value_type,
+      };
+
+      // calculate the record values for this field
+      let recordValues = _.map(column.values, (cellValue, recordIndex) => {
+        if (field.value_type === "Number") {
+          // if the cell was blank, make the field optional and return null
+          // NOTE: if they entered 0, cellValue would be "0", which is truthy
+          if (!cellValue) {
+            field.optional = true;
+            return null;
+          }
+
+          // if the number was entered as an integer, save it as an integer
+          if (cellValue.indexOf(".") === -1) {
+            return parseInt(cellValue);
+          } else {
+            return parseFloat(cellValue);
+          }
+        } else {
+          // if falsey, pretend it's blank for the SimpleSchema custom
+          // function which uses typeof
+          if (!cellValue) { return ""; }
+
+          return cellValue;
+        }
+      });
+
+      // add the record values to the record
+      _.each(recordValues, (value, index) => {
+        records[index][field.name] = value;
+      });
+
+      return field;
+    });
+
+
+
+    // make sure the gene_label_field points to a valid field:
+    // - all values defined, not blank, and no spaces
+    // - values are unique
+    // - value_type is string
+
+    let geneLabelField = _.findWhere(fields, {
+      name: formValues.gene_label_field
+    });
+
+    // make sure it's type String
+    if (geneLabelField.value_type !== "String") {
+      throw new Meteor.Error("gene-label-field-invalid");
+    }
+
+    // make sure they're unique
+    let geneLabelValues = _.pluck(records, geneLabelField.name);
+    let gene_labels = _.uniq(geneLabelValues);
+    if (gene_labels.length !== geneLabelValues.length) {
+      throw new Meteor.Error("gene-label-field-invalid");
+    }
+
+    // make sure there's no blank values or spaces
+    _.each(gene_labels, (label) => {
+      if (/\s/.test(label) || !label) {
+        throw new Meteor.Error("gene-label-field-invalid");
+      }
+    });
+
+
+
+    // validate all records before inserting the gene set
+    _.each(records, (record) => {
+      // set to a dummy value so that the record is valid: we'll set
+      // this to the actual gene set _id after inserting
+      record.associated_object.mongo_id = "not a real _id";
+
+      MedBook.validateRecord(record, fields);
+    });
+
+    // create the gene set
+    let geneSet = _.extend(formValues, {
+      collaborations: [ user.personalCollaboration() ],
+      fields,
+      gene_labels,
+    });
+
+    let geneSetId = GeneSets.insert(geneSet);
+
+    // set the mongo_id for each record and insert
+    _.each(records, (record) => {
+      record.associated_object.mongo_id = geneSetId;
+
+      Records.insert(record);
+    });
+
+    return geneSetId;
   },
 
   // Rename a sample: if a user has access to a study they can rename

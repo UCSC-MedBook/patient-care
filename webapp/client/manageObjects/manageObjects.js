@@ -21,10 +21,19 @@ var managableTypes = [
     permissionDeniedTemplate: "waitAndThenPermissionDenied",
   },
   {
+    collectionSlug: "gene-sets",
+    humanName: "Gene Sets",
+    singularName: "gene set",
+    collectionName: "GeneSets",
+    introTemplate: "introGeneSets",
+    createTemplate: "createGeneSet",
+    showTemplate: "showGeneSet",
+  },
+  {
     collectionSlug: "gene-set-groups",
     humanName: "Gene Set Groups",
     singularName: "gene set group",
-    collectionName: "GeneSetCollections",
+    collectionName: "GeneSetGroups",
     introTemplate: "introGeneSetGroups",
     createTemplate: "createGeneSetGroup",
     showTemplate: "showGeneSetGroup",
@@ -77,15 +86,16 @@ Template.dataTypeInfoIcon.onRendered(function () {
 Template.manageObjectsGrid.onCreated(function () {
   let instance = this;
 
-  instance.currentObject = new ReactiveVar();
+  instance.currentlyManaging = new ReactiveVar();
 
-  // subscribe to the names of the available data
+  // subscribe to the names of the available data, and
+  // set instance.currentlyManaging
   instance.autorun(() => {
     let slug = FlowRouter.getParam("collectionSlug");
     let currObj = _.findWhere(managableTypes, { collectionSlug: slug });
 
-    instance.currentObject.set(currObj);
-    instance.subscribe("allOfCollectionOnlyName", currObj.collectionName);
+    instance.currentlyManaging.set(currObj);
+    instance.subscribe("allOfCollectionOnlyMetadata", currObj.collectionName);
   });
 
   // if the user selected something before, select that one
@@ -114,15 +124,15 @@ Template.manageObjectsGrid.onCreated(function () {
   });
 });
 
-function getObjects () {
+function getObjects (query = {}) {
   // get all the objects for this data type
   let slug = FlowRouter.getParam("collectionSlug");
-  let managing = _.findWhere(managableTypes, { collectionSlug: slug });
+  let managing = Template.instance().currentlyManaging.get();
 
-  return MedBook.collections[managing.collectionName].find({}, {
+  return MedBook.collections[managing.collectionName].find(query, {
     // need to sort by _id also to break ties: if two things have the same
     // name, clicking on one can cause the list to reorder itself
-    sort: { name: 1, _id: 1 },
+    sort: { name: 1, version: 1, _id: 1 },
   });
 }
 
@@ -130,6 +140,9 @@ Template.manageObjectsGrid.helpers({
   getObjects,
   managingObject() {
     return this._id === FlowRouter.getParam("selected");
+  },
+  showVersion() {
+    return getObjects({ name: this.name }).count() > 1 || this.version !== 1;
   },
 });
 

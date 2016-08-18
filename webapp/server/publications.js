@@ -98,12 +98,13 @@ Meteor.publish("browseCollaborations", function() {
 var allowedCollections = [
   "DataSets",
   "SampleGroups",
-  "GeneSetCollections",
+  "GeneSets",
+  "GeneSetGroups",
   "Forms",
   "Studies",
 ];
 
-Meteor.publish("allOfCollectionOnlyName", function(collectionName) {
+Meteor.publish("allOfCollectionOnlyMetadata", function(collectionName) {
   check(collectionName, String);
   let user = MedBook.ensureUser(this.userId);
 
@@ -111,7 +112,7 @@ Meteor.publish("allOfCollectionOnlyName", function(collectionName) {
 
   return MedBook.collections[collectionName].find({
     collaborations: { $in: user.getCollaborations() },
-  }, { fields: { name: 1 } });
+  }, { fields: { name: 1, version: 1 } });
 });
 
 Meteor.publish("objectFromCollection", function(collectionName, objectId) {
@@ -222,10 +223,10 @@ Meteor.publish("specificJob", function (jobId) {
 
 // general
 
-Meteor.publish("geneSetCollections", function () {
+Meteor.publish("geneSetGroups", function () {
   let user = MedBook.ensureUser(this.userId);
 
-  return GeneSetCollections.find({
+  return GeneSetGroups.find({
     collaborations: { $in: user.getCollaborations() },
   });
 });
@@ -246,14 +247,25 @@ Meteor.publish("blob", function (blobId) {
   return Blobs.find(blobId);
 });
 
-Meteor.publish("geneSetsForGroup", function (geneSetGroupId) {
-  check(geneSetGroupId, String);
+Meteor.publish("geneSetsForGroup", function (gene_set_group_id) {
+  check(gene_set_group_id, String);
 
   let user = MedBook.ensureUser(this.userId);
-  let geneSetGroup = GeneSetCollections.findOne(geneSetGroupId);
+  user.ensureAccess(GeneSetGroups.findOne(gene_set_group_id));
+
+  return GeneSets.find({ gene_set_group_id });
+});
+
+Meteor.publish("geneSetInGroup", function (gene_set_group_id, geneSetNameIndex) {
+  check(gene_set_group_id, String);
+  check(geneSetNameIndex, Number);
+
+  let user = MedBook.ensureUser(this.userId);
+  let geneSetGroup = GeneSetGroups.findOne(gene_set_group_id);
   user.ensureAccess(geneSetGroup);
 
   return GeneSets.find({
-    gene_set_collection_id: geneSetGroupId
+    gene_set_group_id,
+    name: geneSetGroup.gene_set_names[geneSetNameIndex]
   });
 });
