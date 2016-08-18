@@ -124,10 +124,10 @@ Template.manageObjectsGrid.onCreated(function () {
   });
 });
 
-function getObjects (query = {}) {
+function getObjects (instance, query = {}) {
   // get all the objects for this data type
   let slug = FlowRouter.getParam("collectionSlug");
-  let managing = Template.instance().currentlyManaging.get();
+  let managing = instance.currentlyManaging.get();
 
   return MedBook.collections[managing.collectionName].find(query, {
     // need to sort by _id also to break ties: if two things have the same
@@ -137,12 +137,18 @@ function getObjects (query = {}) {
 }
 
 Template.manageObjectsGrid.helpers({
-  getObjects,
+  getObjects() { return getObjects(Template.instance()); },
   managingObject() {
     return this._id === FlowRouter.getParam("selected");
   },
   showVersion() {
-    return getObjects({ name: this.name }).count() > 1 || this.version !== 1;
+    if (this.version) {
+      let instance = Template.instance();
+
+      // only show the version if the version isn't 1 or there's a duplicate
+      return this.version !== 1 ||
+          getObjects(instance, { name: this.name }).count() > 1;
+    }
   },
 });
 
@@ -163,7 +169,9 @@ Template.manageObject.onCreated(function () {
 });
 
 Template.manageObject.helpers({
-  getObjects,
+  getObjects() {
+    return getObjects(Template.instance().parent());
+  },
   getObject() {
     let slug = FlowRouter.getParam("collectionSlug");
     let managing = _.findWhere(managableTypes, { collectionSlug: slug });
