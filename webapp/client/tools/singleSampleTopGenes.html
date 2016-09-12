@@ -1,0 +1,182 @@
+<template name="listSingleSampleTopGenes">
+  <h1>
+    Single Sample Top Genes
+
+    {{#semanticUIPopup selector=".help.circle.icon"}}
+      <i class="help circle icon"></i>
+      <p class="ui popup">
+        Compute a signature with the top N or top N percent
+        of genes in a single sample.
+      </p>
+    {{/semanticUIPopup}}
+  </h1>
+
+  <h2>Run a new analysis</h2>
+  {{#autoForm id="createSingleSampleTopGenes" schema=schema
+      type="method" meteormethod="createSingleSampleTopGenes"
+      class=(loadingIfFalse Template.subscriptionsReady)}}
+    {{#if length dataSetOptions}}
+      {{> afQuickField name="data_set_id" search=true options=dataSetOptions
+          placeholder="Select a data set..."}}
+    {{else}}
+      <div class="ui warning message">
+        <div class="header">
+          No data sets
+        </div>
+        You have must have access to at least one data set
+        to run this tool.
+      </div>
+    {{/if}}
+
+    {{#if sampleOptions}}
+      {{> afQuickField name="sample_labels" options=sampleOptions
+          multiple=true search=true type="select"
+          placeholder="Select one or more samples..."}}
+
+      {{#if multipleSamplesSelected}}
+        <div class="ui info message">
+          <p>
+            Separate jobs will be created for each selected sample.
+          </p>
+        </div>
+      {{/if}}
+    {{/if}}
+
+    {{> afQuickField name="percent_or_count" options="allowed"
+        placeholder="Percent or count?"}}
+
+    {{#if afFieldValueIs name="percent_or_count" value="percent"}}
+      {{> afQuickField name="top_percent"
+          placeholder="Signature will contain this percent of the sample's genes"}}
+    {{/if}}
+
+    {{#if afFieldValueIs name="percent_or_count" value="count"}}
+      {{> afQuickField name="top_count"
+          placeholder="Signature will contain this many genes"}}
+    {{/if}}
+
+    <button type="submit" class="ui primary button">
+      Start analysis
+    </button>
+  {{/autoForm}}
+
+  <h2>Previously run analyses</h2>
+  {{> previouslyRunSingleSampleTopGenes}}
+</template>
+
+<template name="previouslyRunSingleSampleTopGenes">
+  {{#if Template.subscriptionsReady}}
+    {{#if length getJobs}}
+      <table class="ui single line table">
+        <thead>
+          <tr>
+            <th>Data set</th>
+            <th>Sample</th>
+            <th>Top amount</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each getJobs}}
+            <tr>
+              <td>{{args.data_set_name}}</td>
+              <td>
+                {{args.sample_label}}
+              </td>
+              <td>
+                {{#if compare args.percent_or_count "percent"}}
+                  {{args.top_percent}}% of genes
+                {{else}}
+                  {{args.top_count}}
+                  {{#if compare args.top_count 1}}
+                    gene
+                  {{else}}
+                    genes
+                  {{/if}}
+                {{/if}}
+              </td>
+              <td>
+                {{> viewJobButton job=this
+                    href=(pathFor "singleSampleTopGenesJob" job_id=_id)}}
+              </td>
+              <td>
+                {{> shareAndDeleteButtons object=this collectionName="Jobs"}}
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    {{else}}
+      <div class="ui message">
+        <div class="content">
+          <div class="header">
+            No analyses... yet!
+          </div>
+          <p>
+            You haven't run any analyses.
+          </p>
+        </div>
+      </div>
+    {{/if}}
+  {{else}}
+    {{> dataLoading}}
+  {{/if}}
+</template>
+
+<template name="singleSampleTopGenesJob">
+  <h1>
+    Single Sample Top Genes Result
+  </h1>
+
+  {{#jobStatusWrapper (param "job_id")}}
+    <table class="ui celled striped table">
+      <thead>
+        <tr>
+          <th colspan="2">Arguments</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Data set</td>
+          <td>{{args.data_set_name}}</td>
+        </tr>
+        <tr>
+          <td>Sample</td>
+          <td>{{args.sample_label}}</td>
+        </tr>
+        <tr>
+          <td>Top amount</td>
+          <td>
+            {{#if compare args.percent_or_count "percent"}}
+              {{args.top_percent}}% of genes
+            {{else}}
+              {{args.top_count}}
+              {{#if compare args.top_count 1}}
+                gene
+              {{else}}
+                genes
+              {{/if}}
+            {{/if}}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>
+      Signature
+
+      {{! Show a list of previously run GSEA jobs as well as a form to
+          create a new GSEA job}}
+      <button class="ui labeled icon button
+          {{#if Template.subscriptionsReady}}
+            primary run-gsea{{else}}loading{{/if}}">
+        <i class="right arrow icon"></i>
+        Run GSEA
+      </button>
+    </h2>
+
+    {{! reuse paired analysis template}}
+    {{> showPairedAnalysisResult}}
+  {{/jobStatusWrapper}}
+</template>

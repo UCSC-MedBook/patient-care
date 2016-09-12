@@ -230,21 +230,6 @@ Meteor.publish("jobsOfType", function (name, query) {
 
   let user = MedBook.ensureUser(this.userId);
 
-  // only allow certain job names
-  // NOTE: I don't know if this actually adds any security
-  let allowedJobNames = [
-    "RunLimmaGSEA",
-    "UpDownGenes",
-    "TumorMapOverlay",
-    "ApplyExprAndVarianceFilters",
-    "RunGSEA",
-    "RunPairedAnalysis",
-    "RunLimma",
-  ];
-  if (allowedJobNames.indexOf(name) === -1) {
-    return null;
-  }
-
   // NOTE: name and collaborations override those attributes in query if
   // they exist
   _.extend(query, {

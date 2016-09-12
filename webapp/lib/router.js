@@ -47,11 +47,18 @@ tools.route("/paired-analysis", sameNameAndAction("listPairedAnalysis"));
 tools.route("/paired-analysis/:job_id", sameNameAndAction("pairedAnalysisJob"));
 tools.route("/limma", sameNameAndAction("listLimma"));
 tools.route("/limma/:job_id", sameNameAndAction("limmaJob"));
+tools.route("/outlier-analysis", sameNameAndAction("listUpDownGenes"));
+tools.route("/outlier-analysis/:job_id", sameNameAndAction("upDownGenesJob"));
+tools.route("/single-sample-top-genes",
+    sameNameAndAction("listSingleSampleTopGenes"));
+tools.route("/single-sample-top-genes/:job_id",
+    sameNameAndAction("singleSampleTopGenesJob"));
+
+// old jobs
 tools.route("/limma-gsea", sameNameAndAction("listLimmaGSEA"));
 tools.route("/limma-gsea/:job_id", sameNameAndAction("limmaGseaJob"));
 tools.route("/tumor-map", sameNameAndAction("listTumorMap"));
-tools.route("/outlier-analysis", sameNameAndAction("listUpDownGenes"));
-tools.route("/outlier-analysis/:job_id", sameNameAndAction("upDownGenesJob"));
+
 
 // documentation
 

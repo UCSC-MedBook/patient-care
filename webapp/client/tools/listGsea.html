@@ -12,6 +12,21 @@
   </h1>
 
   <h2>Run a new analysis</h2>
+  <div class="ui info message">
+    <div class="header">
+      Linking jobs
+    </div>
+    <p>
+      You can now also run GSEA from the output of a job that generates
+      a signature.
+    </p>
+    <p>
+      Try it now with
+      <a href={{pathFor "listLimma"}}>limma</a>,
+      <a href={{pathFor "listPairedAnalysis"}}>paired tumor analysis</a>, or
+      <a href={{pathFor "listUpDownGenes"}}>outlier analysis</a>.
+    </p>
+  </div>
   {{> createGseaForm active=true autoformId="createGsea"}}
 
   <h2>Previously run analyses</h2>

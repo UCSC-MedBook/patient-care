@@ -33,6 +33,10 @@
             Limma
           </a>
 
+          <a href={{pathFor "listSingleSampleTopGenes"}} class="item">
+            Single Sample Top Genes
+          </a>
+
           <a href={{pathFor "listLimmaGSEA"}} class="item">
             Limma <i class="right arrow icon"></i> GSEA
           </a>
@@ -192,6 +196,14 @@
       {{#breadcrumbItem isActive=(isActiveRoute "listLimma")
           href=(pathFor "listLimma")}}
         Limma
+      {{/breadcrumbItem}}
+    {{/if}}
+
+    {{#if or (isActiveRoute "listSingleSampleTopGenes")
+        (isActiveRoute "singleSampleTopGenesJob")}}
+      {{#breadcrumbItem isActive=(isActiveRoute "listSingleSampleTopGenes")
+          href=(pathFor "listSingleSampleTopGenes")}}
+        Single Sample Top Genes
       {{/breadcrumbItem}}
     {{/if}}
 

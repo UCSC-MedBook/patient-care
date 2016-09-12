@@ -39,6 +39,7 @@ Template.siteBreadcrumbs.helpers({
       "gseaJob",
       "pairedAnalysisJob",
       "limmaJob",
+      "singleSampleTopGenesJob",
     ].indexOf(FlowRouter.getRouteName()) !== -1;
   },
 });

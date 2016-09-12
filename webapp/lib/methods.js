@@ -287,6 +287,61 @@ Meteor.methods({
       args
     });
   },
+  createSingleSampleTopGenes(args) {
+    check(args, new SimpleSchema({
+      data_set_id: { type: String },
+      sample_labels: { type: [String]},
+      percent_or_count: {
+        type: String,
+        allowedValues: [
+          "percent",
+          "count",
+        ],
+      },
+      top_percent: {
+        type: Number,
+        optional: true,
+        min: .0001,
+        max: 100,
+        decimal: true,
+      },
+      top_count: { type: Number, optional: true, min: 1 },
+    }));
+
+    // make they've specified the necessary one
+    // It's not a problem if they specify both because it'll be ignored.
+    if (args.percent_or_count === "percent") {
+      // can't use Match becuase it doesn't do decimals
+      if (!args.top_percent) {
+        throw new Meteor.Error("must-provide-top-percent");
+      }
+    } else if (args.percent_or_count === "count") {
+      check(args.top_count, Number);
+    }
+
+    let user = MedBook.ensureUser(Meteor.userId());
+
+    let dataSet = DataSets.findOne(args.data_set_id);
+    user.ensureAccess(dataSet);
+
+    args.data_set_name = dataSet.name;
+
+    let sampleLabels = args.sample_labels;
+    delete args.sample_labels;
+
+    return _.map(sampleLabels, (sample_label) => {
+      // will override previous values
+      args.sample_label = sample_label;
+
+      return Jobs.insert({
+        name: "RunSingleSampleTopGenes",
+        status: "waiting",
+        user_id: user._id,
+        collaborations: [ user.personalCollaboration() ],
+        args
+      });
+    });
+  },
   createLimma(args) {
     check(args, new SimpleSchema({
       // No allowed values for value_type becuase we check if the value_types
@@ -768,15 +823,13 @@ Meteor.methods({
         "UpDownGenes",
         "RunPairedAnalysis",
         "RunLimma",
+        "RunSingleSampleTopGenes",
       ];
 
       if (deleteableJobs.indexOf(object.name) === -1) {
         throw new Meteor.Error("permission-denied");
       }
     }
-
-    // remove original object
-    MedBook.collections[collection_name].remove(mongo_id);
 
     // remove associated blobs
     // NOTE: Blobs2.delete isn't defined on the client
@@ -793,17 +846,34 @@ Meteor.methods({
     }
 
     // remove other linked object types
+    let associatedQuery = {
+      "associated_object.collection_name": collection_name,
+      "associated_object.mongo_id": mongo_id,
+    };
+
     if (collection_name === "DataSets") {
       GenomicExpression.remove({ data_set_id: mongo_id });
     } else if (collection_name === "Forms"
         || collection_name === "GeneSets") {
-      Records.remove({
-        "associated_object.collection_name": collection_name,
-        "associated_object.mongo_id": mongo_id,
-      });
+      Records.remove(associatedQuery);
     } else if (collection_name === "GeneSetGroups") {
       GeneSets.remove({ gene_set_group_id: mongo_id });
     }
+
+    // recursively remove associated gene sets
+    // ==> we need to remove not just the gene sets but the gene sets
+    //     associated objects
+    // Only do this on the server because the data isn't necessarily loaded.
+    if (Meteor.isServer) {
+      GeneSets.find(associatedQuery).forEach((geneSet) => {
+        Meteor.call("removeObject", "GeneSets", geneSet._id);
+      });
+    }
+
+    // remove original object
+    // NOTE: do this after so the associated objects can still look
+    // it up for security until the very end
+    MedBook.collections[collection_name].remove(mongo_id);
   },
   updateObjectCollaborations(collectionName, mongoId, collaborations) {
     check([collectionName, mongoId], [String]);
@@ -1106,3 +1176,11 @@ Meteor.methods({
     });
   },
 });
+
+if (Meteor.isServer) {
+  // for deleting records
+  Moko.ensureIndex(Records, {
+    "associated_object.collection_name": 1,
+    "associated_object.mongo_id": 1,
+  });
+}
