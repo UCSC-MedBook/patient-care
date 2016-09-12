@@ -142,28 +142,175 @@ Meteor.publish("dataSetNamesSamples", function() {
 
   return DataSets.find({
     collaborations: {$in: user.getCollaborations() },
-  }, { fields: { name: 1, sample_labels: 1 } });
+  }, {
+    fields: {
+      name: 1,
+      sample_labels: 1,
+
+      // to get rid of ensureAccess errors client-side
+      collaborations: 1,
+    }
+  });
 });
 
-Meteor.publish("jobsOfType", function (name) {
+// all data necessary for the GSEA form
+Meteor.publish("gseaFormData", function (maybeGeneSetId) {
+  // See below for string validation. maybeGeneSetId can be null sometimes,
+  // so Match.Optional will fail. This should be Match.Maybe but that's
+  // not available until Meteor 1.3.
+  check(maybeGeneSetId, Match.Any);
+
+  let user = MedBook.ensureUser(this.userId);
+
+  // send only siguatures
+  let geneSetsQuery = {
+    collaborations: { $in: user.getCollaborations() },
+    "fields.value_type": "Number",
+  };
+
+  // send only the selected gene set if provided
+  if (maybeGeneSetId) {
+    check(maybeGeneSetId, String);
+
+    geneSetsQuery._id = maybeGeneSetId;
+  }
+
+  return [
+    GeneSets.find(geneSetsQuery, {
+      fields: {
+        name: 1,
+      }
+    }),
+    GeneSetGroups.find({
+      collaborations: { $in: user.getCollaborations() },
+    }, {
+      fields: {
+        name: 1,
+        gene_set_names: 1,
+      }
+    }),
+  ];
+});
+
+// send down the sample labels for a specific data set
+Meteor.publish("dataSetSampleLabels", function (dataSetId) {
+  check(dataSetId, String);
+
+  let user = MedBook.ensureUser(this.userId);
+
+  return DataSets.find({
+    _id: dataSetId,
+    collaborations: { $in: user.getCollaborations() },
+  }, {
+    name: 1,
+    sample_labels: 1,
+  });
+});
+
+Meteor.publish("limmaFormData", function (value_type) {
+  check(value_type, String);
+
+  let user = MedBook.ensureUser(this.userId);
+
+  return SampleGroups.find({
+    value_type,
+    collaborations: { $in: user.getCollaborations() },
+  });
+});
+
+// return all jobs with a given name, filtered by extraQuery if provided
+Meteor.publish("jobsOfType", function (name, query) {
   check(name, String);
+
+  // first check with Match.Any so the audit-arguments package doesn't
+  // complain about us using the variable before checking it's type
+  check(query, Match.Any);
+  if (!query) { query = {}; }
+  check(query, Object);
 
   let user = MedBook.ensureUser(this.userId);
 
   // only allow certain job names
+  // NOTE: I don't know if this actually adds any security
   let allowedJobNames = [
     "RunLimmaGSEA",
     "UpDownGenes",
     "TumorMapOverlay",
     "ApplyExprAndVarianceFilters",
+    "RunGSEA",
+    "RunPairedAnalysis",
+    "RunLimma",
   ];
   if (allowedJobNames.indexOf(name) === -1) {
     return null;
   }
 
-  return Jobs.find({
+  // NOTE: name and collaborations override those attributes in query if
+  // they exist
+  _.extend(query, {
     name,
     collaborations: { $in: user.getCollaborations() },
+  });
+
+  return Jobs.find(query);
+});
+
+// publish all UpDownGenes jobs to be shown in a list view
+Meteor.publish("upDownGenesJobs", function () {
+  let user = MedBook.ensureUser(this.userId);
+
+  return Jobs.find({
+    name: "UpDownGenes",
+    collaborations: { $in: user.getCollaborations() },
+  }, {
+    fields: {
+      // for showing the job
+      name: 1,
+      collaborations: 1,
+      status: 1,
+      args: 1,
+
+      // only send down relevant output
+      // (the list of genes itself is relatively large)
+      "output.up_genes_count": 1,
+      "output.down_genes_count": 1,
+
+      // client-side sorting
+      date_created: 1,
+    },
+  });
+});
+
+// a gene set linked to a certain object
+Meteor.publish("associatedObjectGeneSet",
+    function (associatedObj, metadata = {}) {
+  check(associatedObj, {
+    mongo_id: String,
+    collection_name: String
+  });
+  check(metadata, Object);
+
+  let { mongo_id, collection_name } = associatedObj
+
+  let user = MedBook.ensureUser(this.userId);
+  let obj = MedBook.collections[collection_name].findOne(mongo_id);
+  user.ensureAccess(obj);
+
+  let query = {
+    "associated_object.mongo_id": mongo_id,
+    "associated_object.collection_name": collection_name,
+  };
+
+  // only query with metadata if something is defined
+  if (Object.keys(metadata).length > 0) {
+    query.metadata = metadata;
+  }
+
+  return GeneSets.find(query, {
+    fields: {
+      // don't send down this gigantic list
+      gene_labels: 0
+    }
   });
 });
 
@@ -216,7 +363,6 @@ Meteor.publish("specificJob", function (jobId) {
 
   return Jobs.find({
     _id: jobId,
-    name: { $in: [ "UpDownGenes", "RunLimmaGSEA" ] },
     collaborations: { $in: user.getCollaborations() },
   });
 });

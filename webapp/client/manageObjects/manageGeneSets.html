@@ -145,6 +145,22 @@
 </template>
 
 <template name="showGeneSet">
+  <table class="ui celled striped table">
+    <thead>
+      <tr>
+        <th colspan="2">
+          Metadata
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Genes count</td>
+        <td>{{length gene_labels}}</td>
+      </tr>
+    </tbody>
+  </table>
+
   <h3>Fields</h3>
   <table class="ui celled striped table">
     <thead>
@@ -168,6 +184,7 @@
     </tbody>
   </table>
 
+  <h3>Data</h3>
   {{> showRecords fields=fields mongoId=(param "selected")
       collectionName="GeneSets" primaryFieldName=gene_label_field}}
 </template>

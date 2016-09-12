@@ -40,14 +40,17 @@
 
   {{#if Template.subscriptionsReady}}
     {{> outlierGenesTable title="Upregulated genes" data=output.up_genes
-        url=(getBlobUrl output.up_blob_id "up_outlier_genes")}}
+        url=(getBlobUrl output.up_blob_id "up_outlier_genes")
+        outlierType="up"}}
 
     {{> outlierGenesTable title="Downregulated genes" data=output.down_genes
-        url=(getBlobUrl output.down_blob_id "down_outlier_genes")}}
+        url=(getBlobUrl output.down_blob_id "down_outlier_genes")
+        outlierType="down"}}
     <!-- confirm top5% is available; older analyses may not have this field-->
     {{#if output.top5percent_genes}}
       {{> outlierGenesTable title="Top 5% expressed genes" data=output.top5percent_genes
-          url=(getBlobUrl output.top5percent_blob_id "top_5_percent_most_highly_expressed_genes.tsv") isTop5percent=true }}
+          url=(getBlobUrl output.top5percent_blob_id "top_5_percent_most_highly_expressed_genes.tsv") isTop5percent=true
+          outlierType="top5percent"}}
     {{else}}
       <div>
         <h2 style="display: inline;">
@@ -71,7 +74,16 @@
       <button class="ui labeled icon button copy-genes-to-clipboard"
           data-content="Add users to your feed">
         <i class="copy icon"></i>
-        Copy genes to clipboard
+        Copy genes
+      </button>
+
+      {{! Show a list of previously run GSEA jobs as well as a form to
+          create a new GSEA job}}
+      <button class="ui labeled icon button
+          {{#if Template.subscriptionsReady}}
+            primary run-gsea{{else}}loading{{/if}}">
+        <i class="right arrow icon"></i>
+        Run GSEA
       </button>
     </h2>
 
@@ -156,4 +168,36 @@
   {{else}}
     {{>dataLoading}}
   {{/if}}
+</template>
+
+<template name="gseaFromGeneSetModal">
+  {{! Included in appBody template}}
+
+  <div class="ui modal gsea-from-gene-set">
+    <i class="close icon"></i>
+    {{#if getGeneSet}}
+      <div class="header">
+        GSEA for {{getGeneSet.name}}
+      </div>
+      <div class="content">
+        <h3>Create a new analysis</h3>
+        {{! NOTE: this template does not subscribe to the gene set and
+            we assume another template has already subscribed to it}}
+        {{> createGseaForm gene_set_id=getGeneSet._id active=getGeneSet
+            autoformId="createGseaFromOutlierAnalysis"}}
+
+        <h3>Previously run analyses for {{getGeneSet.name}}</h3>
+        {{> previouslyRunGsea query=query}}
+      </div>
+
+      {{! <div class="actions">
+        <div class="ui button">Done</div>
+      </div> }}
+    {{else}}
+      {{! If this doesn't go away, you either forgot to subscribe
+          to the gene set or forgot to set
+          the <code>geneSetIdForGsea</code> query parameter.}}
+      {{> dataLoading}}
+    {{/if}}
+  </div>
 </template>

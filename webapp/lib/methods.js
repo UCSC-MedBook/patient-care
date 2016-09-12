@@ -206,6 +206,133 @@ Meteor.methods({
   },
 
   // jobs
+  createGsea: function (args) {
+    check(args, new SimpleSchema({
+      gene_set_id: { type: String },
+      gene_set_sort_field: { type: String },
+      gene_set_group_ids: { type: [String] },
+      set_max: { type: Number },
+      set_min: { type: Number },
+      plot_top_x: { type: Number, min: 0 },
+      nperm: { type: Number, min: 0 },
+      metric: { type: String },
+      scoring_scheme: { type: String },
+    }));
+
+    let user = MedBook.ensureUser(Meteor.userId());
+
+    // ensure access for gene_set_id
+    let geneSet = GeneSets.findOne(args.gene_set_id);
+    user.ensureAccess(geneSet);
+
+    // ensure access for gene_set_group_id
+    // Don't do this on the client because collaborations aren't necessarily
+    // loaded client-side.
+    if (Meteor.isServer) {
+      // NOTE: this will also fail if the gene_set_group_ids aren't unique
+      let accessableGSGCount = GeneSetGroups.find({
+        _id: { $in: args.gene_set_group_ids },
+        collaborations: { $in: user.getCollaborations() },
+      }).count();
+
+      if (accessableGSGCount !== args.gene_set_group_ids.length) {
+        throw new Meteor.Error("invalid-gene-set-group-ids");
+      }
+    }
+
+    // validate gene_set_sort_field (make sure it exists in the gene set)
+    let sortField = _.findWhere(geneSet.fields, {
+      name: args.gene_set_sort_field,
+    });
+    if (!sortField) {
+      throw new Meteor.Error("gene-set-sort-field-invalid");
+    }
+
+    // set a bunch of denormalization args
+    args.gene_set_name = geneSet.name;
+    args.gene_set_associated_object = geneSet.associated_object;
+    args.gene_set_group_names = _.map(args.gene_set_group_ids, (gsgId) => {
+      // NOTE: we have to do this as a findOne to preserve the order of the
+      // gene sets because they're not sorted by anything
+      return GeneSetGroups.findOne(gsgId).name;
+    });
+
+    return Jobs.insert({
+      name: "RunGSEA",
+      status: "waiting",
+      user_id: user._id,
+      collaborations: [ user.personalCollaboration() ],
+      args
+    });
+  },
+  createPairedAnalysis(args) {
+    check(args, new SimpleSchema({
+      data_set_id: { type: String, label: "Data set" },
+      primary_sample_labels: { type: [ String ] },
+      progression_sample_labels: { type: [ String ] },
+    }));
+
+    let user = MedBook.ensureUser(Meteor.userId());
+
+    let dataSet = DataSets.findOne(args.data_set_id);
+    user.ensureAccess(dataSet);
+
+    args.data_set_name = dataSet.name;
+
+    return Jobs.insert({
+      name: "RunPairedAnalysis",
+      status: "waiting",
+      user_id: user._id,
+      collaborations: [ user.personalCollaboration() ],
+      args
+    });
+  },
+  createLimma(args) {
+    check(args, new SimpleSchema({
+      // No allowed values for value_type becuase we check if the value_types
+      // of the sample groups match this, and those have allowedValues on
+      // insert.
+      value_type: { type: String },
+
+      experimental_sample_group_id: { type: String },
+      reference_sample_group_id: { type: String },
+      top_genes_count: { type: Number, min: 1 },
+    }));
+
+    // ensure access to all of the things
+    let user = MedBook.ensureUser(Meteor.userId());
+
+    let experimental = SampleGroups.findOne(args.experimental_sample_group_id);
+    let reference = SampleGroups.findOne(args.reference_sample_group_id);
+    user.ensureAccess(experimental);
+    user.ensureAccess(reference);
+
+    // TODO: make sure the groups don't share samples from the same data set
+
+    // make sure the sample groups match the value type
+    function ensureValueType (sampleGroup) {
+      if (sampleGroup.value_type !== args.value_type) {
+        throw new Meteor.Error("value-type-mismatch");
+      }
+    }
+    ensureValueType(experimental);
+    ensureValueType(reference);
+
+    // set denormalized args
+    args.experimental_sample_group_name = experimental.name;
+    args.reference_sample_group_name = reference.name;
+    args.experimental_sample_group_version = experimental.version;
+    args.reference_sample_group_version = reference.version;
+
+    // insert the job
+    return Jobs.insert({
+      name: "RunLimma",
+      status: "waiting",
+      user_id: user._id,
+      collaborations: [ user.personalCollaboration() ],
+      args,
+    });
+  },
   createLimmaGSEA: function (args) {
     check(args, new SimpleSchema({
       sample_group_a_id: { type: String },
@@ -635,9 +762,12 @@ Meteor.methods({
     // do some collection-specific checking before actually removing the object
     if (collection_name === "Jobs") {
       let deleteableJobs = [
+        "RunGSEA",
         "RunLimmaGSEA",
         "TumorMapOverlay",
         "UpDownGenes",
+        "RunPairedAnalysis",
+        "RunLimma",
       ];
 
       if (deleteableJobs.indexOf(object.name) === -1) {

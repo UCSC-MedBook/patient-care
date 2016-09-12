@@ -1,0 +1,204 @@
+<template name="listLimma">
+  <h1>
+    Limma
+
+    {{#semanticUIPopup selector=".help.circle.icon"}}
+      <i class="help circle icon"></i>
+      <p class="ui popup">
+        Create a genomic signature given two phenotypes with
+        Bioconductor's limma R package.
+      </p>
+    {{/semanticUIPopup}}
+  </h1>
+
+  <h2>Run a new analysis</h2>
+  {{#autoForm id="createLimma" schema=createLimmaSchema
+      type="method" meteormethod="createLimma"
+      class=(loadingIfFalse Template.subscriptionsReady)}}
+    {{> afQuickField name="value_type" type="select"
+        placeholder="Select a value type..."}}
+
+    {{#if sampleGroupOptions}}
+      {{> afQuickField name="experimental_sample_group_id"
+          options=sampleGroupOptions search=true type="select"
+          placeholder="Select an experimental sample group..."}}
+      {{> afQuickField name="reference_sample_group_id"
+          options=sampleGroupOptions search=true type="select"
+          placeholder="Select a reference sample group..."}}
+    {{/if}}
+
+    {{> afQuickField name="top_genes_count" value=1000
+        placeholder="Top N differential genes to be used in the signature"}}
+
+    {{#if duplicateSamples}}
+      <div class="ui warning message">
+        <div class="header">
+          Sample selected twice
+        </div>
+        <p>
+          One or more samples are selected both as a
+          primary and progression sample.
+        </p>
+      </div>
+    {{else}}
+      <button type="submit" class="ui primary button">
+        Start analysis
+      </button>
+    {{/if}}
+  {{/autoForm}}
+
+  <h2>Previously run analyses</h2>
+  {{> previouslyRunLimma}}
+</template>
+
+<template name="previouslyRunLimma">
+  {{#if Template.subscriptionsReady}}
+    {{#if length getJobs}}
+      <table class="ui single line table">
+        <thead>
+          <tr>
+            <th>Experimental group</th>
+            <th>Reference group</th>
+            <th>Top genes count</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each getJobs}}
+            <tr>
+              {{#with args}}
+                <td>
+                  {{experimental_sample_group_name}}
+                  (v{{experimental_sample_group_version}})
+                </td>
+                <td>
+                  {{reference_sample_group_name}}
+                  (v{{reference_sample_group_version}})
+                </td>
+                <td>
+                  {{top_genes_count}}
+                </td>
+              {{/with}}
+              <td>
+                {{> viewJobButton href=(pathFor "limmaJob"
+                    job_id=_id) job=this}}
+              </td>
+              <td>
+                {{> shareAndDeleteButtons object=this collectionName="Jobs"}}
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    {{else}}
+      <div class="ui message">
+        <div class="content">
+          <div class="header">
+            No analyses... yet!
+          </div>
+          <p>
+            You haven't run any analyses.
+          </p>
+        </div>
+      </div>
+    {{/if}}
+  {{else}}
+    {{> dataLoading}}
+  {{/if}}
+</template>
+
+<template name="limmaJob">
+  <h1>
+    Limma Result
+  </h1>
+
+  {{#jobStatusWrapper (param "job_id")}}
+    <table class="ui celled striped table">
+      <thead>
+        <tr>
+          <th colspan="2">Arguments</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Value type</td>
+          <td>{{slugToString args.value_type}}</td>
+        </tr>
+        <tr>
+          <td>Experimental group</td>
+          <td>
+            <a href={{pathFor "manageObjects" collectionSlug="sample-groups"
+                selected=args.experimental_sample_group_id}}>
+              {{args.experimental_sample_group_name}}
+              (v{{args.experimental_sample_group_version}})
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td>Reference group</td>
+          <td>
+            <a href={{pathFor "manageObjects" collectionSlug="sample-groups"
+                selected=args.reference_sample_group_id}}>
+              {{args.reference_sample_group_name}}
+              (v{{args.reference_sample_group_version}})
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td>Top genes count</td>
+          <td>{{args.top_genes_count}}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>
+      Signature
+
+      {{! Show a list of previously run GSEA jobs as well as a form to
+          create a new GSEA job}}
+      <button class="ui labeled icon button
+          {{#if Template.subscriptionsReady}}
+            primary run-gsea{{else}}loading{{/if}}">
+        <i class="right arrow icon"></i>
+        Run GSEA
+      </button>
+    </h2>
+    {{> showLimmaResult}}
+
+    <h2>
+      Voom plot
+
+      <div class="ui icon primary button voom-iframe-new-tab" target="_blank">
+        <i class="external icon"></i>
+        Open in new tab
+      </div>
+    </h2>
+    <iframe id="voom-plot" src={{getJobResultUrl "Rplots.pdf"}}
+        style="height: 500px; width: 100%">
+    </iframe>
+
+    <h2>
+      MDS plot
+
+      <div class="ui icon primary button mds-iframe-new-tab" target="_blank">
+        <i class="external icon"></i>
+        Open in new tab
+      </div>
+    </h2>
+    <iframe id="mds-plot" src={{getJobResultUrl "mds.pdf"}}
+        style="height: 500px; width: 100%">
+    </iframe>
+  {{/jobStatusWrapper}}
+</template>
+
+<template name="showLimmaResult">
+  {{#if Template.subscriptionsReady}}
+    {{#with getGeneSet}}
+      {{> showRecords fields=fields mongoId=_id
+          collectionName="GeneSets" primaryFieldName=gene_label_field}}
+    {{/with}}
+  {{else}}
+    {{> dataLoading}}
+  {{/if}}
+</template>

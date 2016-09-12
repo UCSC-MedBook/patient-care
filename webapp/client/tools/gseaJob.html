@@ -1,0 +1,76 @@
+<template name="gseaJob">
+  <h1>
+    GSEA Result
+  </h1>
+
+  {{#jobStatusWrapper (param "job_id")}}
+    <table class="ui celled striped table">
+      <thead>
+        <tr>
+          <th colspan="2">Arguments</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{! NOTE: these names are also in listGsea.js }}
+        <tr>
+          <td>Gene set</td>
+          <td>{{args.gene_set_name}}</td>
+        </tr>
+        <tr>
+          <td>Gene set sort field</td>
+          <td>{{args.gene_set_sort_field}}</td>
+        </tr>
+        <tr>
+          <td>Gene set groups</td>
+          <td>{{joinedGeneSetGroups}}</td>
+        </tr>
+        <tr>
+          <td>Minimum size gene set</td>
+          <td>{{args.set_min}}</td>
+        </tr>
+        <tr>
+          <td>Maximum size gene sest</td>
+          <td>{{args.set_max}}</td>
+        </tr>
+        <tr>
+          <td>Top pathways count</td>
+          <td>{{args.plot_top_x}}</td>
+        </tr>
+        <tr>
+          <td>Permutation count</td>
+          <td>{{args.nperm}}</td>
+        </tr>
+        <tr>
+          <td>Metric for ranking genes</td>
+          <td>{{args.metric}}</td>
+        </tr>
+        <tr>
+          <td>Scoring statistic</td>
+          <td>{{args.scoring_scheme}}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Heatmap: samples vs. gene sets</h2>
+    <div style="overflow: auto; width: 100%;">
+      {{#with getJobResultUrl "leading_edge_heat_map_clustered.png"}}
+        <a href={{this}} target="_blank" title="Click to open in new tab">
+          <img src={{this}}
+              alt="Heatmap could not be loaded" />
+        </a>
+      {{/with}}
+    </div>
+
+    <h2>
+      Full Report
+
+      <div class="ui icon primary button gsea-iframe-new-tab" target="_blank">
+        <i class="external icon"></i>
+        Open in new tab
+      </div>
+    </h2>
+    <iframe id="gsea-report" src={{getJobResultUrl "index.html"}}
+        style="height: 500px; width: 100%">
+    </iframe>
+  {{/jobStatusWrapper}}
+</template>

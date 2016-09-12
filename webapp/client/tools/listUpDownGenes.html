@@ -105,8 +105,8 @@
                   None
                 {{/if}}
               </td>
-              <td>{{output.up_genes.length}}</td>
-              <td>{{output.down_genes.length}}</td>
+              <td>{{output.up_genes_count}}</td>
+              <td>{{output.down_genes_count}}</td>
               <td>
                 {{> viewJobButton href=(pathFor "upDownGenesJob" job_id=_id)
                     job=this}}

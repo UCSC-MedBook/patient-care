@@ -6,6 +6,7 @@
 <template name="appBody">
   {{! shared modals that are used on multiple pages}}
   {{> editCollaborationsModal}}
+  {{> gseaFromGeneSetModal}}
 
   <div class="ui container">
     <div class="ui menu">
@@ -16,15 +17,29 @@
       <a href={{pathFor "home"}} class="ui simple dropdown item">
         Tools
         <div class="menu">
+          <a href={{pathFor "listGsea"}} class="item">
+            GSEA
+          </a>
+
+          <a href={{pathFor "listUpDownGenes"}} class="item">
+            Outlier Analysis
+          </a>
+
+          <a href={{pathFor "listPairedAnalysis"}} class="item">
+            Paired Tumor Analysis
+          </a>
+
+          <a href={{pathFor "listLimma"}} class="item">
+            Limma
+          </a>
+
           <a href={{pathFor "listLimmaGSEA"}} class="item">
             Limma <i class="right arrow icon"></i> GSEA
           </a>
           <!-- <a href={{pathFor "listTumorMap"}} class="item">
             Tumor Map
           </a> -->
-          <a href={{pathFor "listUpDownGenes"}} class="item">
-            Outlier Analysis
-          </a>
+
         </div>
       </a>
 
@@ -156,6 +171,30 @@
       {{/breadcrumbItem}}
     {{/if}}
 
+    {{#if or (isActiveRoute "listGsea")
+        (isActiveRoute "gseaJob")}}
+      {{#breadcrumbItem isActive=(isActiveRoute "listGsea")
+          href=(pathFor "listGsea")}}
+        GSEA
+      {{/breadcrumbItem}}
+    {{/if}}
+
+    {{#if or (isActiveRoute "listPairedAnalysis")
+        (isActiveRoute "pairedAnalysisJob")}}
+      {{#breadcrumbItem isActive=(isActiveRoute "listPairedAnalysis")
+          href=(pathFor "listPairedAnalysis")}}
+        Paired Tumor Analysis
+      {{/breadcrumbItem}}
+    {{/if}}
+
+    {{#if or (isActiveRoute "listLimma")
+        (isActiveRoute "limmaJob")}}
+      {{#breadcrumbItem isActive=(isActiveRoute "listLimma")
+          href=(pathFor "listLimma")}}
+        Limma
+      {{/breadcrumbItem}}
+    {{/if}}
+
     <!-- {{#if isActiveRoute "listTumorMap"}}
       {{#breadcrumbItem isActive=true}}
         Tumor Map
@@ -170,7 +209,7 @@
       {{/breadcrumbItem}}
     {{/if}}
 
-    {{#if or (isActiveRoute "upDownGenesJob") (isActiveRoute "limmaGseaJob")}}
+    {{#if isJobResult}}
       {{#breadcrumbItem isActive=true}}
         Result
       {{/breadcrumbItem}}
@@ -226,7 +265,7 @@
       </p>
       <p>
         MedBook enables you to quickly compare private patient information with
-        <b>publically available data sets</b> and then securely
+        <b>publicly available data sets</b> and then securely
         <b>share findings with collaborators</b>.
       </p>
       <p>
