@@ -10,7 +10,7 @@ Template.listPairedAnalysis.onCreated(function () {
   let instance = this;
 
   // first only subscribe to the name
-  instance.subscribe("allOfCollectionOnlyName", "DataSets");
+  instance.subscribe("allOfCollectionOnlyMetadata", "DataSets");
 
   // when the data set is selected, subscribe to the sample_labels
   // NOTE: this subscribe introduces a race condition that
