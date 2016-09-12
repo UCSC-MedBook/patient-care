@@ -61,6 +61,11 @@ Template.listUpDownGenes.helpers({
   customSampleGroup() { return Template.instance().customSampleGroup; },
   error() { return Template.instance().error; },
   talkingToServer() { return Template.instance().talkingToServer.get() },
+  multipleSamplesSelected() {
+    let samples = AutoForm.getFieldValue("sample_labels", "createUpDownGenes");
+
+    return samples && samples.length > 1;
+  },
 });
 
 Template.listUpDownGenes.events({

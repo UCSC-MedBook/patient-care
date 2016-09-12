@@ -50,15 +50,12 @@
       {{> editSampleGroup sampleGroup=customSampleGroup}}
     {{/if}}
 
-    <div class="ui info message">
-      <p>
-        A separate outlier analysis job will be created for each sample selected.
-      </p>
-      <p>
-        If a job has already been run with the given arguments, a
-        duplicate will not be created.
-      </p>
-    </div>
+    {{#if multipleSamplesSelected}}
+      <div class="ui info message">
+        A separate outlier analysis job will be created for
+        each sample selected.
+      </div>
+    {{/if}}
 
     {{> showErrorMessage error}}
 

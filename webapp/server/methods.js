@@ -84,38 +84,15 @@ Meteor.methods({
       var args = _.clone(sameArgs);
       args.sample_label = sample_label;
 
-      // check to see if a job like this one has already been run,
-      // and if so, return that job's _id
-      // NOTE: I believe there could be a race condition here, but
-      // I don't think Meteor handles more than one Meteor method at once.
-      // (That said, we unblock above to create a sample group, but because
-      // that is a new object, this should be the first thing run with the
-      // new _id.)
-
-      // Jobs that predate sample group filters will match for new jobs using
-      // an unfiltered sample group as neither has 'use_filtered_sample_group'
-      // as an arg.
-      let duplicateJob = Jobs.findOne({
+      // insert the job
+      Jobs.insert({
+        name: "UpDownGenes",
+        status: "waiting",
+        user_id: user._id,
+        collaborations: [ user.personalCollaboration() ],
         args,
-        collaborations: user.personalCollaboration(),
-        status: { $ne: "error" }
+        prerequisite_job_ids
       });
-
-      let jobId;
-      if (duplicateJob) {
-        jobId = duplicateJob._id;
-      } else {
-        jobId = Jobs.insert({
-          name: "UpDownGenes",
-          status: "waiting",
-          user_id: user._id,
-          collaborations: [ user.personalCollaboration() ],
-          args,
-          prerequisite_job_ids
-        });
-      }
-
-      return jobId;
     });
   },
   createSampleGroup: function (sampleGroup) {
