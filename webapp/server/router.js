@@ -80,7 +80,7 @@ Picker.route("/download/:userId/:loginToken/" +
 
   let blob = Blobs2.findOne(blobId);
   if(!blob){ return notFound(res);}
- 
+
   let assocObjName = blob.associated_object.collection_name;
   let assocObjId = blob.associated_object.mongo_id;
   let assocObj = MedBook.collections[assocObjName].findOne(
@@ -88,7 +88,7 @@ Picker.route("/download/:userId/:loginToken/" +
 
   // confirm user's access to blob via associated object
   if( !user.hasAccess(assocObj)){ return permissionDenied(res);}
-  
+
   // Provide the blob for download
   res.setHeader("Content-Type", blob.mime_type);
   res.setHeader("Content-Disposition",

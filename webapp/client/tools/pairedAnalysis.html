@@ -1,0 +1,178 @@
+<template name="listPairedAnalysis">
+  <h1>
+    Paired Tumor Analysis
+
+    {{#semanticUIPopup selector=".help.circle.icon"}}
+      <i class="help circle icon"></i>
+      <p class="ui popup">
+        Compute a signature of differential gene expression
+        between baseline and progression samples from the same patient.
+      </p>
+    {{/semanticUIPopup}}
+  </h1>
+
+  <h2>Run a new analysis</h2>
+  {{#autoForm id="createPairedAnalysis" schema=createPairedAnalysisSchema
+      type="method" meteormethod="createPairedAnalysis"
+      class=(loadingIfFalse Template.subscriptionsReady)}}
+    {{#if length dataSetOptions}}
+      {{> afQuickField name="data_set_id" search=true options=dataSetOptions
+          placeholder="Select a data set..."}}
+    {{else}}
+      <div class="ui warning message">
+        <div class="header">
+          No data sets
+        </div>
+        You have must have access to at least one data set
+        to run the paired tumor analysis tool.
+      </div>
+    {{/if}}
+
+    {{#if sampleOptions}}
+      {{> afQuickField name="primary_sample_labels" options=sampleOptions
+          multiple=true search=true type="select"
+          placeholder="Select one or more primary samples..."}}
+      {{> afQuickField name="progression_sample_labels" options=sampleOptions
+          multiple=true search=true type="select"
+          placeholder="Select one or more progression samples..."}}
+    {{/if}}
+
+    {{#if duplicateSamples}}
+      <div class="ui warning message">
+        <div class="header">
+          Sample selected twice
+        </div>
+        <p>
+          One or more samples are selected both as a
+          primary and progression sample.
+        </p>
+      </div>
+    {{/if}}
+
+    <button type="submit" class="ui primary button
+        {{#if duplicateSamples}}disabled{{/if}}">
+      Start analysis
+    </button>
+  {{/autoForm}}
+
+  <h2>Previously run analyses</h2>
+  {{> previouslyRunPairedAnalysis}}
+</template>
+
+<template name="previouslyRunPairedAnalysis">
+  {{#if Template.subscriptionsReady}}
+    {{#if length getJobs}}
+      <table class="ui single line table">
+        <thead>
+          <tr>
+            <th>Data set</th>
+            <th>Primary samples</th>
+            <th>Progression samples</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each getJobs}}
+            <tr>
+              <td>{{args.data_set_name}}</td>
+              <td>
+                {{#each args.primary_sample_labels}}
+                  {{this}}<br>
+                {{/each}}
+              </td>
+              <td>
+                {{#each args.progression_sample_labels}}
+                  {{this}}<br>
+                {{/each}}
+              </td>
+              <td>
+                {{> viewJobButton href=(pathFor "pairedAnalysisJob" job_id=_id)
+                    job=this}}
+              </td>
+              <td>
+                {{> shareAndDeleteButtons object=this collectionName="Jobs"}}
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    {{else}}
+      <div class="ui message">
+        <div class="content">
+          <div class="header">
+            No analyses... yet!
+          </div>
+          <p>
+            You haven't run any analyses.
+          </p>
+        </div>
+      </div>
+    {{/if}}
+  {{else}}
+    {{> dataLoading}}
+  {{/if}}
+</template>
+
+<template name="pairedAnalysisJob">
+  <h1>
+    Paired Tumor Analysis Result
+  </h1>
+
+  {{#jobStatusWrapper (param "job_id")}}
+    <table class="ui celled striped table">
+      <thead>
+        <tr>
+          <th colspan="2">Arguments</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Data set</td>
+          <td>{{args.data_set_name}}</td>
+        </tr>
+        <tr>
+          <td>Primary samples</td>
+          <td>
+            {{#each args.primary_sample_labels}}
+              {{this}}<br>
+            {{/each}}
+          </td>
+        </tr>
+        <tr>
+          <td>Progression samples</td>
+          <td>
+            {{#each args.progression_sample_labels}}
+              {{this}}<br>
+            {{/each}}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>
+      Signature
+
+      {{! Show a list of previously run GSEA jobs as well as a form to
+          create a new GSEA job}}
+      <button class="ui labeled icon button
+          {{#if Template.subscriptionsReady}}
+            primary run-gsea{{else}}loading{{/if}}">
+        <i class="right arrow icon"></i>
+        Run GSEA
+      </button>
+    </h2>
+    {{> showPairedAnalysisResult}}
+  {{/jobStatusWrapper}}
+</template>
+
+<template name="showPairedAnalysisResult">
+  {{#if Template.subscriptionsReady}}
+    {{#with getGeneSet}}
+      {{> showRecords fields=fields mongoId=_id
+          collectionName="GeneSets" primaryFieldName=gene_label_field}}
+    {{/with}}
+  {{else}}
+    {{> dataLoading}}
+  {{/if}}
+</template>

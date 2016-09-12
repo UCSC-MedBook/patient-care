@@ -27,14 +27,18 @@ Template.appBody.helpers({
   invalidUrl() {
     return FlowRouter.getRouteName() === undefined;
   },
-  activeRouteIsInTools() {
+});
+
+// Template.siteBreadcrumbs
+
+Template.siteBreadcrumbs.helpers({
+  isJobResult() {
     return [
-      "listTools",
-      "listGsea",
-      "listLimmaGSEA",
-      "listTumorMap",
-      "listUpDownGenes",
       "upDownGenesJob",
+      "limmaGseaJob",
+      "gseaJob",
+      "pairedAnalysisJob",
+      "limmaJob",
     ].indexOf(FlowRouter.getRouteName()) !== -1;
   },
 });

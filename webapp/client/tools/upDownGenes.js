@@ -35,6 +35,16 @@ Template.outlierAnalysis.helpers({
 Template.outlierGenesTable.onCreated(function () {
   const instance = this;
 
+  // subscribe to the gene set that was generated
+  instance.associatedObj = {
+    collection_name: "Jobs",
+    mongo_id: FlowRouter.getParam("job_id"),
+  };
+  instance.subscribe("associatedObjectGeneSet", instance.associatedObj, {
+    outlier_type: instance.data.outlierType
+  });
+
+  // a bunch of instance variables for the table
   instance.filterText = new ReactiveVar("");
   instance.filteredData = new ReactiveVar([]);
   instance.pageIndex = new ReactiveVar(0);
@@ -60,6 +70,7 @@ Template.outlierGenesTable.onCreated(function () {
     };
   });
 
+  // search with Fuse.js
   let unfilteredData = instance.data.data;
   let f = new Fuse(unfilteredData, {
     keys: [ "gene_label" ],
@@ -102,6 +113,7 @@ Template.outlierGenesTable.onCreated(function () {
 Template.outlierGenesTable.onRendered(function () {
   let instance = this;
 
+  // set up the clipboard copy button
   let clipboard = new Clipboard(instance.$('.copy-genes-to-clipboard')[0], {
     text: () => {
       return _.pluck(instance.data.data, "gene_label").join("\n");
@@ -213,12 +225,84 @@ Template.outlierGenesTable.events({
       instance.rowsPerPage.set(newValue);
     }
   },
+  "click .run-gsea"(event, instance) {
+    let { mongo_id, collection_name } = instance.associatedObj;
+
+    // find the gene set;
+    let geneSet = GeneSets.findOne({
+      "associated_object.mongo_id": mongo_id,
+      "associated_object.collection_name": collection_name,
+      "metadata.outlier_type": instance.data.outlierType,
+    });
+
+    // pass the gene set to the modal via a query
+    FlowRouter.setQueryParams({
+      "geneSetIdForGsea": geneSet._id
+    });
+  },
 });
 
+// Template.geneWithInfo
 
 Template.geneWithInfo.onRendered(function(){
   this.$(".geneInfoIcon.icon").popup({
     position: "bottom left",
     hoverable: true,
   });
+});
+
+// Template.gseaFromGeneSetModal
+
+// This modal depends on the geneSetIdForGsea query parameter.
+
+Template.gseaFromGeneSetModal.onRendered(function () {
+  let instance = this;
+
+  instance.$(".gsea-from-gene-set.modal").modal({
+    // remove geneSetIdForGsea from the query parameters when it is closed
+    onHide() {
+      // Defer setting the query parameters. When a user navigates away from
+      // the page with the modal open (viewing a job, for example), the
+      // query parameter is cleared before the route changes. This means
+      // that when the user hits the back button, the query parameter won't
+      // exist and the modal won't open automatically. Deferring waits
+      // to clear the query param until the route has changed, which solves
+      // this bug.
+      Meteor.defer(() => {
+        FlowRouter.setQueryParams({
+          geneSetIdForGsea: null
+        });
+      });
+    },
+    observeChanges: true,
+  });
+
+  // show the modal when the query param is set
+  instance.autorun(() => {
+    let geneSetId = FlowRouter.getQueryParam("geneSetIdForGsea");
+
+    if (geneSetId) {
+      $(".gsea-from-gene-set.modal").modal("show");
+    } else {
+      $(".gsea-from-gene-set.modal").modal("hide");
+    }
+  });
+});
+
+Template.gseaFromGeneSetModal.helpers({
+  query() {
+    let geneSetId = FlowRouter.getQueryParam("geneSetIdForGsea");
+
+    return {
+      "args.gene_set_id": geneSetId,
+      "args.gene_set_name": GeneSets.findOne(geneSetId).name,
+    };
+  },
+  getGeneSet() {
+    let geneSetId = FlowRouter.getQueryParam("geneSetIdForGsea");
+
+    if (geneSetId) {
+      return GeneSets.findOne(geneSetId);
+    }
+  },
 });

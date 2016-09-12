@@ -25,6 +25,7 @@
   {{> listSamplesButton fakeSamples}}
 
   <h2><code>{{|> viewJobButton}}</code></h2>
+  This closes all open modals and goes to the specified link.
   {{> viewJobButton job=(fakeJob "waiting") href="https://google.com"}}
   {{> viewJobButton job=(fakeJob "running") href="https://google.com"}}
   {{> viewJobButton job=(fakeJob "error") href="https://google.com"}}
@@ -202,7 +203,7 @@
 
 <template name="viewJobButton">
   <a href={{href}}
-      class="ui right labeled icon {{buttonClass}} button">
+      class="ui right labeled icon {{buttonClass}} button close-modals">
     <i class="right arrow icon"></i>
     {{#if compare job.status "done"}}
       View
@@ -240,7 +241,7 @@
       {{#if compare status "error"}}
         <div class="ui huge error message">
           <div class="header">
-            Error running job.
+            Error running job
           </div>
           <p>
             We have encountered an error running your job.
@@ -258,6 +259,8 @@
           <p>
             {{{contactTeoText}}}
           </p>
+
+          {{> jobErrorBlobs}}
         </div>
       {{/if}}
     {{/with}}
@@ -279,6 +282,25 @@
     {{/unless}}
   {{else}}
     {{> dataLoading}}
+  {{/if}}
+</template>
+
+<template name="jobErrorBlobs">
+  {{#if length blobs}}
+    <h3>Log files</h3>
+
+    {{#each blobs}}
+      <h4>
+        {{file_name}}
+        <div class="ui icon primary button iframe-new-tab">
+          <i class="external icon"></i>
+          Open in new tab
+        </div>
+      </h4>
+      <iframe id={{_id}} src={{blobUrl}}
+          style="height: 200px; width: 100%">
+      </iframe>
+    {{/each}}
   {{/if}}
 </template>
 

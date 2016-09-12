@@ -12,34 +12,144 @@
   </h1>
 
   <h2>Run a new analysis</h2>
+  {{> createGseaForm active=true autoformId="createGsea"}}
 
-  <h3>Arguments</h3>
-  <div class="ui bulleted list">
-    <div class="item">
-      two sample groups
-    </div>
-    <div class="item">
-      Gene set: is this the ranked set of genes?
-    </div>
-    <div class="item">
-      metric value: Class seperation metric - gene markers are ranked using this metric to produce the gene list
-      <div class="ui bulleted list">
-        <div class="item">Signal2Noise</div>
-        <div class="item">tTest</div>
-        <div class="item">Cosine</div>
-        <div class="item">Euclidean</div>
-        <div class="item">Manhatten</div>
-        <div class="item">Pearson</div>
-        <div class="item">Ratio_of_Classes</div>
-        <div class="item">Diff_of_Classes</div>
-        <div class="item">log2_Ratio_of_Classes</div>
+  <h2>Previously run analyses</h2>
+  {{> previouslyRunGsea}}
+</template>
+
+<template name="createGseaForm">
+  {{! NOTE: you can pass gene_set_id to hide that field.
+      You must pass active=true in order to load the data needed. This
+      is because this template is included in all pages as a modal, which
+      means without this it would load the necessary form data and
+      keep it loaded for the entire app lifecycle.
+      You must also pass autoformId (a string) in order to make the forms
+      unique. (AutoForm still sees the form even if the modal it's in
+      is hidden.)}}
+
+  {{#autoForm id=autoformId schema=createGseaSchema
+      type="method" meteormethod="createGsea"
+      class=(loadingIfFalse Template.subscriptionsReady)}}
+    {{#if gene_set_id}}
+      {{> afQuickField name="gene_set_id" type="hidden"
+          value=gene_set_id}}
+    {{else}}
+      {{> afQuickField name="gene_set_id" type="select"
+          options=geneSetOptions search=true
+          placeholder="Which gene set would you like to use?"}}
+    {{/if}}
+
+    {{#if availableSortFields}}
+      {{> afQuickField name="gene_set_sort_field"
+          options=availableSortFields type="select" search=true
+          placeholder="Which field should we use to rank the gene set?"}}
+    {{/if}}
+
+    {{> afQuickField name="gene_set_group_ids"
+        options=geneSetGroupOptions type="select" search=true
+        placeholder="Select gene set groups..." multiple=true}}
+
+    {{#if duplicateGeneSetNames}}
+      <div class="ui warning message">
+        <div class="header">
+          Duplicate gene set names
+        </div>
+        <p>
+          The chosen gene set groups have duplicate gene set names.
+        </p>
+        <p>
+          Please deselect gene set groups containing duplicate
+          gene set names.
+        </p>
+      </div>
+    {{/if}}
+
+    <div class="ui accordion field">
+      <div class="title">
+        <i class="icon dropdown"></i>
+        Advanced arguments
+
+        <i class="help circle icon"></i>
+        <div class="ui popup">
+          <a href="http://www.broadinstitute.org/cancer/software/gsea/doc/GSEAUserGuideFrame.html">
+            See here for detailed documentation.
+          </a>
+        </div>
+      </div>
+
+      {{! display: none so they don't show up at the beginning.
+          Thanks @ArnaudGallardo!}}
+      <div class="six fields" style="display: none;">
+        {{> afQuickField name="set_min" value=15}}
+        {{> afQuickField name="set_max" value=500}}
+        {{> afQuickField name="plot_top_x" value=20}}
+        {{> afQuickField name="nperm" value=1000}}
+        {{> afQuickField name="metric" value="Signal2Noise"
+            type="select" options="allowed"}}
+        {{> afQuickField name="scoring_scheme" value="weighted"
+            type="select" options="allowed"}}
       </div>
     </div>
-    <div class="item">
-      max and min (optional?): what is this?
-    </div>
-    <div class="item">
-      top x gene sets (optional? how many is "normal"?)
-    </div>
-  </div>
+
+    {{! don't allow them to start a job that will break}}
+
+    <button type="submit" class="ui primary button
+        {{#if duplicateGeneSetNames}}disabled{{/if}}">
+      Start analysis
+    </button>
+  {{/autoForm}}
+</template>
+
+<template name="previouslyRunGsea">
+  {{#if Template.subscriptionsReady}}
+    {{#if length getJobs}}
+      <table class="ui single line table">
+        <thead>
+          <tr>
+            {{#unless geneSetNameSet}}
+              <th>Gene set name</th>
+            {{/unless}}
+            <th>Ranking field</th>
+            <th>Gene sets</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each getJobs}}
+            <tr>
+              {{#unless geneSetNameSet}}
+                <td>{{args.gene_set_name}}</td>
+              {{/unless}}
+              <td>{{args.gene_set_sort_field}}</td>
+              <td>
+                {{#each args.gene_set_group_names}}
+                  {{this}}<br>
+                {{/each}}
+              </td>
+              <td>
+                {{> viewJobButton href=(pathFor "gseaJob" job_id=_id)
+                    job=this}}
+              </td>
+              <td>{{> shareAndDeleteButtons object=this collectionName="Jobs"}}</td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    {{else}}
+      <div class="ui message">
+        <div class="content">
+          <div class="header">
+            No analyses... yet!
+          </div>
+          <p>
+            You haven't run any analyses.
+          </p>
+        </div>
+      </div>
+    {{/if}}
+  {{else}}
+    {{> dataLoading}}
+  {{/if}}
 </template>
