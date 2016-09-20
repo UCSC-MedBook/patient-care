@@ -140,7 +140,18 @@
           {{> loggingInMessage}}
         {{/if}}
       {{else}}
-        {{> notLoggedIn}}
+        {{> welcomeToMedBook}}
+
+        {{#if isActiveRoute "home"}}
+          {{> home}}
+        {{else}}
+          <div class="ui massive message">
+            <div class="header">
+              Sign in to continue
+            </div>
+            Please sign in to access the MedBook suite.
+          </div>
+        {{/if}}
       {{/if}}
     {{/if}}
   </div>
@@ -264,7 +275,7 @@
   </div>
 </template>
 
-<template name="notLoggedIn">
+<template name="welcomeToMedBook">
   <div class="ui massive message">
     <!-- <i class="warning sign icon"></i> -->
     <div class="content">
