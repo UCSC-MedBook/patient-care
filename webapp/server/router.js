@@ -21,10 +21,7 @@ Picker.route("/download/:userId/:loginToken/" +
 
   let job = Jobs.findOne(jobId);
   if (!user || !user.hasAccess(job)) {
-    res.writeHead(403);
-    res.write("Permission denied\n");
-    res.end();
-    return;
+    return permissionDenied(res);
   }
 
   let blob = Blobs2.findOne({
@@ -54,9 +51,9 @@ function permissionDenied (res) {
 }
 
 function notFound(res) {
-    res.writeHead(404);
-    res.write('404 Not Found\n');
-    res.end();
+  res.writeHead(404);
+  res.write('404 Not Found\n');
+  res.end();
 }
 
 // Route for downloading an arbitrary blobs2
@@ -87,7 +84,7 @@ Picker.route("/download/:userId/:loginToken/" +
     {_id: assocObjId});
 
   // confirm user's access to blob via associated object
-  if( !user.hasAccess(assocObj)){ return permissionDenied(res);}
+  if( !user.hasAccess(assocObj)){ return permissionDenied(res); }
 
   // Provide the blob for download
   res.setHeader("Content-Type", blob.mime_type);
