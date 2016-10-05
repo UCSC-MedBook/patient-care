@@ -382,4 +382,20 @@ Meteor.methods({
       gene_set_group_id: blessedGeneSet._id,
     }, {transform: addExtraInfo}).fetch();
   },
+
+  createNewUser(email, password) {
+    check([email, password], [String]);
+
+    // Only allow logged-in users to create new users so that no one
+    // can come along and start using our precious resources.
+    let loggedInUser = MedBook.ensureUser(Meteor.userId());
+
+    let newUserId = Accounts.createUser({
+      email,
+      password
+    });
+    console.log(`${loggedInUser.email()} created new user: ${email}`);
+
+    return newUserId;
+  },
 });
