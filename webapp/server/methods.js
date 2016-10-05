@@ -144,7 +144,7 @@ Meteor.methods({
         Meteor.call("getSampleGroupVersion", sampleGroup.name);
 
     // ensure uniqueness for data sets
-    let uniqueDataSets = _.uniq(_.pluck(sampleGroup.data_sets, "_id"));
+    let uniqueDataSets = _.uniq(_.pluck(sampleGroup.data_sets, "data_set_id"));
     if (uniqueDataSets.length !== sampleGroup.data_sets.length) {
       throw new Meteor.Error("non-unique-data-sets");
     }
