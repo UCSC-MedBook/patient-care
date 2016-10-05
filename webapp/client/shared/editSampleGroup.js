@@ -50,7 +50,7 @@ Template.editSampleGroup.onRendered(function () {
   let instance = this;
 
   instance.$(".sample-group-version").popup({
-    position : "top right",
+    position : "bottom right",
   });
 });
 
@@ -105,6 +105,7 @@ Template.addDataSetMenu.onRendered(function () {
   instance.$(".dropdown").popup({
     hoverable: true,
     on: "click",
+    position: "bottom left",
   });
 });
 
@@ -335,7 +336,7 @@ Template.formValuesFilter.onCreated(function(){
   instance.editing = new ReactiveVar(false);
 
   let dataset_id = instance.data.data_set_id ;
-  instance.available_filter_forms = new ReactiveVar(); 
+  instance.available_filter_forms = new ReactiveVar();
   instance.available_filter_forms.set([{name: "Loading forms...", urlencodedId: "placeholder_loadingforms"}]);
   instance.filter_forms_options = new ReactiveVar();
   instance.filter_forms_options.set({});
@@ -348,7 +349,7 @@ Template.formValuesFilter.onCreated(function(){
     if(err) {
       instance.available_filter_forms.set([{name:'Error loading forms!', urlencodedId: 'Errorloadingforms'}]);
       console.log("Error getting forms for this data set", err);
-      throw err; 
+      throw err;
     } else {
       console.log("got forms!", res);
       // put the res in the available forms so that we can get it later
@@ -378,13 +379,13 @@ Template.formValuesFilter.helpers({
 
 Template.formValuesFilter.events({
   "click .chosen-form-filter": function(event, instance) {
-    
-    // Find the fields for the selected form 
+
+    // Find the fields for the selected form
     let whichFormId = event.target.id;
     let forms = instance.available_filter_forms.get();
     let chosenForm = _.find(forms, function(form){ return form.urlencodedId === whichFormId});
     let formFields = chosenForm.fields ;
-    
+
     // Then build the filters for the querybuilder
     let queryFilters = [];
     for(let field of formFields){
@@ -399,7 +400,7 @@ Template.formValuesFilter.events({
           operators: ['equal', 'not_equal', 'is_null', 'is_not_null'],
         }
       );
-    } 
+    }
 
   // Only show one querybuilder div at a time
   $(".querybuilder").hide()
@@ -426,9 +427,9 @@ Template.formValuesFilter.events({
      let dataset_id = instance.data.data_set_id;
 
     instance.editing.set(false);
-   
+
     // Populate the filter info
-    // TODO: rename variables -- sampleCrfId no longer refers to a CRF 
+    // TODO: rename variables -- sampleCrfId no longer refers to a CRF
     // but to a Form; & it's the ID of the actual Form (not a Record
     // of that form)
     instance.data.setOptions({
