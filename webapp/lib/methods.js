@@ -1104,12 +1104,12 @@ Meteor.methods({
     // Update the sample label in
     // - Studies
     // - DataSets
-    // - Forms
-    // - Records
+    // - Forms (and Records)
     // - SampleGroups
 
     Studies.update({
       _id: studyId,
+      // need this to do the fancy $ trick in the $set
       sample_labels: oldSampleLabel
     }, {
       $set: {
@@ -1131,9 +1131,27 @@ Meteor.methods({
       });
     });
 
-    // Can't update records/forms yet because we don't know the name of the
-    // sample field in the records. We can address this better after
-    // adding `sample_labels` to forms (#46)
+    Forms.find({ sample_labels: oldSampleLabel }).forEach((form) => {
+      // update associated records
+      Records.update({
+        "associated_object.collection_name": "Forms",
+        "associated_object.mongo_id": form._id,
+      }, {
+        $set: {
+          [form.sample_label_field]: newSampleLabel
+        }
+      });
+
+      // update the sample label in the form
+      Forms.update({
+        _id: form._id,
+        sample_labels: oldSampleLabel
+      }, {
+        $set: {
+          "sample_labels.$": newSampleLabel
+        }
+      });
+    });
 
     // We have to do a forEach here because it's not possible to update
     // sample groups two array levels deep
@@ -1141,6 +1159,8 @@ Meteor.methods({
       "data_sets.sample_labels": oldSampleLabel
     });
     sampleGroupCursor.forEach((sampleGroup) => {
+      // for each data set in the sample group, update the sample names
+      // in the sample list
       _.each(sampleGroup.data_sets, (sgDataSet, sgDataSetIndex) => {
         let sampleIndex = sgDataSet.sample_labels.indexOf(oldSampleLabel);
 

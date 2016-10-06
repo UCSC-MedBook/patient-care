@@ -394,7 +394,7 @@ Template.recordsHandsOnTable.onRendered(function () {
 
 Template.recordsHandsOnTable.helpers({
   height() {
-    if (this.recordsData.length > 500) {
+    if (this.recordsData.length > 150) {
       // make the table as tall as the viewfinder
       // http://stackoverflow.com/a/16837667/1092640
       return "100vh";
