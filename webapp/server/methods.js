@@ -398,4 +398,138 @@ Meteor.methods({
 
     return newUserId;
   },
+
+  // remove a single sample from a data set
+  // NOTE: If someone is reading data from a data set while this
+  //       Meteor method is running, they could get bogus data. We need to
+  //       put in soft-locks to prevent that before making a UI for this
+  //       functionality.
+  // TODO: perhaps have a flag on a data set where we can see if it's corrupt
+  //       or not (in case a function like this fails). Currently if it fails,
+  //       currently_wrangling will continue to be true and no one can modify
+  //       the data set, but users can continue to read the data (running jobs
+  //       or downloading the data).
+  removeSampleFromDataSet(data_set_id, sampleIndex) {
+    check(data_set_id, String);
+    check(sampleIndex, Number);
+
+    let user = MedBook.ensureUser(Meteor.userId());
+
+    let dataSet = DataSets.findOne(data_set_id);
+    user.ensureAccess(dataSet);
+
+    // TODO: perhaps put this in if we make a UI for this. Commented out
+    //       to reduce possible side-effects of unblocking the server.
+    // this method takes a long time (~5 seconds) and we want other
+    // things to be able to happen at the same time
+    // this.unblock();
+
+    // soft lock the data set, bail if we can't get a lock on it
+    let modifiedCount = DataSets.update({
+      _id: data_set_id,
+
+      // This query attribute is the reason we can be sure the lock
+      // doesn't go to two threads at the same time.
+      currently_wrangling: false,
+    }, {
+      $set: {
+        currently_wrangling: true
+      }
+    });
+    if (modifiedCount !== 1) {
+      throw new Meteor.Error("data-set-wrangling",
+          "The data set is currently being modified elsewhere. " +
+          "Please try again later.");
+    }
+
+    // validate the provided sampleIndex
+    // NOTE: we need to do this after the soft lock because otherwise the
+    //       data set could change out from under us
+    if (sampleIndex < 0 || sampleIndex >= dataSet.sample_labels.length) {
+      // we're going to bail out so unset the soft lock on the data set
+      DataSets.update(data_set_id, {
+        $set: {
+          currently_wrangling: false
+        }
+      });
+
+      throw new Meteor.Error("invalid-sample-index");
+    }
+
+    // calculate the new sample label array and index for the data set
+    let { sample_labels } = dataSet;
+
+    // remove the sample label from the array
+    sample_labels.splice(sampleIndex, 1);
+
+    // regenerate the index based on the new array
+    let sample_label_index = _.reduce(sample_labels,
+        (memo, sampleLabel, index) => {
+      memo[sampleLabel] = index;
+      return memo;
+    }, {});
+
+    // create a future in order to do some fun async stuff before the method
+    // returns
+    let future = new Future();
+
+    // update the GenomicExpression documents
+    // NOTE: There is no way to remove a given index from an array with mongo.
+    //       It's been 6 YEARS and they still haven't scheduled the feature:
+    //       https://jira.mongodb.org/browse/SERVER-1014
+    // Instead of using a mongo modifier: we pull each document out of the db,
+    // modify it, and then put it back. This requires N update commands where
+    // N is the number of features in the data set.
+    let promises = GenomicExpression.find({ data_set_id }).map((doc) => {
+      let { values } = doc;
+
+      // remove the value for the specified sample
+      values.splice(sampleIndex, 1);
+
+      // make a promise for this single update
+      return new Promise((resolve, reject) => {
+        // push the modified document back into the db
+        GenomicExpression.rawCollection().update({ _id: doc._id }, {
+          $set: { values }
+        }, (error, result) => {
+          if (error) { reject(error); }
+          else { resolve(); }
+        });
+      });
+    });
+
+    // Wait until all of the genomic expression updates have completed and then
+    // update the data set with the new sample information. Also unset the
+    // soft lock because we're all done.
+    Promise.all(promises)
+      .then(() => {
+        // use rawCollection because we don't have the Meteor environment
+        // and also because SimpleSchema takes forever to validate large arrays
+        DataSets.rawCollection().update({ _id: data_set_id }, {
+          $set: {
+            currently_wrangling: false,
+            sample_labels,
+            sample_label_index,
+          }
+        }, (error, result) => {
+          if (error) {
+            console.log("Error updating data set after removing single " +
+                "sample from the data set genomic expression docs. The " +
+                `data set ${dataSet.name} is now currupt: ${data_set_id}`);
+            future.throw(error);
+          } else {
+            future.return();
+          }
+        });
+      })
+      .catch((error) => {
+        console.log("Error removing single sample from data set! " +
+            `The data set ${dataSet.name} may now be corrupt: ${data_set_id}`);
+        console.log(error);
+        future.throw(error);
+      });
+
+    // wait for future.throw or future.return to be called
+    return future.wait();
+  },
 });
