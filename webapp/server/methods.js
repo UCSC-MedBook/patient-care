@@ -418,6 +418,10 @@ Meteor.methods({
     let dataSet = DataSets.findOne(data_set_id);
     user.ensureAccess(dataSet);
 
+    // this method takes a long time (~5 seconds) and we want other
+    // things to be able to happen at the same time
+    this.unblock();
+
     // soft lock the data set, bail if we can't get a lock on it
     let modifiedCount = DataSets.update({
       _id: data_set_id,
