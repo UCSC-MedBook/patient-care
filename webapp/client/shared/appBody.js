@@ -13,8 +13,6 @@ Template.appBody.onCreated(function () {
 });
 
 Template.appBody.onRendered(function () {
-  let instance = this;
-
   // color the background of the site if not on production
   if (Meteor.settings &&
       Meteor.settings.public.WORLD_URL === "staging.medbook.io") {
@@ -89,5 +87,41 @@ Template.chatWithUsOnSlack.events({
   "click .explain-slack-button"(event, instance) {
     // TODO: be able to not show again
     $(".ui.modal.explain-slack").modal("show");
+  },
+});
+
+// Template.notificationsMenuItem
+
+Template.notificationsMenuItem.onRendered(function () {
+  let instance = this;
+
+  // show the notifications popup
+  instance.$("#notifications-activator").popup({
+    hoverable: true,
+    position: "bottom center",
+  });
+});
+
+Template.notificationsMenuItem.helpers({
+  getNotifications() {
+    let now = new Date();
+
+    return [
+      {
+        type: "share",
+        date_created: new Date().setDate(now.getDate() - 1),
+        href: "https://medbook.io/",
+        content: "<b>Ted Goldstein</b> shared a gene set with you: " +
+            "<b>Cool genes</b>",
+      },
+    ];
+  },
+  getIconClass() {
+    if (this.type === "share") {
+      return "share";
+    } else {
+      // default to alarm icon
+      return "alarm";
+    }
   },
 });

@@ -83,15 +83,8 @@
       </a>
 
       <div class="right menu">
-        <div class="ui simple dropdown icon item">
-          <i class="alarm icon"></i>
-          <!-- <div class="floating ui red label">3</div> -->
-          <div class="menu">
-            <div class="item">
-              No notifications
-            </div>
-          </div>
-        </div>
+        {{> notificationsMenuItem}}
+
         <div class="ui simple dropdown icon item">
           <i class="info circle icon"></i>
           <div class="menu">
@@ -101,6 +94,7 @@
             </a>
           </div>
         </div>
+
         <div class="ui simple dropdown icon item">
           <i class="grid layout icon"></i>
           <div class="menu">
@@ -116,6 +110,7 @@
             </a>
           </div>
         </div>
+
         <div class="item">
           {{> loginButtons}}
         </div>
@@ -385,5 +380,36 @@
     <p>
       If you think you are seeing this message in error, please {{> contactUsButton}}
     </p>
+  </div>
+</template>
+
+<template name="notificationsMenuItem">
+  <div id="notifications-activator" class="ui icon item">
+    <i class="alarm icon"></i>
+    {{#if length getNotifications}}
+      <div class="floating ui red label">{{length getNotifications}}</div>
+    {{/if}}
+  </div>
+  <div class="ui wide popup">
+    <div class="ui divided selection list">
+      {{! style so as to not look like a link}}
+      <div class="item" style="background-color: transparent; cursor: auto;">
+        <div class="content">
+          <div class="header" style="display: inline;">Notifications</div>
+          <div class="right floated content">
+            <a href="#" id="notification-settings">Settings</a>
+          </div>
+        </div>
+      </div>
+
+      {{#each getNotifications}}
+        <a class="item" href={{href}}>
+          <i class="{{getIconClass}} icon"></i>
+          <div class="content">
+            <div class="description">{{{content}}}</div>
+          </div>
+        </a>
+      {{/each}}
+    </div>
   </div>
 </template>
