@@ -167,6 +167,32 @@ Meteor.publish("jobsOfType", function (name) {
   });
 });
 
+// publish all UpDownGenes jobs to be shown in a list view
+Meteor.publish("upDownGenesJobs", function () {
+  let user = MedBook.ensureUser(this.userId);
+
+  return Jobs.find({
+    name: "UpDownGenes",
+    collaborations: { $in: user.getCollaborations() },
+  }, {
+    fields: {
+      // for showing the job
+      name: 1,
+      collaborations: 1,
+      status: 1,
+      args: 1,
+
+      // only send down relevant output
+      // (the list of genes itself is relatively large)
+      "output.up_genes_count": 1,
+      "output.down_genes_count": 1,
+
+      // client-side sorting
+      date_created: 1,
+    },
+  });
+});
+
 // Let anyone with access to a sample group have access
 // to all ApplyExprAndVarianceFilters jobs for that sample group,
 // to avoid applying them twice.

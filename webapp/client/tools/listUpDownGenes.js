@@ -104,7 +104,7 @@ Template.listUpDownGenes.events({
 Template.previouslyRunUpDownGenes.onCreated(function() {
   let instance = this;
 
-  instance.subscribe("jobsOfType", "UpDownGenes");
+  instance.subscribe("upDownGenesJobs");
   instance.subscribe("sampleGroups");
 });
 
